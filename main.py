@@ -62,6 +62,92 @@ def remove_html_tags(text):
     text = text.replace('\\\'', '\'') 
     return text.strip()
 
+def shorten_weather_desc(text):
+    """Skráti popis počasia pre zobrazenie v ľavom stĺpci."""
+    if not text:
+        return ""
+        
+    # 1. Odstránenie výplňových slov (prídavné mená a príslovky, ktoré len naťahujú text)
+    removes = [
+        "Prevažne", "prevažne", 
+        "Miestami", "miestami", 
+        "Ojedinele", "ojedinele", 
+        "Čiastočne", "čiastočne", 
+        "Prechodne", "prechodne", 
+        "Neskôr", "neskôr",
+        "Ráno", "ráno",
+        "Lokálne", "lokálne"
+    ]
+    
+    for word in removes:
+        text = text.replace(word, "")
+        
+    # 2. Náhrada spojok čiarkami pre úsporu miesta
+    text = text.replace(" a ", ", ").replace(" s ", ", ").replace(" so ", ", ").replace(" až ", "/")
+
+    # 3. Oprava skloňovania (inštrumentál -> nominatív)
+    # A. Najprv frázy (adjektívum + substantívum) aby sedel rod
+    replacements_phrases = {
+        "slabým snežením": "slabé sneženie",
+        "miernym snežením": "mierne sneženie",
+        "hustým snežením": "husté sneženie",
+        "občasným snežením": "občasné sneženie",
+        "trvalým snežením": "trvalé sneženie",
+        
+        "slabým dažďom": "slabý dážď",
+        "miernym dažďom": "mierny dážď",
+        "silným dažďom": "silný dážď",
+        "prudkým dažďom": "prudký dážď",
+        "občasným dažďom": "občasný dážď",
+        "trvalým dažďom": "trvalý dážď",
+        
+        "slabým mrholením": "slabé mrholenie",
+        "miernym mrholením": "mierne mrholenie",
+
+        "silným vetrom": "silný vietor",
+        "prudkým vetrom": "prudký vietor",
+        "nárazovým vetrom": "nárazový vietor",
+        
+        "ojedinelými búrkami": "ojedinelé búrky",
+        "miestnymi búrkami": "miestne búrky",
+        "silnými búrkami": "silné búrky",
+        
+        "ojedinelými prehánkami": "ojedinelé prehánky",
+        "miestnymi prehánkami": "miestne prehánky",
+        "občasnými prehánkami": "občasné prehánky",
+        "snehovými prehánkami": "snehové prehánky"
+    }
+    
+    for old, new in replacements_phrases.items():
+        text = text.replace(old, new)
+
+    # B. Samostatné slová (zvyšky)
+    replacements_words = {
+        "prehánkami": "prehánky",
+        "mrholením": "mrholenie",
+        "dažďom": "dážď",
+        "snežením": "sneženie",
+        "búrkami": "búrky",
+        "vetrom": "vietor",
+        "hmlou": "hmla"
+    }
+    for old, new in replacements_words.items():
+        text = text.replace(old, new)
+    
+    # 4. Čistenie nadbytočných medzier a čiarok vzniknutých mazaním
+    text = re.sub(r'\s+', ' ', text).strip(" ,") # viac medzier na jednu, trim
+    text = re.sub(r',\s*,', ',', text) # odstránenie zdvojených čiarok
+    
+    # 5. Prvé písmeno veľké
+    if len(text) > 0:
+        text = text[0].upper() + text[1:]
+
+    # 6. Orezanie ak je stále dlhé (cca 32-34 znakov pre šírku stĺpca)
+    if len(text) > 34:
+        text = text[:32] + ".."
+        
+    return text
+
 def get_moon_phase(date=None):
     if date is None:
         date = datetime.datetime.now()
@@ -612,7 +698,11 @@ def create_dashboard():
             draw_weather_icon(draw, left_col_x, current_y, 24, day_data['desc'])
             text_x = left_col_x + 35
             draw.text((text_x, current_y), day_data['day'], font=fonts['bold_small'], fill=TEXT_COLOR)
-            draw.text((text_x, current_y + 19), day_data['desc'], font=fonts['tiny'], fill=TEXT_COLOR)
+            
+            # POUŽITIE NOVEJ FUNKCIE PRE SKRÁTENIE POPISU
+            cleaned_desc = shorten_weather_desc(day_data['desc'])
+            draw.text((text_x, current_y + 19), cleaned_desc, font=fonts['tiny'], fill=TEXT_COLOR)
+            
             temp_vals = f"{day_data['max']} | {day_data['min']}"
             draw.text((text_x + 75, current_y), temp_vals, font=fonts['bold_small'], fill=TEXT_COLOR)
             if day_data['wind']:
