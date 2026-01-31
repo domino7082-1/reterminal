@@ -1,0 +1,48 @@
+name: Generate Dashboard BMP
+
+on:
+  schedule:
+    # Spustiť každú hodinu (minúta 0)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Umožní spustiť to aj manuálne tlačidlom
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install System Fonts
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y fonts-dejavu
+        # Tvoj skript hľadá fonty v /usr/share/fonts/truetype/dejavu/
+        # Toto zabezpečí, že tam budú, keďže na serveri nie sú Windows fonty (arial.ttf)
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run script
+      run: python main.py
+
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Pridáme vygenerovaný obrázok a JSON so stavom (aby sa striedali zaujímavosti)
+        git add dashboard_output.bmp dashboard_state.json
+        
+        # Skontrolujeme, či sú nejaké zmeny, ak nie, končíme
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update dashboard [skip ci]" && git push)
