@@ -6,6 +6,7 @@ import os
 import re
 import random
 import math
+import time
 from PIL import Image, ImageDraw, ImageFont
 
 # --- KONFIGURÁCIA ---
@@ -499,6 +500,14 @@ def get_next_event_cyclic(events, key_suffix="otd"):
     return selected_event
 
 def get_slovak_date():
+    # Nastavíme časovú zónu na Bratislavu (funguje na Linux/GitHub serveroch)
+    try:
+        os.environ['TZ'] = 'Europe/Bratislava'
+        time.tzset()
+    except AttributeError:
+        # Na Windows (lokálne) time.tzset neexistuje, ale tam je čas zvyčajne správny
+        pass
+
     now = datetime.datetime.now()
     days = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota", "Nedeľa"]
     months = ["Január", "Február", "Marec", "Apríl", "Máj", "Jún", "Júl", "August", "September", "Október", "November", "December"]
@@ -670,4 +679,5 @@ def main():
     image.show()
 
 if __name__ == "__main__":
+
     main()
