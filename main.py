@@ -661,7 +661,8 @@ def create_dashboard():
     # Word of the Day
     wod_word, wod_meaning, wod_example = scrape_word_of_the_day()
     
-    intl_day = scrape_international_day(now.day, now.month)
+    # intl_day = scrape_international_day(now.day, now.month)
+    intl_day = scrape_international_day(12, 6) # SIMULÁCIA 12. JÚN
     
     # Odstránená simulácia, pridanie logiky pre spracovanie viacerých sviatkov
     if intl_day:
