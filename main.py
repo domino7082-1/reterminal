@@ -17,6 +17,10 @@ BACKGROUND_COLOR = 255 # Biela
 TEXT_COLOR = 0         # Čierna
 STATE_FILE = "dashboard_state.json" 
 
+# Fixné pozície pre sekcie (aby neskákali)
+WEATHER_FIXED_Y = 255
+TV_PROGRAM_FIXED_Y = 320
+
 # Súradnice Šamorín
 LAT = 48.0282
 LON = 17.3097
@@ -40,6 +44,13 @@ def get_fonts():
         fonts['bold_small'] = ImageFont.truetype(font_path_bold, 16) 
         fonts['bold_tiny'] = ImageFont.truetype(font_path_bold, 13)
         
+        # Nové veľkosti pre dynamické škálovanie mien
+        fonts['value_22'] = ImageFont.truetype(font_path_bold, 22) # Alias pre value
+        fonts['value_20'] = ImageFont.truetype(font_path_bold, 20)
+        fonts['value_18'] = ImageFont.truetype(font_path_bold, 18)
+        fonts['value_16'] = ImageFont.truetype(font_path_bold, 16)
+        fonts['value_14'] = ImageFont.truetype(font_path_bold, 14)
+        
         fonts['label'] = ImageFont.truetype(font_path_reg, 14)
         fonts['value'] = ImageFont.truetype(font_path_bold, 22)
         fonts['value_reg'] = ImageFont.truetype(font_path_reg, 22)
@@ -47,7 +58,7 @@ def get_fonts():
     except IOError:
         print("POZOR: Systémové fonty sa nenašli, používam predvolený.")
         default = ImageFont.load_default()
-        fonts = {k: default for k in ['huge', 'large', 'medium', 'regular', 'small', 'tiny', 'bold_small', 'bold_tiny', 'label', 'value', 'value_reg']}
+        fonts = {k: default for k in ['huge', 'large', 'medium', 'regular', 'small', 'tiny', 'bold_small', 'bold_tiny', 'label', 'value', 'value_reg', 'value_22', 'value_20', 'value_18', 'value_16', 'value_14']}
     
     return fonts
 
@@ -379,10 +390,10 @@ def scrape_tv_program():
         return []
     return results
 
-def scrape_wikipedia_events_facts():
+def scrape_wikipedia_events():
+    """Stiahne iba udalosti z Hlavnej stránky Wikipédie. Zaujímavosti odstránené."""
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     events = []
-    facts = []
 
     try:
         url_main = "https://sk.wikipedia.org/wiki/Hlavn%C3%A1_str%C3%A1nka"
@@ -397,70 +408,61 @@ def scrape_wikipedia_events_facts():
         print(f"Chyba Wiki (Hlavná stránka - udalosti): {e}")
         events = ["Chyba dát."]
 
-    portals = [
-        "https://sk.wikipedia.org/wiki/Port%C3%A1l:Astron%C3%B3mia/Zauj%C3%ADmavosti",
-        "https://sk.wikipedia.org/wiki/Port%C3%A1l:Biol%C3%B3gia/arch%C3%ADv_zauj%C3%ADmavost%C3%AD",
-        "https://sk.wikipedia.org/wiki/Port%C3%A1l:Kozmonautika/Zauj%C3%ADmavosti",
-    ]
-    
-    MAX_RETRIES = 5
-    
-    for attempt in range(MAX_RETRIES):
-        selected_portal_url = random.choice(portals)
-        print(f"Pokus {attempt+1}/{MAX_RETRIES}: Sťahujem zaujímavosti z: {selected_portal_url}")
-        
-        try:
-            response_portal = requests.get(selected_portal_url, headers=headers, timeout=8)
-            response_portal.encoding = 'utf-8'
-            html_portal = response_portal.text
-            
-            raw_items = re.findall(r'<li[^>]*>(.*?)</li>', html_portal, re.DOTALL)
-            temp_facts = []
-            
-            for item in raw_items:
-                clean_text = remove_html_tags(item).strip()
-                is_fact = False
-                if clean_text.endswith('?') and len(clean_text) > 20:
-                    is_fact = True
-                elif (clean_text.startswith('...') or clean_text.startswith('…')) and len(clean_text) > 20:
-                    is_fact = True
-                
-                if is_fact:
-                    clean_text = re.sub(r'^[\s\.\…]+', '', clean_text) 
-                    clean_text = clean_text.strip()
-                    if len(clean_text) > 0:
-                        clean_text = clean_text[0].upper() + clean_text[1:]
-                    if not clean_text.endswith('?'):
-                        clean_text += "?"
-                    if len(clean_text) < 360:
-                        temp_facts.append(clean_text)
-
-            if temp_facts:
-                facts = temp_facts
-                break 
-            else:
-                print(f"Na {selected_portal_url} sa nenašli žiadne položky vyzerajúce ako fakty.")
-            
-        except Exception as e:
-            print(f"Chyba pri sťahovaní z {selected_portal_url}: {e}")
-            continue
-
     if not events: events = ["Dáta nedostupné."]
     
-    if not facts or facts == ["Dáta nedostupné."]:
-        print("POZOR: Nepodarilo sa stiahnuť fakty zo žiadneho portálu. Používam záložné dáta.")
-        facts = [
-            "Slnko tvorí 99,86 % hmotnosti celej Slnečnej sústavy?",
-            "Venuša sa točí okolo svojej osi v opačnom smere ako ostatné planéty?",
-            "Med je jediná potravina, ktorá sa pri správnom skladovaní nikdy nepokazí?",
-            "Chobotnice majú tri srdcia a modrú krv?",
-            "Banány sú z botanického hľadiska bobule, ale jahody nie?",
-            "Ľudské oko dokáže rozoznať asi 10 miliónov rôznych farieb?",
-            "Voda je jediná látka, ktorá sa v prírode vyskytuje v troch skupenstvách?",
-            "Najdlhšia zaznamenaná doba letu sliepky je 13 sekúnd?"
-        ]
-    
-    return events, facts
+    return events
+
+def scrape_word_of_the_day():
+    url = "https://www.merriam-webster.com/word-of-the-day/"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        html = response.text
+        
+        # Word
+        word_match = re.search(r'<title>Word of the Day: (.*?) \| Merriam-Webster</title>', html)
+        word = word_match.group(1) if word_match else "Unknown"
+        
+        # Meaning & Example
+        meaning = "Definition not found."
+        example = ""
+        
+        # Hladame sekciu "What It Means"
+        # Obycajne je to <h2>What It Means</h2> nasledovane <p> (definicia) a dalsie <p> (priklad // ...)
+        # Niekedy je to vnutri <div class="wod-definition-container">, ale regexom prejdeme text.
+        
+        # Najdeme text od H2 az po dalsi tag, ktory by mohol ukoncit sekciu (napr. H2, div, atd)
+        # Pre istotu zoberieme vacsi kus textu
+        section_match = re.search(r'<h2>What It Means</h2>(.*?)(?:<div|<h2>|<!--)', html, re.DOTALL)
+        
+        if section_match:
+            content = section_match.group(1)
+            # Najdeme vsetky paragrafy
+            paragraphs = re.findall(r'<p.*?>(.*?)</p>', content, re.DOTALL)
+            
+            if len(paragraphs) >= 1:
+                meaning = remove_html_tags(paragraphs[0])
+            
+            # Skusime najst priklad. Zvycajne druhy paragraf, zacina na //
+            if len(paragraphs) >= 2:
+                raw_example = paragraphs[1].strip()
+                # Overime ci zacina na // (niekedy su tam HTML tagy na zaciatku, takze remove_html_tags najprv)
+                clean_example_check = remove_html_tags(raw_example).strip()
+                if clean_example_check.startswith('//'):
+                    example = clean_example_check
+                # Ak nie je druhy, skusime prejst vsetky paragrafy
+                else:
+                    for p in paragraphs:
+                        clean_p = remove_html_tags(p).strip()
+                        if clean_p.startswith('//'):
+                            example = clean_p
+                            break
+        
+        return word, meaning, example
+    except Exception as e:
+        print(f"Error WOTD: {e}")
+        return None, None, None
 
 # === MENINY ===
 
@@ -502,7 +504,6 @@ def scrape_meniny_zones():
         response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'utf-8'
         html = response.text
-        # Hľadáme štruktúru: meniny</a> má ... <strong>NAME_TODAY</strong></a>, zajtra ... <strong>NAME_TOMORROW</strong>
         match = re.search(r"meniny</a> má.*?<strong>(.*?)</strong>.*?zajtra.*?<strong>(.*?)</strong>", html, re.DOTALL | re.IGNORECASE)
         
         if match:
@@ -518,12 +519,10 @@ def scrape_meniny_zones():
 
 def get_meniny_combined():
     """Hlavná funkcia na získanie menín s fallbackom."""
-    # 1. Pokus - kto-ma-meniny.sk
     today, tomorrow = scrape_meniny_kto_ma_meniny()
     if today and tomorrow and today != "Neznáme":
         return today, tomorrow
     
-    # 2. Pokus - zones.sk (Fallback)
     today, tomorrow = scrape_meniny_zones()
     if today and tomorrow:
         return today, tomorrow
@@ -544,6 +543,44 @@ def scrape_international_day(day, month):
     except Exception: pass
     return ""
 
+def get_next_season_info():
+    now = datetime.datetime.now()
+    year = now.year
+    
+    # Definícia udalostí (orientačné dátumy)
+    # Jar: 20.3., Leto: 21.6., Jeseň: 23.9., Zima: 21.12.
+    events = [
+        (datetime.datetime(year, 3, 20), "Prvý jarný deň", "rovnodennosť"),
+        (datetime.datetime(year, 6, 21), "Prvý letný deň", "slnovrat"),
+        (datetime.datetime(year, 9, 23), "Prvý jesenný deň", "rovnodennosť"),
+        (datetime.datetime(year, 12, 21), "Prvý zimný deň", "slnovrat")
+    ]
+    
+    next_event = None
+    for date_obj, name, type_name in events:
+        # Porovnanie iba dátumov
+        if date_obj.date() > now.date():
+            next_event = (date_obj, name, type_name)
+            break
+            
+    # Ak už prešli všetky tento rok, zoberieme jar budúceho roka
+    if next_event is None:
+        next_event = (datetime.datetime(year + 1, 3, 20), "Prvý jarný deň", "rovnodennosť")
+        
+    evt_date, evt_name, evt_type = next_event
+    days_left = (evt_date.date() - now.date()).days
+    
+    # Skloňovanie slova "deň"
+    if days_left == 1:
+        days_str = "deň"
+    elif 2 <= days_left <= 4:
+        days_str = "dni"
+    else:
+        days_str = "dní"
+        
+    # Vrátime rozdelené hodnoty pre 3-riadkový výpis
+    return evt_name, f"({evt_type})", f"o {days_left} {days_str}"
+
 def get_next_event_cyclic(events, key_suffix="otd"):
     if not events: return "Žiadne dáta."
     today_str = datetime.date.today().isoformat()
@@ -559,7 +596,6 @@ def get_next_event_cyclic(events, key_suffix="otd"):
                 else:
                     state['date'] = today_str
                     state['index_otd'] = 0
-                    state['index_dyk'] = 0
                     current_index = 0
         except Exception as e: pass
     
@@ -586,25 +622,27 @@ def get_slovak_date():
     date_str = f"{days[now.weekday()]}, {now.day}. {months[now.month-1]} {now.year}"
     return now, date_str
 
-def draw_text_mixed(draw, x_start, y_start, max_width, year_text, body_text, fonts):
+def draw_text_mixed(draw, x_start, y_start, max_width, year_text, body_text, fonts, simulate=False):
     x = x_start
     y = y_start
     line_height = 20
     year_font = fonts['bold_small']
     body_font = fonts['small']
     if year_text:
-        draw.text((x, y), year_text, font=year_font, fill=TEXT_COLOR)
-        year_width = draw.textlength(year_text, font=year_font)
+        if not simulate:
+            draw.text((x, y), year_text, font=year_font, fill=TEXT_COLOR)
+        year_width = fonts['bold_small'].getlength(year_text) # Using getlength for simulate/draw
         x += year_width + 6
     words = body_text.split()
-    space_width = draw.textlength(" ", font=body_font)
+    space_width = fonts['small'].getlength(" ")
     for word in words:
-        word_width = draw.textlength(word, font=body_font)
+        word_width = fonts['small'].getlength(word)
         if x + word_width > x_start + max_width:
             x = x_start
             y += line_height
             if y > HEIGHT - 50: return y 
-        draw.text((x, y), word, font=body_font, fill=TEXT_COLOR)
+        if not simulate:
+            draw.text((x, y), word, font=body_font, fill=TEXT_COLOR)
         x += word_width + space_width
     return y + line_height 
 
@@ -616,16 +654,18 @@ def create_dashboard():
     
     meniny_today, meniny_tomorrow = get_meniny_combined()
     
-    # Wiki
-    all_events, all_facts = scrape_wikipedia_events_facts()
+    # Wiki (iba events)
+    all_events = scrape_wikipedia_events()
+    todays_event = get_next_event_cyclic(all_events, key_suffix="otd")
+    
+    # Word of the Day
+    wod_word, wod_meaning, wod_example = scrape_word_of_the_day()
     
     intl_day = scrape_international_day(now.day, now.month)
     weather_list, sunrise, sunset = scrape_weather_detailed()
     tv_program_list = scrape_tv_program()
     
-    todays_event = get_next_event_cyclic(all_events, key_suffix="otd")
-    todays_fact = get_next_event_cyclic(all_facts, key_suffix="dyk")
-    last_updated = now.strftime("%H:%M:%S")
+    last_updated = now.strftime("%H:%M")
 
     # A. HLAVIČKA
     header_height = 64
@@ -650,19 +690,38 @@ def create_dashboard():
     left_col_x = 20
     col_y_start = header_height + 15
     
-    # UPRAVENÉ ZOBRAZENIE MENÍN
     label_meniny = "Meniny má "
     draw.text((left_col_x, col_y_start), label_meniny, font=fonts['regular'], fill=TEXT_COLOR)
     w_label = draw.textlength(label_meniny, font=fonts['regular'])
     
-    y_names = col_y_start # Riadok 1
+    y_names = col_y_start 
     
     if meniny_today and meniny_tomorrow:
-        # 1. Riadok: Meniny má [Meno Bold],
-        # Posunute o 4px vyssie kvoli zarovnaniu baseline s mensim textom
-        draw.text((left_col_x + w_label, y_names - 4), meniny_today + ",", font=fonts['value'], fill=TEXT_COLOR)
+        name_text = meniny_today + ","
+        max_name_x = 315
+        current_x = left_col_x + w_label
+        available_w = max_name_x - current_x
         
-        # 2. Riadok: zajtra [Meno regular]
+        font_candidates = [
+            (fonts['value_22'], -3),     
+            (fonts['value_20'], -1),     
+            (fonts['value_18'], 0),      
+            (fonts['value_16'], 2),      
+            (fonts['value_14'], 4)       
+        ]
+        
+        selected_font = font_candidates[-1][0]
+        selected_offset = font_candidates[-1][1]
+        
+        for font, offset in font_candidates:
+            w_text = draw.textlength(name_text, font=font)
+            if w_text <= available_w:
+                selected_font = font
+                selected_offset = offset
+                break
+
+        draw.text((current_x, y_names + selected_offset), name_text, font=selected_font, fill=TEXT_COLOR)
+        
         y_tomorrow = y_names + 25
         txt_tomorrow = "zajtra " + meniny_tomorrow
         draw.text((left_col_x, y_tomorrow), txt_tomorrow, font=fonts['regular'], fill=TEXT_COLOR)
@@ -670,21 +729,55 @@ def create_dashboard():
     else:
         draw.text((left_col_x, y_names + 25), "Dáta nedostupné", font=fonts['value'], fill=TEXT_COLOR)
     
-    current_y = col_y_start + 90
-    if intl_day:
-        draw.text((left_col_x, current_y), "Medzinárodný deň:", font=fonts['regular'], fill=TEXT_COLOR)
-        wrapped_intl = textwrap.wrap(intl_day, width=36)
-        current_y += 25
-        for line in wrapped_intl:
-            draw.text((left_col_x, current_y), line, font=fonts['small'], fill=TEXT_COLOR)
-            current_y += 18
-    else:
-        current_y += 10 
+    # NOVÁ LOGIKA PRE SVIATKY / SEZÓNY
+    # Priestor medzi meninami a počasím
+    # Meniny končia cca na Y=130 (header 64 + 15 + ~50)
+    # Počasie začína napevno na WEATHER_FIXED_Y = 255
+    # Stred pre centrovanie: (20 + 320) / 2 = 170
+    center_x_left_col = (20 + 320) // 2
     
-    # UPRAVENÉ POČASIE (Offset + Premenovanie)
-    # Zmena posunu z +15 na +25 (o 10px nizsie)
-    current_y = max(current_y + 35, 220) + 25 
-    draw.text((left_col_x, current_y), "Predpoveď počasia", font=fonts['regular'], fill=TEXT_COLOR) # Bez (Šamorín)
+    info_y_start = 135 # Približný začiatok oblasti pre info
+    
+    if intl_day:
+        # Pôvodné zobrazenie medzinárodného dňa (zarovnané vľavo, viacriadkové)
+        text_info = intl_day
+        selected_font = fonts['regular'] if len(text_info) < 40 else fonts['small']
+        line_spacing = 22 if selected_font == fonts['regular'] else 18
+        wrapped_info = textwrap.wrap(text_info, width=32 if selected_font == fonts['regular'] else 38)
+        
+        # Ak je medzinárodný deň, vypíšeme ho normálne od ľavého okraja (alebo vycentrovaný - požiadavka bola špecifická pre sezónu)
+        # Necháme zarovnané vľavo, ako bolo, keďže požiadavka na centrovanie bola pre "Prvý jarný deň..."
+        current_y_info = info_y_start
+        for line in wrapped_info:
+            draw.text((left_col_x, current_y_info), line, font=selected_font, fill=TEXT_COLOR)
+            current_y_info += line_spacing
+    else:
+        # Sezónna info (Prvý jarný deň...) - CENTROVANÉ NA 3 RIADKY
+        line1, line2, line3 = get_next_season_info()
+        
+        # Výpočet pozície Y pre centrovanie bloku vertikálne
+        # Máme priestor od 135 po 255 = 120 px
+        # Blok má výšku cca 3 * 22 = 66 px
+        # Top padding = (120 - 66) / 2 = 27
+        current_y_season = info_y_start + 15 
+        
+        # Riadok 1
+        w1 = draw.textlength(line1, font=fonts['regular'])
+        draw.text((center_x_left_col - w1/2, current_y_season), line1, font=fonts['regular'], fill=TEXT_COLOR)
+        current_y_season += 22
+        
+        # Riadok 2
+        w2 = draw.textlength(line2, font=fonts['small'])
+        draw.text((center_x_left_col - w2/2, current_y_season), line2, font=fonts['small'], fill=TEXT_COLOR)
+        current_y_season += 20
+        
+        # Riadok 3
+        w3 = draw.textlength(line3, font=fonts['regular'])
+        draw.text((center_x_left_col - w3/2, current_y_season), line3, font=fonts['regular'], fill=TEXT_COLOR)
+
+    # POČASIE - FIXNÁ POZÍCIA
+    current_y = WEATHER_FIXED_Y
+    draw.text((left_col_x, current_y), "Predpoveď počasia", font=fonts['regular'], fill=TEXT_COLOR)
     current_y += 30
     
     if weather_list:
@@ -716,7 +809,8 @@ def create_dashboard():
     max_text_width = WIDTH - right_col_x - 20 
     
     draw.text((right_col_x, col_y_start), "V tento deň:", font=fonts['regular'], fill=TEXT_COLOR)
-    right_y = col_y_start + 35
+    # ZMENA: Medzera nastavená na 25px pre zhodu s Word of the Day
+    right_y = col_y_start + 25
     
     parts = todays_event.split(':', 1)
     if len(parts) == 2:
@@ -726,20 +820,55 @@ def create_dashboard():
     else:
         right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", todays_event, fonts)
 
+    # NOVÁ SEKCIA: Word of the Day
     right_y += 15
-    available_space = (HEIGHT - 40) - right_y - (len(tv_program_list) * 20 + 40)
-    if available_space > 60:
-        draw.text((right_col_x, right_y), "Vedeli ste, že...?", font=fonts['regular'], fill=TEXT_COLOR)
-        right_y += 25
-        right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", todays_fact, fonts)
-
-    tv_height = len(tv_program_list) * 20 + 40
-    tv_start_y = max(right_y + 10, HEIGHT - 40 - tv_height)
+    label_wod = "Word of the Day: "
+    draw.text((right_col_x, right_y), label_wod, font=fonts['regular'], fill=TEXT_COLOR)
+    w_label_wod = draw.textlength(label_wod, font=fonts['regular'])
     
-    if tv_start_y < HEIGHT - 40:
-        draw.text((right_col_x, tv_start_y), "TV Program (Dnes):", font=fonts['regular'], fill=TEXT_COLOR)
+    if wod_word and wod_word != "Unknown":
+        draw.text((right_col_x + w_label_wod, right_y - 2), wod_word, font=fonts['value_18'], fill=TEXT_COLOR)
+        right_y += 25
+        
+        # Definicia
+        if wod_meaning:
+            right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", wod_meaning, fonts)
+            
+        # Priklad (ak existuje) - INTELIGENTNÉ KRESLENIE
+        if wod_example:
+            # 1. Zistime potrebnu vysku pre TV Program
+            tv_height = len(tv_program_list) * 20 + 40
+            tv_padding = 30 # Odstup medzi contentom a TV
+            
+            # 2. Vypocitame, kde by skoncil priklad (SIMULACIA)
+            test_start_y = right_y + 5
+            test_end_y = draw_text_mixed(draw, right_col_x, test_start_y, max_text_width, "", wod_example, fonts, simulate=True)
+            
+            # 3. Skontrolujeme, ci by to neodsunulo TV program prilis nizko (voci FIXNEJ pozicii TV)
+            # TV Program je fixovany na TV_PROGRAM_FIXED_Y = 320
+            # Takze content nesmie ist pod cca 310
+            
+            if test_end_y <= TV_PROGRAM_FIXED_Y - 10:
+                # Zmestí sa, vykreslíme naozaj
+                right_y += 5
+                right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", wod_example, fonts)
+            else:
+                # Nezmestí sa, preskočíme príklad
+                pass
+            
+    else:
+         draw.text((right_col_x, right_y + 25), "Dáta nedostupné", font=fonts['small'], fill=TEXT_COLOR)
+         right_y += 45
+
+    # TV PROGRAM - FIXNÁ POZÍCIA
+    tv_start_y = TV_PROGRAM_FIXED_Y
+    
+    # Kreslíme vždy (ak sa zmestí na obrazovku, čo by mal)
+    if tv_start_y < HEIGHT - 20:
+        draw.text((right_col_x, tv_start_y), "TV Program:", font=fonts['regular'], fill=TEXT_COLOR)
         tv_y = tv_start_y + 25
         for item in tv_program_list:
+            if tv_y > HEIGHT - 35: break # Ochrana proti pretečeniu dole
             draw.text((right_col_x, tv_y), item['station'], font=fonts['small'], fill=TEXT_COLOR)
             draw.text((right_col_x + 80, tv_y), item['time'], font=fonts['small'], fill=TEXT_COLOR)
             title = item['title']
