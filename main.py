@@ -745,8 +745,12 @@ def create_dashboard():
     # Priestor medzi meninami a počasím
     # Meniny končia cca na Y=130 (header 64 + 15 + ~50)
     # Počasie začína napevno na WEATHER_FIXED_Y = 255
-    # Stred pre centrovanie: (20 + 320) / 2 = 170
-    center_x_left_col = (20 + 320) // 2
+    
+    # ÚPRAVA: Výpočet stredu tak, aby bolo odsadenie sprava (od čiary 320)
+    # rovnaké ako zľava (20). Teda pravý okraj textovej oblasti je 320 - 20 = 300.
+    left_padding = 20
+    right_limit_x = 320 - left_padding # 300
+    center_x_left_col = (left_padding + right_limit_x) // 2 # 160
     
     # Približné hranice priestoru pre info
     info_area_top = 135
@@ -761,7 +765,9 @@ def create_dashboard():
         is_long = len(text_info) > 40
         selected_font = fonts['small'] if is_long else fonts['regular']
         line_spacing = 18 if is_long else 22
-        max_width_chars = 38 if is_long else 32
+        
+        # Znížená šírka pre zalamovanie, aby text rešpektoval nový pravý okraj (300px namiesto 320px)
+        max_width_chars = 35 if is_long else 30 
         
         wrapped_info = textwrap.wrap(text_info, width=max_width_chars)
         
@@ -921,3 +927,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
+
