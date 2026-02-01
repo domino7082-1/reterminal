@@ -67,82 +67,48 @@ def shorten_weather_desc(text):
     if not text:
         return ""
         
-    # 1. Odstránenie výplňových slov (prídavné mená a príslovky, ktoré len naťahujú text)
     removes = [
-        "Prevažne", "prevažne", 
-        "Miestami", "miestami", 
-        "Ojedinele", "ojedinele", 
-        "Čiastočne", "čiastočne", 
-        "Prechodne", "prechodne", 
-        "Neskôr", "neskôr",
-        "Ráno", "ráno",
-        "Lokálne", "lokálne"
+        "Prevažne", "prevažne", "Miestami", "miestami", "Ojedinele", "ojedinele", 
+        "Čiastočne", "čiastočne", "Prechodne", "prechodne", "Neskôr", "neskôr",
+        "Ráno", "ráno", "Lokálne", "lokálne"
     ]
     
     for word in removes:
         text = text.replace(word, "")
         
-    # 2. Náhrada spojok čiarkami pre úsporu miesta
     text = text.replace(" a ", ", ").replace(" s ", ", ").replace(" so ", ", ").replace(" až ", "/")
 
-    # 3. Oprava skloňovania (inštrumentál -> nominatív)
-    # A. Najprv frázy (adjektívum + substantívum) aby sedel rod
     replacements_phrases = {
-        "slabým snežením": "slabé sneženie",
-        "miernym snežením": "mierne sneženie",
-        "hustým snežením": "husté sneženie",
-        "občasným snežením": "občasné sneženie",
-        "trvalým snežením": "trvalé sneženie",
-        
-        "slabým dažďom": "slabý dážď",
-        "miernym dažďom": "mierny dážď",
-        "silným dažďom": "silný dážď",
-        "prudkým dažďom": "prudký dážď",
-        "občasným dažďom": "občasný dážď",
-        "trvalým dažďom": "trvalý dážď",
-        
-        "slabým mrholením": "slabé mrholenie",
-        "miernym mrholením": "mierne mrholenie",
-
-        "silným vetrom": "silný vietor",
-        "prudkým vetrom": "prudký vietor",
-        "nárazovým vetrom": "nárazový vietor",
-        
-        "ojedinelými búrkami": "ojedinelé búrky",
-        "miestnymi búrkami": "miestne búrky",
-        "silnými búrkami": "silné búrky",
-        
-        "ojedinelými prehánkami": "ojedinelé prehánky",
-        "miestnymi prehánkami": "miestne prehánky",
-        "občasnými prehánkami": "občasné prehánky",
+        "slabým snežením": "slabé sneženie", "miernym snežením": "mierne sneženie",
+        "hustým snežením": "husté sneženie", "občasným snežením": "občasné sneženie",
+        "trvalým snežením": "trvalé sneženie", "slabým dažďom": "slabý dážď",
+        "miernym dažďom": "mierny dážď", "silným dažďom": "silný dážď",
+        "prudkým dažďom": "prudký dážď", "občasným dažďom": "občasný dážď",
+        "trvalým dažďom": "trvalý dážď", "slabým mrholením": "slabé mrholenie",
+        "miernym mrholením": "mierne mrholenie", "silným vetrom": "silný vietor",
+        "prudkým vetrom": "prudký vietor", "nárazovým vetrom": "nárazový vietor",
+        "ojedinelými búrkami": "ojedinelé búrky", "miestnymi búrkami": "miestne búrky",
+        "silnými búrkami": "silné búrky", "ojedinelými prehánkami": "ojedinelé prehánky",
+        "miestnymi prehánkami": "miestne prehánky", "občasnými prehánkami": "občasné prehánky",
         "snehovými prehánkami": "snehové prehánky"
     }
     
     for old, new in replacements_phrases.items():
         text = text.replace(old, new)
 
-    # B. Samostatné slová (zvyšky)
     replacements_words = {
-        "prehánkami": "prehánky",
-        "mrholením": "mrholenie",
-        "dažďom": "dážď",
-        "snežením": "sneženie",
-        "búrkami": "búrky",
-        "vetrom": "vietor",
-        "hmlou": "hmla"
+        "prehánkami": "prehánky", "mrholením": "mrholenie", "dažďom": "dážď",
+        "snežením": "sneženie", "búrkami": "búrky", "vetrom": "vietor", "hmlou": "hmla"
     }
     for old, new in replacements_words.items():
         text = text.replace(old, new)
     
-    # 4. Čistenie nadbytočných medzier a čiarok vzniknutých mazaním
-    text = re.sub(r'\s+', ' ', text).strip(" ,") # viac medzier na jednu, trim
-    text = re.sub(r',\s*,', ',', text) # odstránenie zdvojených čiarok
+    text = re.sub(r'\s+', ' ', text).strip(" ,") 
+    text = re.sub(r',\s*,', ',', text) 
     
-    # 5. Prvé písmeno veľké
     if len(text) > 0:
         text = text[0].upper() + text[1:]
 
-    # 6. Orezanie ak je stále dlhé (cca 32-34 znakov pre šírku stĺpca)
     if len(text) > 34:
         text = text[:32] + ".."
         
@@ -414,14 +380,10 @@ def scrape_tv_program():
     return results
 
 def scrape_wikipedia_events_facts():
-    """
-    Stiahne udalosti z Hlavnej stránky a zaujímavosti z NÁHODNÉHO portálu.
-    """
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     events = []
     facts = []
 
-    # 1. UDALOSTI (V tento deň) - z Hlavnej stránky
     try:
         url_main = "https://sk.wikipedia.org/wiki/Hlavn%C3%A1_str%C3%A1nka"
         response = requests.get(url_main, headers=headers, timeout=10)
@@ -435,14 +397,12 @@ def scrape_wikipedia_events_facts():
         print(f"Chyba Wiki (Hlavná stránka - udalosti): {e}")
         events = ["Chyba dát."]
 
-    # 2. ZAUJÍMAVOSTI (Vedeli ste, že) - z náhodného portálu
     portals = [
         "https://sk.wikipedia.org/wiki/Port%C3%A1l:Astron%C3%B3mia/Zauj%C3%ADmavosti",
         "https://sk.wikipedia.org/wiki/Port%C3%A1l:Biol%C3%B3gia/arch%C3%ADv_zauj%C3%ADmavost%C3%AD",
         "https://sk.wikipedia.org/wiki/Port%C3%A1l:Kozmonautika/Zauj%C3%ADmavosti",
     ]
     
-    # Skúsime až 5 rôznych portálov
     MAX_RETRIES = 5
     
     for attempt in range(MAX_RETRIES):
@@ -454,15 +414,11 @@ def scrape_wikipedia_events_facts():
             response_portal.encoding = 'utf-8'
             html_portal = response_portal.text
             
-            # NOVÁ STRATÉGIA:
-            # Hľadáme všetky <li> položky, aj keď majú atribúty (preto <li[^>]*>)
             raw_items = re.findall(r'<li[^>]*>(.*?)</li>', html_portal, re.DOTALL)
             temp_facts = []
             
             for item in raw_items:
                 clean_text = remove_html_tags(item).strip()
-                
-                # Heuristika pre "Vedeli ste, že":
                 is_fact = False
                 if clean_text.endswith('?') and len(clean_text) > 20:
                     is_fact = True
@@ -470,21 +426,18 @@ def scrape_wikipedia_events_facts():
                     is_fact = True
                 
                 if is_fact:
-                    # Čistenie formátovania
-                    clean_text = re.sub(r'^[\s\.\…]+', '', clean_text) # Odstráni počiatočné bodky
+                    clean_text = re.sub(r'^[\s\.\…]+', '', clean_text) 
                     clean_text = clean_text.strip()
                     if len(clean_text) > 0:
                         clean_text = clean_text[0].upper() + clean_text[1:]
                     if not clean_text.endswith('?'):
                         clean_text += "?"
-                    
-                    # Filtrovanie dĺžky (aby sa zmestilo na displej)
                     if len(clean_text) < 360:
                         temp_facts.append(clean_text)
 
             if temp_facts:
                 facts = temp_facts
-                break # Úspech, končíme hľadanie
+                break 
             else:
                 print(f"Na {selected_portal_url} sa nenašli žiadne položky vyzerajúce ako fakty.")
             
@@ -494,7 +447,6 @@ def scrape_wikipedia_events_facts():
 
     if not events: events = ["Dáta nedostupné."]
     
-    # ZÁCHRANNÁ BRZDA (Fallback):
     if not facts or facts == ["Dáta nedostupné."]:
         print("POZOR: Nepodarilo sa stiahnuť fakty zo žiadneho portálu. Používam záložné dáta.")
         facts = [
@@ -509,6 +461,8 @@ def scrape_wikipedia_events_facts():
         ]
     
     return events, facts
+
+# === MENINY ===
 
 def scrape_meniny_kto_ma_meniny():
     url = "https://kto-ma-meniny.sk/"
@@ -536,7 +490,44 @@ def scrape_meniny_kto_ma_meniny():
         if name_today != "Neznáme":
             return name_today, name_tomorrow
     except Exception as e:
-        print(f"Chyba pri sťahovaní menín: {e}")
+        print(f"Chyba pri sťahovaní menín (kto-ma-meniny): {e}")
+    return None, None
+
+def scrape_meniny_zones():
+    """Fallback funkcia pre stiahnutie menín zo zones.sk"""
+    url = "https://www.zones.sk/kalendar-udalosti/meniny/"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    try:
+        print("Skúšam sťahovať meniny zo zones.sk...")
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        html = response.text
+        # Hľadáme štruktúru: meniny</a> má ... <strong>NAME_TODAY</strong></a>, zajtra ... <strong>NAME_TOMORROW</strong>
+        match = re.search(r"meniny</a> má.*?<strong>(.*?)</strong>.*?zajtra.*?<strong>(.*?)</strong>", html, re.DOTALL | re.IGNORECASE)
+        
+        if match:
+            name_today = remove_html_tags(match.group(1)).strip()
+            name_tomorrow = remove_html_tags(match.group(2)).strip()
+            return name_today, name_tomorrow
+        else:
+            print("Regex na zones.sk nenašiel mená.")
+            
+    except Exception as e:
+        print(f"Chyba pri sťahovaní menín (zones.sk): {e}")
+    return None, None
+
+def get_meniny_combined():
+    """Hlavná funkcia na získanie menín s fallbackom."""
+    # 1. Pokus - kto-ma-meniny.sk
+    today, tomorrow = scrape_meniny_kto_ma_meniny()
+    if today and tomorrow and today != "Neznáme":
+        return today, tomorrow
+    
+    # 2. Pokus - zones.sk (Fallback)
+    today, tomorrow = scrape_meniny_zones()
+    if today and tomorrow:
+        return today, tomorrow
+        
     return None, None
 
 def scrape_international_day(day, month):
@@ -575,9 +566,6 @@ def get_next_event_cyclic(events, key_suffix="otd"):
     safe_index = current_index % len(events)
     selected_event = events[safe_index]
     
-    # Pre zaujímavosti (dyk) chceme posunúť index, ale keďže portál sa mení náhodne, 
-    # zoznam 'events' (v tomto prípade facts) je iný pri každom spustení.
-    # To nevadí, modulo to ošetrí.
     state['date'] = today_str
     state[index_key] = current_index + 1
     try:
@@ -586,12 +574,10 @@ def get_next_event_cyclic(events, key_suffix="otd"):
     return selected_event
 
 def get_slovak_date():
-    # Nastavíme časovú zónu na Bratislavu (funguje na Linux/GitHub serveroch)
     try:
         os.environ['TZ'] = 'Europe/Bratislava'
         time.tzset()
     except AttributeError:
-        # Na Windows (lokálne) time.tzset neexistuje, ale tam je čas zvyčajne správny
         pass
 
     now = datetime.datetime.now()
@@ -628,9 +614,9 @@ def create_dashboard():
     fonts = get_fonts()
     now, date_str = get_slovak_date()
     
-    meniny_today, meniny_tomorrow = scrape_meniny_kto_ma_meniny()
+    meniny_today, meniny_tomorrow = get_meniny_combined()
     
-    # Wiki: events (Udalosti) z Hlavnej stránky, facts (Zaujímavosti) z náhodného portálu
+    # Wiki
     all_events, all_facts = scrape_wikipedia_events_facts()
     
     intl_day = scrape_international_day(now.day, now.month)
@@ -663,18 +649,26 @@ def create_dashboard():
     # B. ĽAVÝ STĹPEC (Meniny + Sviatky + Počasie)
     left_col_x = 20
     col_y_start = header_height + 15
-    draw.text((left_col_x, col_y_start), "Dnes má meniny:", font=fonts['regular'], fill=TEXT_COLOR)
     
-    y_names = col_y_start + 25
+    # UPRAVENÉ ZOBRAZENIE MENÍN
+    label_meniny = "Meniny má "
+    draw.text((left_col_x, col_y_start), label_meniny, font=fonts['regular'], fill=TEXT_COLOR)
+    w_label = draw.textlength(label_meniny, font=fonts['regular'])
+    
+    y_names = col_y_start # Riadok 1
+    
     if meniny_today and meniny_tomorrow:
-        draw.text((left_col_x, y_names), meniny_today, font=fonts['value'], fill=TEXT_COLOR)
-        w1 = draw.textlength(meniny_today, font=fonts['value'])
-        txt_spojka = ", zajtra "
-        draw.text((left_col_x + w1, y_names + 3), txt_spojka, font=fonts['regular'], fill=TEXT_COLOR)
-        w2 = draw.textlength(txt_spojka, font=fonts['regular'])
-        draw.text((left_col_x + w1 + w2, y_names), meniny_tomorrow, font=fonts['value'], fill=TEXT_COLOR)
+        # 1. Riadok: Meniny má [Meno Bold],
+        # Posunute o 4px vyssie kvoli zarovnaniu baseline s mensim textom
+        draw.text((left_col_x + w_label, y_names - 4), meniny_today + ",", font=fonts['value'], fill=TEXT_COLOR)
+        
+        # 2. Riadok: zajtra [Meno regular]
+        y_tomorrow = y_names + 25
+        txt_tomorrow = "zajtra " + meniny_tomorrow
+        draw.text((left_col_x, y_tomorrow), txt_tomorrow, font=fonts['regular'], fill=TEXT_COLOR)
+        
     else:
-        draw.text((left_col_x, y_names), "Dáta nedostupné", font=fonts['value'], fill=TEXT_COLOR)
+        draw.text((left_col_x, y_names + 25), "Dáta nedostupné", font=fonts['value'], fill=TEXT_COLOR)
     
     current_y = col_y_start + 90
     if intl_day:
@@ -687,8 +681,10 @@ def create_dashboard():
     else:
         current_y += 10 
     
-    current_y = max(current_y + 35, 220)
-    draw.text((left_col_x, current_y), "Predpoveď (Šamorín):", font=fonts['regular'], fill=TEXT_COLOR)
+    # UPRAVENÉ POČASIE (Offset + Premenovanie)
+    # Zmena posunu z +15 na +25 (o 10px nizsie)
+    current_y = max(current_y + 35, 220) + 25 
+    draw.text((left_col_x, current_y), "Predpoveď počasia", font=fonts['regular'], fill=TEXT_COLOR) # Bez (Šamorín)
     current_y += 30
     
     if weather_list:
@@ -699,7 +695,6 @@ def create_dashboard():
             text_x = left_col_x + 35
             draw.text((text_x, current_y), day_data['day'], font=fonts['bold_small'], fill=TEXT_COLOR)
             
-            # POUŽITIE NOVEJ FUNKCIE PRE SKRÁTENIE POPISU
             cleaned_desc = shorten_weather_desc(day_data['desc'])
             draw.text((text_x, current_y + 19), cleaned_desc, font=fonts['tiny'], fill=TEXT_COLOR)
             
@@ -731,7 +726,6 @@ def create_dashboard():
     else:
         right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", todays_event, fonts)
 
-    # ZMENA: "Vedeli ste, že" teraz zobrazuje aj zdroj (napr. Astronómia)
     right_y += 15
     available_space = (HEIGHT - 40) - right_y - (len(tv_program_list) * 20 + 40)
     if available_space > 60:
