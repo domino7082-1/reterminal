@@ -662,6 +662,18 @@ def create_dashboard():
     wod_word, wod_meaning, wod_example = scrape_word_of_the_day()
     
     intl_day = scrape_international_day(now.day, now.month)
+    
+    # Odstránená simulácia, pridanie logiky pre spracovanie viacerých sviatkov
+    if intl_day:
+        # Rozdelíme podľa čiarky a očistíme
+        holidays = [h.strip() for h in intl_day.split(',')]
+        # Ak je viac ako 3, zoberieme prvé 3
+        if len(holidays) > 3:
+            holidays = holidays[:3]
+        
+        # Spojíme späť čiarkou
+        intl_day = ", ".join(holidays)
+    
     weather_list, sunrise, sunset = scrape_weather_detailed()
     tv_program_list = scrape_tv_program()
     
@@ -736,30 +748,45 @@ def create_dashboard():
     # Stred pre centrovanie: (20 + 320) / 2 = 170
     center_x_left_col = (20 + 320) // 2
     
-    info_y_start = 135 # Približný začiatok oblasti pre info
+    # Približné hranice priestoru pre info
+    info_area_top = 135
+    info_area_bottom = WEATHER_FIXED_Y
+    info_area_height = info_area_bottom - info_area_top
     
     if intl_day:
-        # Pôvodné zobrazenie medzinárodného dňa (zarovnané vľavo, viacriadkové)
+        # CENTROVANÉ ZOBRAZENIE MEDZINÁRODNÉHO DŇA (alebo viacerých dní)
         text_info = intl_day
-        selected_font = fonts['regular'] if len(text_info) < 40 else fonts['small']
-        line_spacing = 22 if selected_font == fonts['regular'] else 18
-        wrapped_info = textwrap.wrap(text_info, width=32 if selected_font == fonts['regular'] else 38)
         
-        # Ak je medzinárodný deň, vypíšeme ho normálne od ľavého okraja (alebo vycentrovaný - požiadavka bola špecifická pre sezónu)
-        # Necháme zarovnané vľavo, ako bolo, keďže požiadavka na centrovanie bola pre "Prvý jarný deň..."
-        current_y_info = info_y_start
+        # Ak je text dlhý, použijeme menšie písmo, inak regular
+        is_long = len(text_info) > 40
+        selected_font = fonts['small'] if is_long else fonts['regular']
+        line_spacing = 18 if is_long else 22
+        max_width_chars = 38 if is_long else 32
+        
+        wrapped_info = textwrap.wrap(text_info, width=max_width_chars)
+        
+        # Vypočítame celkovú výšku textového bloku
+        total_text_height = len(wrapped_info) * line_spacing
+        
+        # Vypočítame štartovaciu Y pozíciu pre vertikálne centrovanie
+        start_y_centered = info_area_top + (info_area_height - total_text_height) // 2
+        
+        current_y_info = start_y_centered
         for line in wrapped_info:
-            draw.text((left_col_x, current_y_info), line, font=selected_font, fill=TEXT_COLOR)
+            w_line = draw.textlength(line, font=selected_font)
+            draw.text((center_x_left_col - w_line/2, current_y_info), line, font=selected_font, fill=TEXT_COLOR)
             current_y_info += line_spacing
+
     else:
         # Sezónna info (Prvý jarný deň...) - CENTROVANÉ NA 3 RIADKY
         line1, line2, line3 = get_next_season_info()
         
         # Výpočet pozície Y pre centrovanie bloku vertikálne
-        # Máme priestor od 135 po 255 = 120 px
         # Blok má výšku cca 3 * 22 = 66 px
-        # Top padding = (120 - 66) / 2 = 27
-        current_y_season = info_y_start + 15 
+        block_height = 66
+        start_y_season = info_area_top + (info_area_height - block_height) // 2
+        
+        current_y_season = start_y_season
         
         # Riadok 1
         w1 = draw.textlength(line1, font=fonts['regular'])
