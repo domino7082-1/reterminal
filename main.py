@@ -1062,21 +1062,21 @@ def create_dashboard():
             w_sep = draw.textlength(sep_char, font=fonts['bold_small'])
             w_max = draw.textlength(max_t_str, font=fonts['bold_small'])
             
-            # Kreslenie Max teploty (zarovnané doprava k čiare)
-            draw.text((sep_x_center - w_max - 5, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+            # Kreslenie Max teploty (zarovnané doprava k čiare) - POSUN O 2px DOĽAVA (5 -> 7)
+            draw.text((sep_x_center - w_max - 7, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
             
             # Kreslenie oddeľovača (vycentrované)
             draw.text((sep_x_center - w_sep/2, current_y), sep_char, font=fonts['bold_small'], fill=TEXT_COLOR)
             
-            # Kreslenie Min teploty (zarovnané doľava od čiary)
-            draw.text((sep_x_center + w_sep/2 + 5, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+            # Kreslenie Min teploty (zarovnané doľava od čiary) - POSUN O 2px DOPRAVA (5 -> 7)
+            draw.text((sep_x_center + w_sep/2 + 7, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
 
             if day_data['wind']:
-                 # POSUN +3px (pôvodne 135)
-                 draw.text((text_x + 138, current_y), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
+                 # POSUN +3px (pôvodne 135) + Y zarovnanie (+2)
+                 draw.text((text_x + 138, current_y + 2), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
             if day_data['prob'] and day_data['prob'] != "0%":
-                 # POSUN +8px (pôvodne 195)
-                 draw.text((text_x + 203, current_y), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
+                 # POSUN +8px (pôvodne 195) + Y zarovnanie (+2)
+                 draw.text((text_x + 203, current_y + 2), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
             current_y += row_height
     else:
         draw.text((left_col_x, current_y), "Dáta počasia nedostupné", font=fonts['small'], fill=TEXT_COLOR)
