@@ -337,7 +337,102 @@ def scrape_weather_detailed():
         print(f"Chyba pri sťahovaní z pocasie.sk: {e}")
     return weather_data, sunrise, sunset
 
+def scrape_tv_program_fallback():
+    """Záložný scraper z program.sk, ak hlavný zlyhá."""
+    print("Skúšam záložný zdroj program.sk...")
+    url = "https://www.program.sk/"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    targets = [
+        {"search_name": "Jednotka", "display_name": "Jednotka", "target_time": 20*60 + 30},
+        {"search_name": "Markíza", "display_name": "Markíza", "target_time": 20*60 + 30},
+        {"search_name": "JOJ", "display_name": "JOJ", "target_time": 20*60 + 40},
+        {"search_name": "Plus", "display_name": "JOJ Plus", "target_time": 20*60 + 30},
+        {"search_name": "Dajto", "display_name": "Dajto", "target_time": 20*60 + 30}
+    ]
+    results = []
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        html = response.text
+        
+        # Rozdelíme HTML podľa hlavičiek kanálov.
+        # Kanály sú zvyčajne v blokoch začínajúcich <div class="hdr"> alebo podobne,
+        # kde je <h2>Nazov</h2>.
+        
+        # Regex nájde bloky textu, ktoré začínajú <h2>Názov</h2> a pokračujú až po ďalší <h2>
+        # alebo koniec kontajnera.
+        
+        # Zjednodušene: prejdeme ciele a pre každý skúsime nájsť jeho blok v HTML
+        
+        for target in targets:
+            s_name = target["search_name"]
+            
+            # Hľadáme blok pre konkrétnu stanicu. 
+            # Hľadáme <h2>Stanica</h2> a potom nasledujúci obsah.
+            # Použijeme flexibilnejší regex pre názov stanice
+            
+            # Pre JOJ Plus môže byť názov "JOJ Plus" alebo len "Plus"
+            # Pre istotu hľadáme v celom HTML výskyty programov pre danú stanicu.
+            
+            # Nájdeme sekciu stanice:
+            # <div class="hdr"> ... <h2>Markíza</h2> ... </div> ... zoznam programov ...
+            
+            # Stratégia: Nájdeme index výskytu <h2>NazovStanice</h2>
+            # Od tohto indexu hľadáme programy, kým nenarazíme na ďalší <h2> alebo koniec.
+            
+            search_regex_name = re.escape(s_name)
+            if s_name == "Plus": search_regex_name = r"(JOJ Plus|Plus)"
+            
+            # Nájdi pozíciu hlavičky
+            header_match = re.search(fr"<h2>.*?{search_regex_name}.*?</h2>", html, re.IGNORECASE)
+            
+            best_prog = None
+            min_diff = 9999
+            
+            if header_match:
+                start_pos = header_match.end()
+                # Zoberieme kus textu po ďalší <h2> alebo dostatočne dlhý kus
+                rest_html = html[start_pos:]
+                next_header = re.search(r"<h2>", rest_html)
+                if next_header:
+                    block_html = rest_html[:next_header.start()]
+                else:
+                    block_html = rest_html
+                    
+                # V bloku hľadáme programy. Formát:
+                # <div class="sT t20" ...>20:30</div> ... <a ... class="n">Názov</a>
+                
+                progs = re.findall(r'<div class="sT[^"]*">(\d{1,2}:\d{2})</div>\s*<a[^>]*class="n"[^>]*>(.*?)</a>', block_html, re.DOTALL)
+                
+                for time_str, title_raw in progs:
+                    try:
+                        hh, mm = map(int, time_str.split(':'))
+                        minutes = hh * 60 + mm
+                        diff = abs(minutes - target["target_time"])
+                        
+                        if diff < min_diff and diff < 60: # Max hodina rozdiel
+                            min_diff = diff
+                            best_prog = {
+                                "time": time_str,
+                                "title": remove_html_tags(title_raw).strip()
+                            }
+                    except ValueError: continue
+            
+            if best_prog:
+                results.append({"station": target['display_name'], "time": best_prog['time'], "title": best_prog['title']})
+            else:
+                results.append({"station": target['display_name'], "time": "--:--", "title": "Nedostupné"})
+
+    except Exception as e:
+        print(f"Chyba záložného zdroja program.sk: {e}")
+        return []
+        
+    return results
+
 def scrape_tv_program():
+    """Hlavná funkcia pre TV program s fallbackom."""
+    # 1. Primárny zdroj
     url = "https://tv-program.aktuality.sk/dnes/"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     targets = [
@@ -348,47 +443,73 @@ def scrape_tv_program():
         {"search_name": "Dajto", "display_name": "Dajto", "target_time": 20*60 + 30}
     ]
     results = []
+    
+    success_primary = False
+    
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'utf-8'
         html_content = response.text
         pattern = r"program_desc\[\d+\]\s*=\s*\{(.*?)\}"
         matches = re.findall(pattern, html_content, re.DOTALL)
-        all_programs = []
-        for match in matches:
-            title_m = re.search(r"title:'(.*?)'", match)
-            time_m = re.search(r"time:'(.*?)'", match)
-            channel_m = re.search(r"channel_title:'(.*?)'", match)
-            if title_m and time_m and channel_m:
-                title = remove_html_tags(title_m.group(1))
-                time_str = time_m.group(1) 
-                channel = remove_html_tags(channel_m.group(1))
-                start_time_str = time_str.split('-')[0].strip()
-                try:
-                    hh, mm = map(int, start_time_str.split(':'))
-                    minutes = hh * 60 + mm
-                    all_programs.append({"channel": channel, "time_str": start_time_str, "minutes": minutes, "title": title})
-                except ValueError: continue
+        
+        if matches:
+            all_programs = []
+            for match in matches:
+                title_m = re.search(r"title:'(.*?)'", match)
+                time_m = re.search(r"time:'(.*?)'", match)
+                channel_m = re.search(r"channel_title:'(.*?)'", match)
+                if title_m and time_m and channel_m:
+                    title = remove_html_tags(title_m.group(1))
+                    time_str = time_m.group(1) 
+                    channel = remove_html_tags(channel_m.group(1))
+                    start_time_str = time_str.split('-')[0].strip()
+                    try:
+                        hh, mm = map(int, start_time_str.split(':'))
+                        minutes = hh * 60 + mm
+                        all_programs.append({"channel": channel, "time_str": start_time_str, "minutes": minutes, "title": title})
+                    except ValueError: continue
 
-        for target in targets:
-            best_match = None
-            min_diff = 9999
-            channel_programs = [p for p in all_programs if target["search_name"].lower() in p["channel"].lower()]
-            if target["search_name"] == "JOJ":
-                channel_programs = [p for p in channel_programs if "plus" not in p["channel"].lower()]
-            for prog in channel_programs:
-                diff = abs(prog["minutes"] - target["target_time"])
-                if diff < min_diff and diff < 45: 
-                    min_diff = diff
-                    best_match = prog
-            if best_match:
-                results.append({"station": target['display_name'], "time": best_match['time_str'], "title": best_match['title']})
-            else:
-                results.append({"station": target['display_name'], "time": "--:--", "title": "Dáta nedostupné"})
+            # Ak sme našli nejaké programy, spracujeme ich
+            if all_programs:
+                success_count = 0
+                for target in targets:
+                    best_match = None
+                    min_diff = 9999
+                    channel_programs = [p for p in all_programs if target["search_name"].lower() in p["channel"].lower()]
+                    if target["search_name"] == "JOJ":
+                        channel_programs = [p for p in channel_programs if "plus" not in p["channel"].lower()]
+                    for prog in channel_programs:
+                        diff = abs(prog["minutes"] - target["target_time"])
+                        if diff < min_diff and diff < 45: 
+                            min_diff = diff
+                            best_match = prog
+                    if best_match:
+                        results.append({"station": target['display_name'], "time": best_match['time_str'], "title": best_match['title']})
+                        success_count += 1
+                    else:
+                        results.append({"station": target['display_name'], "time": "--:--", "title": "Dáta nedostupné"})
+                
+                if success_count >= 2: # Považujeme za úspech ak máme aspoň 2 stanice
+                    success_primary = True
+
     except Exception as e:
-        print(f"Chyba pri sťahovaní TV programu: {e}")
-        return []
-    return results
+        print(f"Chyba pri sťahovaní TV programu (aktuality): {e}")
+
+    # 2. Fallback ak primárny zlyhal
+    if not success_primary:
+        fallback_results = scrape_tv_program_fallback()
+        if fallback_results:
+            # Skontrolujeme, či fallback vrátil použiteľné dáta (nie samé chyby)
+            valid_count = sum(1 for r in fallback_results if r['time'] != "--:--")
+            if valid_count > 0:
+                return fallback_results
+            
+    # Ak primárny zdroj vrátil aspoň niečo (aj keď s chybami), vrátime to, inak prázdne
+    if results:
+        return results
+        
+    return []
 
 def scrape_wikipedia_events():
     """Stiahne iba udalosti z Hlavnej stránky Wikipédie. Zaujímavosti odstránené."""
@@ -917,8 +1038,31 @@ def create_dashboard():
             cleaned_desc = shorten_weather_desc(day_data['desc'])
             draw.text((text_x, current_y + 19), cleaned_desc, font=fonts['tiny'], fill=TEXT_COLOR)
             
-            temp_vals = f"{day_data['max']} | {day_data['min']}"
-            draw.text((text_x + 75, current_y), temp_vals, font=fonts['bold_small'], fill=TEXT_COLOR)
+            # --- ÚPRAVA ZAROVNANIA TEPLÔT ---
+            # Starý kód: temp_vals = f"{day_data['max']} | {day_data['min']}" ... draw.text((text_x + 75, ...))
+            
+            # Nový kód: Fixná pozícia oddeľovača | a zarovnanie čísel k nemu
+            # text_x je (left_col_x + 35) = cca 55
+            # Pôvodne to začínalo na text_x + 75 = 130
+            # Nastavíme stred oddeľovača na fixnú X pozíciu, napr. text_x + 95 (cca 150px)
+            
+            sep_x_center = text_x + 95
+            sep_char = "|"
+            max_t_str = str(day_data['max'])
+            min_t_str = str(day_data['min'])
+            
+            w_sep = draw.textlength(sep_char, font=fonts['bold_small'])
+            w_max = draw.textlength(max_t_str, font=fonts['bold_small'])
+            
+            # Kreslenie Max teploty (zarovnané doprava k čiare)
+            draw.text((sep_x_center - w_max - 5, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+            
+            # Kreslenie oddeľovača (vycentrované)
+            draw.text((sep_x_center - w_sep/2, current_y), sep_char, font=fonts['bold_small'], fill=TEXT_COLOR)
+            
+            # Kreslenie Min teploty (zarovnané doľava od čiary)
+            draw.text((sep_x_center + w_sep/2 + 5, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+
             if day_data['wind']:
                  draw.text((text_x + 135, current_y), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
             if day_data['prob'] and day_data['prob'] != "0%":
