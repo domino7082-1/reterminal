@@ -1072,9 +1072,11 @@ def create_dashboard():
             draw.text((sep_x_center + w_sep/2 + 5, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
 
             if day_data['wind']:
-                 draw.text((text_x + 135, current_y), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
+                 # POSUN +3px (pôvodne 135)
+                 draw.text((text_x + 138, current_y), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
             if day_data['prob'] and day_data['prob'] != "0%":
-                 draw.text((text_x + 195, current_y), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
+                 # POSUN +8px (pôvodne 195)
+                 draw.text((text_x + 203, current_y), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
             current_y += row_height
     else:
         draw.text((left_col_x, current_y), "Dáta počasia nedostupné", font=fonts['small'], fill=TEXT_COLOR)
