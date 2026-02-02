@@ -529,19 +529,125 @@ def get_meniny_combined():
         
     return None, None
 
-def scrape_international_day(day, month):
-    url = "https://sk.wikipedia.org/wiki/Zoznam_medzin%C3%A1rodn%C3%BDch_dn%C3%AD_a_sviatkov"
+# === MEDZINÁRODNÉ DNI (Wiki + Zones) ===
+
+def scrape_wiki_international_days(day, month):
+    """Vráti dnešný medzinárodný deň z Hlavnej stránky Wikipédie (časť 'Dnes je' po meninách)."""
+    url = "https://sk.wikipedia.org/wiki/Hlavn%C3%A1_str%C3%A1nka"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-    months = ["január", "február", "marec", "apríl", "máj", "jún", "júl", "august", "september", "október", "november", "december"]
-    search_date = f"{day}. {months[month - 1]}"
+    
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'utf-8'
-        match = re.search(fr'<li[^>]*>\s*<a[^>]*title="{re.escape(search_date)}"[^>]*>.*?</a>(.*?)(?:</li>|<br)', response.text, re.IGNORECASE | re.DOTALL)
+        html = response.text
+        
+        # 1. Nájdeme sekciu "Meniny má", a zoberieme celý kontext (napr. po koniec odseku)
+        # Použijeme širší regex, aby sme zachytili celý odstavec
+        match_block = re.search(r"(Meniny má.*?</p>)", html, re.IGNORECASE | re.DOTALL)
+        
+        search_text = ""
+        if match_block:
+            search_text = match_block.group(1)
+        else:
+            # Fallback: ak nenájdeme </p>, skúsime nájsť aspoň "Meniny má" a kus textu za tým
+            match_start = re.search(r"Meniny má", html, re.IGNORECASE)
+            if match_start:
+                search_text = html[match_start.start():match_start.start()+1000]
+
+        if search_text:
+            # 2. Odstránime HTML tagy PRED hľadaním bodky. 
+            # Tým zmiznú URL adresy v href="", ktoré obsahujú bodky a mýlili predchádzajúci regex.
+            clean_block = remove_html_tags(search_text)
+            
+            # 3. Hľadáme vetu "Dnes je..." v očistenom texte
+            # Hľadáme po prvú bodku alebo koniec riadku
+            match_sentence = re.search(r"Dnes je\s+(.*?)(?:\.|$)", clean_block, re.IGNORECASE)
+            
+            if match_sentence:
+                raw_day = match_sentence.group(1).strip()
+                
+                # Filter: Ak text začína dňom v týždni, je to dátum, nie sviatok
+                days_sk = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota", "Nedeľa"]
+                first_word = raw_day.split()[0].replace(',', '') if raw_day else ""
+                
+                if first_word.capitalize() in days_sk:
+                    return []
+                
+                if raw_day:
+                    # Niekedy je tam viac sviatkov oddelených čiarkou, to je OK
+                    return [raw_day]
+
+    except Exception as e:
+        print(f"Chyba Wiki Int. days (Hlavná stránka): {e}")
+        
+    return []
+
+def scrape_zones_international_days(day, month):
+    """Vráti 'Medzinárodný deň Dnes' z boxu na zones.sk."""
+    url = "https://www.zones.sk/kalendar-udalosti/medzinarodne-dni/"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        html = response.text
+        
+        # Hľadáme špeciálny box pre dnešný deň: <div id='mdni_box'> ... <h2>Názov dňa</h2>
+        match = re.search(r"<div id='mdni_box'>.*?<h2>(.*?)</h2>", html, re.DOTALL | re.IGNORECASE)
+        
         if match:
-            return re.sub(r'^[\s–\-—:]+', '', remove_html_tags(match.group(1))).strip()
-    except Exception: pass
-    return ""
+            content = match.group(1)
+            clean_text = remove_html_tags(content).strip()
+            
+            # Odstránime rok (napr. " 2026") z konca textu
+            clean_text = re.sub(r'\s+\d{4}$', '', clean_text)
+            
+            if clean_text:
+                return [clean_text]
+                
+    except Exception as e:
+        print(f"Chyba Zones Int. days (Box): {e}")
+        
+    return []
+
+def get_combined_international_days(day, month):
+    """Kombinuje a deduplikuje dni z Wiki a Zones. Vráti string."""
+    wiki_days = scrape_wiki_international_days(day, month)
+    zones_days = scrape_zones_international_days(day, month)
+    
+    final_list = []
+    seen_normalized = set()
+    
+    # Pomocná funkcia na pridanie dňa ak nie je duplikát
+    def add_day(d_text):
+        norm = d_text.lower().strip()
+        # Odstránime "medzinárodný" pre porovnanie, aby sme odhalili "Deň Zeme" vs "Medzinárodný deň Zeme"
+        norm_short = norm.replace("medzinárodný ", "").replace("svetový ", "")
+        
+        # Skontrolujeme či sme už niečo veľmi podobné nepridali
+        is_duplicate = False
+        for seen in seen_normalized:
+            if norm_short in seen or seen in norm_short:
+                is_duplicate = True
+                break
+        
+        if not is_duplicate:
+            final_list.append(d_text)
+            seen_normalized.add(norm_short)
+
+    # Pridáme najprv Zones (priorita pre dnešný box)
+    for d in zones_days:
+        add_day(d)
+
+    # Pridáme Wiki (doplnenie)
+    for d in wiki_days:
+        add_day(d)
+        
+    # Limit na 3 dni
+    if len(final_list) > 3:
+        final_list = final_list[:3]
+        
+    return ", ".join(final_list)
 
 def get_next_season_info():
     now = datetime.datetime.now()
@@ -661,18 +767,8 @@ def create_dashboard():
     # Word of the Day
     wod_word, wod_meaning, wod_example = scrape_word_of_the_day()
     
-    intl_day = scrape_international_day(now.day, now.month)
-    
-    # Odstránená simulácia, pridanie logiky pre spracovanie viacerých sviatkov
-    if intl_day:
-        # Rozdelíme podľa čiarky a očistíme
-        holidays = [h.strip() for h in intl_day.split(',')]
-        # Ak je viac ako 3, zoberieme prvé 3
-        if len(holidays) > 3:
-            holidays = holidays[:3]
-        
-        # Spojíme späť čiarkou
-        intl_day = ", ".join(holidays)
+    # KOMBINOVANÉ MEDZINÁRODNÉ DNI (Wiki + Zones)
+    intl_day_text = get_combined_international_days(now.day, now.month)
     
     weather_list, sunrise, sunset = scrape_weather_detailed()
     tv_program_list = scrape_tv_program()
@@ -746,8 +842,6 @@ def create_dashboard():
     # Meniny končia cca na Y=130 (header 64 + 15 + ~50)
     # Počasie začína napevno na WEATHER_FIXED_Y = 255
     
-    # ÚPRAVA: Výpočet stredu tak, aby bolo odsadenie sprava (od čiary 320)
-    # rovnaké ako zľava (20). Teda pravý okraj textovej oblasti je 320 - 20 = 300.
     left_padding = 20
     right_limit_x = 320 - left_padding # 300
     center_x_left_col = (left_padding + right_limit_x) // 2 # 160
@@ -757,16 +851,17 @@ def create_dashboard():
     info_area_bottom = WEATHER_FIXED_Y
     info_area_height = info_area_bottom - info_area_top
     
-    if intl_day:
+    # Ak máme medzinárodný deň (alebo viac dní), zobrazíme ich
+    if intl_day_text:
         # CENTROVANÉ ZOBRAZENIE MEDZINÁRODNÉHO DŇA (alebo viacerých dní)
-        text_info = intl_day
+        text_info = intl_day_text
         
         # Ak je text dlhý, použijeme menšie písmo, inak regular
         is_long = len(text_info) > 40
         selected_font = fonts['small'] if is_long else fonts['regular']
         line_spacing = 18 if is_long else 22
         
-        # Znížená šírka pre zalamovanie, aby text rešpektoval nový pravý okraj (300px namiesto 320px)
+        # Znížená šírka pre zalamovanie
         max_width_chars = 35 if is_long else 30 
         
         wrapped_info = textwrap.wrap(text_info, width=max_width_chars)
@@ -784,11 +879,9 @@ def create_dashboard():
             current_y_info += line_spacing
 
     else:
-        # Sezónna info (Prvý jarný deň...) - CENTROVANÉ NA 3 RIADKY
+        # FALLBACK: Ak nie je žiaden medzinárodný deň, zobrazíme sezónu (jar/leto...)
         line1, line2, line3 = get_next_season_info()
         
-        # Výpočet pozície Y pre centrovanie bloku vertikálne
-        # Blok má výšku cca 3 * 22 = 66 px
         block_height = 66
         start_y_season = info_area_top + (info_area_height - block_height) // 2
         
@@ -927,4 +1020,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-
