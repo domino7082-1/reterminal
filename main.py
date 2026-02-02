@@ -1037,6 +1037,19 @@ def create_dashboard():
     
     if weather_list:
         row_height = 35
+        
+        # --- ZISTENIE STAVU PRE ZAROVNANIE ---
+        # Zistíme, či sa v noci vyskytuje mínusová teplota
+        has_minus_night = False
+        max_night_width = 0
+        for d in weather_list:
+            if '-' in str(d['min']):
+                has_minus_night = True
+            # Vypočítame maximálnu šírku textu pre min teploty (potrebné pre zarovnanie doprava)
+            w = fonts['bold_small'].getlength(str(d['min']))
+            if w > max_night_width:
+                max_night_width = w
+                
         for day_data in weather_list:
             if current_y > HEIGHT - 30: break
             draw_weather_icon(draw, left_col_x, current_y, 24, day_data['desc'])
@@ -1047,36 +1060,49 @@ def create_dashboard():
             draw.text((text_x, current_y + 19), cleaned_desc, font=fonts['tiny'], fill=TEXT_COLOR)
             
             # --- ÚPRAVA ZAROVNANIA TEPLÔT ---
-            # Starý kód: temp_vals = f"{day_data['max']} | {day_data['min']}" ... draw.text((text_x + 75, ...))
-            
-            # Nový kód: Fixná pozícia oddeľovača | a zarovnanie čísel k nemu
-            # text_x je (left_col_x + 35) = cca 55
-            # Pôvodne to začínalo na text_x + 75 = 130
-            # Nastavíme stred oddeľovača na fixnú X pozíciu, napr. text_x + 95 (cca 150px)
-            
+            # Definovanie stredovej osi pre oddeľovač
             sep_x_center = text_x + 95
             sep_char = "|"
+            gap = 7 # Pevná medzera od čiary
+            
             max_t_str = str(day_data['max'])
             min_t_str = str(day_data['min'])
             
             w_sep = draw.textlength(sep_char, font=fonts['bold_small'])
             w_max = draw.textlength(max_t_str, font=fonts['bold_small'])
+            w_min = draw.textlength(min_t_str, font=fonts['bold_small'])
             
-            # Kreslenie Max teploty (zarovnané doprava k čiare) - POSUN O 2px DOĽAVA (5 -> 7)
-            draw.text((sep_x_center - w_max - 7, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+            # 1. Max teplota: Vždy zarovnaná DOPRAVA k oddeľovaču
+            # Kotva je vľavo od oddeľovača s medzerou (gap)
+            max_anchor_x = sep_x_center - (w_sep / 2) - gap
+            draw.text((max_anchor_x - w_max, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
             
-            # Kreslenie oddeľovača (vycentrované)
+            # 2. Oddeľovač: Vycentrovaný
             draw.text((sep_x_center - w_sep/2, current_y), sep_char, font=fonts['bold_small'], fill=TEXT_COLOR)
             
-            # Kreslenie Min teploty (zarovnané doľava od čiary) - POSUN O 2px DOPRAVA (5 -> 7)
-            draw.text((sep_x_center + w_sep/2 + 7, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+            # 3. Min teplota: DYNAMICKÉ ZAROVNANIE
+            # Štartovacia pozícia vpravo od oddeľovača
+            min_start_x = sep_x_center + (w_sep / 2) + gap
+            
+            if not has_minus_night:
+                # PRÍPAD A: Všetky teploty sú kladné
+                # "nech budu cislice rovnako daleko od tejto predelovej ciary" -> Zarovnanie DOĽAVA (Left Align)
+                # Tým pádom začínajú všetky čísla presne na min_start_x
+                draw.text((min_start_x, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
+            else:
+                # PRÍPAD B: Existuje mínusová teplota
+                # "odsun cely stlpec o znamienko minus" + zarovnanie jednotiek
+                # Použijeme zarovnanie DOPRAVA (Right Align) voči vypočítanej maximálnej šírke
+                # Tým pádom budú jednotky pod sebou a kladné čísla sa odsunú doprava (o šírku mínusu)
+                min_anchor_right = min_start_x + max_night_width
+                draw.text((min_anchor_right - w_min, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
 
             if day_data['wind']:
-                 # POSUN +3px (pôvodne 135) + Y zarovnanie (+2)
-                 draw.text((text_x + 138, current_y + 2), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
+                 # POSUN: Mierne doprava kvôli zarovnaniu teplôt (138 -> 145)
+                 draw.text((text_x + 145, current_y + 2), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
             if day_data['prob'] and day_data['prob'] != "0%":
-                 # POSUN +8px (pôvodne 195) + Y zarovnanie (+2)
-                 draw.text((text_x + 203, current_y + 2), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
+                 # POSUN: Mierne doprava (203 -> 210)
+                 draw.text((text_x + 210, current_y + 2), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
             current_y += row_height
     else:
         draw.text((left_col_x, current_y), "Dáta počasia nedostupné", font=fonts['small'], fill=TEXT_COLOR)
