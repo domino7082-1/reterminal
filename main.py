@@ -338,10 +338,13 @@ def scrape_weather_detailed():
     return weather_data, sunrise, sunset
 
 def scrape_tv_program_fallback():
-    """Záložný scraper z program.sk, ak hlavný zlyhá."""
-    print("Skúšam záložný zdroj program.sk...")
-    url = "https://www.program.sk/"
+    """Záložný scraper využívajúci alternatívny zdroj (tv-program.sk alebo všeobecnejší parser pre program.sk), keďže pôvodný zlyhával."""
+    print("Skúšam záložný zdroj (tv-program.sk / alternative)...")
+    
+    # Použijeme tv-program.sk, ktorý má často jednoduchšiu štruktúru pre parsing (čistý text)
+    url = "https://tv-program.sk/"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    
     targets = [
         {"search_name": "Jednotka", "display_name": "Jednotka", "target_time": 20*60 + 30},
         {"search_name": "Markíza", "display_name": "Markíza", "target_time": 20*60 + 30},
@@ -353,79 +356,84 @@ def scrape_tv_program_fallback():
     
     try:
         response = requests.get(url, headers=headers, timeout=10)
-        response.encoding = 'utf-8'
+        # Nastavíme encoding, ak je potrebný (tv-program.sk zvyčajne utf-8 alebo windows-1250)
+        response.encoding = 'utf-8' 
         html = response.text
         
-        # Rozdelíme HTML podľa hlavičiek kanálov.
-        # Kanály sú zvyčajne v blokoch začínajúcich <div class="hdr"> alebo podobne,
-        # kde je <h2>Nazov</h2>.
+        # Keďže štruktúra môže byť zložitá, použijeme robustné vyhľadávanie v texte.
+        # Hľadáme názov stanice a potom najbližší čas k cieľovému času.
         
-        # Regex nájde bloky textu, ktoré začínajú <h2>Názov</h2> a pokračujú až po ďalší <h2>
-        # alebo koniec kontajnera.
-        
-        # Zjednodušene: prejdeme ciele a pre každý skúsime nájsť jeho blok v HTML
+        # Odstránime nadbytočné biele znaky pre jednoduchšie regexy
+        # Ale zachováme poradie
         
         for target in targets:
             s_name = target["search_name"]
+            t_time = target["target_time"]
             
-            # Hľadáme blok pre konkrétnu stanicu. 
-            # Hľadáme <h2>Stanica</h2> a potom nasledujúci obsah.
-            # Použijeme flexibilnejší regex pre názov stanice
+            # 1. Nájdeme index výskytu stanice v texte
+            # Hľadáme napr. "Jednotka" nasledované nejakým programom
+            # Pozor na "JOJ" vs "JOJ Plus". Ak hľadáme "JOJ", nesmie za tým byť "Plus".
             
-            # Pre JOJ Plus môže byť názov "JOJ Plus" alebo len "Plus"
-            # Pre istotu hľadáme v celom HTML výskyty programov pre danú stanicu.
+            station_regex = re.escape(s_name)
+            if s_name == "JOJ":
+                station_regex = r"JOJ(?!\s*Plus)"
+            elif s_name == "Plus":
+                station_regex = r"(JOJ\s*Plus|Plus)"
             
-            # Nájdeme sekciu stanice:
-            # <div class="hdr"> ... <h2>Markíza</h2> ... </div> ... zoznam programov ...
+            # Hľadáme stanicu
+            # Zvyčajne je to nadpis alebo v zozname. Zoberieme prvý výskyt, ktorý vyzerá ako hlavička
+            # alebo proste prvý výskyt a budeme skenovať text za ním.
             
-            # Stratégia: Nájdeme index výskytu <h2>NazovStanice</h2>
-            # Od tohto indexu hľadáme programy, kým nenarazíme na ďalší <h2> alebo koniec.
-            
-            search_regex_name = re.escape(s_name)
-            if s_name == "Plus": search_regex_name = r"(JOJ Plus|Plus)"
-            
-            # Nájdi pozíciu hlavičky
-            header_match = re.search(fr"<h2>.*?{search_regex_name}.*?</h2>", html, re.IGNORECASE)
+            matches = list(re.finditer(station_regex, html, re.IGNORECASE))
             
             best_prog = None
             min_diff = 9999
             
-            if header_match:
-                start_pos = header_match.end()
-                # Zoberieme kus textu po ďalší <h2> alebo dostatočne dlhý kus
-                rest_html = html[start_pos:]
-                next_header = re.search(r"<h2>", rest_html)
-                if next_header:
-                    block_html = rest_html[:next_header.start()]
-                else:
-                    block_html = rest_html
-                    
-                # V bloku hľadáme programy. Formát:
-                # <div class="sT t20" ...>20:30</div> ... <a ... class="n">Názov</a>
-                
-                progs = re.findall(r'<div class="sT[^"]*">(\d{1,2}:\d{2})</div>\s*<a[^>]*class="n"[^>]*>(.*?)</a>', block_html, re.DOTALL)
-                
-                for time_str, title_raw in progs:
-                    try:
-                        hh, mm = map(int, time_str.split(':'))
-                        minutes = hh * 60 + mm
-                        diff = abs(minutes - target["target_time"])
-                        
-                        if diff < min_diff and diff < 60: # Max hodina rozdiel
-                            min_diff = diff
-                            best_prog = {
-                                "time": time_str,
-                                "title": remove_html_tags(title_raw).strip()
-                            }
-                    except ValueError: continue
+            # Prejdeme nájdené výskyty názvu stanice (môže ich byť viac, napr. v menu)
+            # Skúsime každý, či za ním nasledujú časy programov.
+            found_valid_block = False
             
+            for match in matches:
+                if found_valid_block: break # Ak sme už našli program pre túto stanicu, končíme
+                
+                start_pos = match.end()
+                # Pozrieme sa na nasledujúcich cca 5000 znakov
+                chunk = html[start_pos:start_pos+5000]
+                
+                # Hľadáme patterny času: HH:MM Názov
+                # Regex: Čas (HH:MM), potom nejaké znaky (medzery, tagy), potom Názov
+                # Názov končí ďalším časom alebo tagom.
+                
+                prog_matches = re.findall(r"(\d{1,2}:\d{2})\s*(?:<[^>]*>|\s|&nbsp;|-)*\s*([^<]+)", chunk)
+                
+                # Ak sme našli aspoň 3 programy s časmi, považujeme to za správny blok
+                if len(prog_matches) > 2:
+                    found_valid_block = True
+                    for time_str, title_raw in prog_matches:
+                        try:
+                            hh, mm = map(int, time_str.split(':'))
+                            minutes = hh * 60 + mm
+                            diff = abs(minutes - t_time)
+                            
+                            # Ak je rozdiel menší ako 60 minút a je to lepší match
+                            if diff < min_diff and diff < 60:
+                                clean_title = remove_html_tags(title_raw).strip()
+                                # Filter na nezmysly (príliš krátke alebo len čísla)
+                                if len(clean_title) > 2:
+                                    min_diff = diff
+                                    best_prog = {
+                                        "time": f"{hh:02d}:{mm:02d}",
+                                        "title": clean_title
+                                    }
+                        except ValueError: continue
+
             if best_prog:
                 results.append({"station": target['display_name'], "time": best_prog['time'], "title": best_prog['title']})
             else:
                 results.append({"station": target['display_name'], "time": "--:--", "title": "Nedostupné"})
 
     except Exception as e:
-        print(f"Chyba záložného zdroja program.sk: {e}")
+        print(f"Chyba záložného zdroja: {e}")
         return []
         
     return results
