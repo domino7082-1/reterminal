@@ -1130,11 +1130,9 @@ def create_dashboard():
     right_y += 15
     
     # Kategória spojená s nadpisom
-    label_facts = "Vedeli ste že...?"
-    if fact_category:
-        label_facts += f" ({fact_category})"
-        
-    draw.text((right_col_x, right_y), label_facts, font=fonts['regular'], fill=TEXT_COLOR)
+    base_label = "Vedeli ste že...?"
+    draw.text((right_col_x, right_y), base_label, font=fonts['regular'], fill=TEXT_COLOR)
+
     right_y += 25
     
     if fact_text:
