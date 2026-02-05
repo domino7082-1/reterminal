@@ -15,7 +15,14 @@ HEIGHT = 480
 MODE = '1' 
 BACKGROUND_COLOR = 255 # Biela
 TEXT_COLOR = 0         # Čierna
-STATE_FILE = "dashboard_state.json" 
+
+# --- OPRAVA CIEST K SÚBOROM ---
+# Získame absolútnu cestu k priečinku, v ktorom sa nachádza tento skript (main.py)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Súbory budeme hľadať relatívne k tomuto priečinku
+STATE_FILE = os.path.join(BASE_DIR, "dashboard_state.json") 
+FACTS_FILE = os.path.join(BASE_DIR, "facts.json")
 
 # Fixné pozície pre sekcie (aby neskákali)
 WEATHER_FIXED_Y = 255
@@ -28,9 +35,11 @@ LON = 17.3097
 def get_fonts():
     fonts = {}
     try:
-        font_path_bold = "arialbd.ttf"
-        font_path_reg = "arial.ttf"
+        # Aj fonty budeme hľadať v priečinku skriptu, ak ide o lokálne súbory
+        font_path_bold = os.path.join(BASE_DIR, "arialbd.ttf")
+        font_path_reg = os.path.join(BASE_DIR, "arial.ttf")
         
+        # Ak lokálne fonty nie sú, skúsime systémové cesty (Linux/Raspberry Pi)
         if not os.path.exists(font_path_bold) and os.path.exists("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"):
             font_path_bold = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
             font_path_reg = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
@@ -541,57 +550,60 @@ def scrape_wikipedia_events():
     
     return events
 
-def scrape_word_of_the_day():
-    url = "https://www.merriam-webster.com/word-of-the-day/"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+# === FAKTY Z FACTS.JSON ===
+
+def get_random_fact_cyclic():
+    """
+    Načíta fakty z facts.json, vyberie náhodný fakt, ktorý ešte nebol zobrazený.
+    Používa dashboard_state.json na sledovanie zobrazených ID.
+    Ak sa minú všetky fakty, reštartuje cyklus.
+    """
+    if not os.path.exists(FACTS_FILE):
+        return None, "Súbor s faktami nenájdený."
+
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.encoding = 'utf-8'
-        html = response.text
-        
-        # Word
-        word_match = re.search(r'<title>Word of the Day: (.*?) \| Merriam-Webster</title>', html)
-        word = word_match.group(1) if word_match else "Unknown"
-        
-        # Meaning & Example
-        meaning = "Definition not found."
-        example = ""
-        
-        # Hladame sekciu "What It Means"
-        # Obycajne je to <h2>What It Means</h2> nasledovane <p> (definicia) a dalsie <p> (priklad // ...)
-        # Niekedy je to vnutri <div class="wod-definition-container">, ale regexom prejdeme text.
-        
-        # Najdeme text od H2 az po dalsi tag, ktory by mohol ukoncit sekciu (napr. H2, div, atd)
-        # Pre istotu zoberieme vacsi kus textu
-        section_match = re.search(r'<h2>What It Means</h2>(.*?)(?:<div|<h2>|<!--)', html, re.DOTALL)
-        
-        if section_match:
-            content = section_match.group(1)
-            # Najdeme vsetky paragrafy
-            paragraphs = re.findall(r'<p.*?>(.*?)</p>', content, re.DOTALL)
-            
-            if len(paragraphs) >= 1:
-                meaning = remove_html_tags(paragraphs[0])
-            
-            # Skusime najst priklad. Zvycajne druhy paragraf, zacina na //
-            if len(paragraphs) >= 2:
-                raw_example = paragraphs[1].strip()
-                # Overime ci zacina na // (niekedy su tam HTML tagy na zaciatku, takze remove_html_tags najprv)
-                clean_example_check = remove_html_tags(raw_example).strip()
-                if clean_example_check.startswith('//'):
-                    example = clean_example_check
-                # Ak nie je druhy, skusime prejst vsetky paragrafy
-                else:
-                    for p in paragraphs:
-                        clean_p = remove_html_tags(p).strip()
-                        if clean_p.startswith('//'):
-                            example = clean_p
-                            break
-        
-        return word, meaning, example
+        with open(FACTS_FILE, 'r', encoding='utf-8') as f:
+            facts = json.load(f)
     except Exception as e:
-        print(f"Error WOTD: {e}")
-        return None, None, None
+        return None, f"Chyba načítania faktov: {e}"
+
+    if not facts:
+        return None, "Žiadne fakty v databáze."
+
+    # Načítanie stavu
+    state = {}
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, 'r') as f:
+                state = json.load(f)
+        except Exception as e:
+            print(f"Chyba načítania stavu: {e}")
+
+    shown_ids = set(state.get('shown_fact_ids', []))
+    
+    # Filtrovanie dostupných faktov
+    available_facts = [f for f in facts if f['id'] not in shown_ids]
+
+    # Ak sú všetky fakty zobrazené, reštartujeme cyklus
+    if not available_facts:
+        print("Všetky fakty boli zobrazené, začínam odznova.")
+        shown_ids = set()
+        available_facts = facts
+
+    # Náhodný výber
+    selected_fact = random.choice(available_facts)
+    
+    # Aktualizácia stavu
+    shown_ids.add(selected_fact['id'])
+    state['shown_fact_ids'] = list(shown_ids)
+    
+    try:
+        with open(STATE_FILE, 'w') as f:
+            json.dump(state, f)
+    except Exception as e:
+        print(f"Chyba ukladania stavu: {e}")
+
+    return selected_fact['kategoria'], selected_fact['text']
 
 # === MENINY ===
 
@@ -893,8 +905,8 @@ def create_dashboard():
     all_events = scrape_wikipedia_events()
     todays_event = get_next_event_cyclic(all_events, key_suffix="otd")
     
-    # Word of the Day
-    wod_word, wod_meaning, wod_example = scrape_word_of_the_day()
+    # FAKTY z facts.json
+    fact_category, fact_text = get_random_fact_cyclic()
     
     # KOMBINOVANÉ MEDZINÁRODNÉ DNI (Wiki + Zones)
     intl_day_text = get_combined_international_days(now.day, now.month)
@@ -971,10 +983,7 @@ def create_dashboard():
     else:
         draw.text((left_col_x, y_names + 25), "Dáta nedostupné", font=fonts['value'], fill=TEXT_COLOR)
     
-    # NOVÁ LOGIKA PRE SVIATKY / SEZÓNY
-    # Priestor medzi meninami a počasím
-    # Meniny končia cca na Y=130 (header 64 + 15 + ~50)
-    # Počasie začína napevno na WEATHER_FIXED_Y = 255
+    # SVIATKY / SEZÓNY
     
     left_padding = 20
     right_limit_x = 320 - left_padding # 300
@@ -1068,7 +1077,6 @@ def create_dashboard():
             # Definovanie stredovej osi pre zarovnanie
             sep_x_center = text_x + 95
             
-            # Zrušený znak "|", zväčšená medzera pre čistý vzhľad
             gap = 12 
             
             max_t_str = str(day_data['max'])
@@ -1078,31 +1086,23 @@ def create_dashboard():
             w_min = draw.textlength(min_t_str, font=fonts['bold_small'])
             
             # 1. Max teplota: Vždy zarovnaná DOPRAVA k virtuálnemu stredu
-            # Kotva je vľavo od stredu s medzerou (gap)
             max_anchor_x = sep_x_center - gap
             draw.text((max_anchor_x - w_max, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
             
-            # 2. Oddeľovač: VYPNUTÝ (nevykresľujeme nič)
-            
             # 3. Min teplota: DYNAMICKÉ ZAROVNANIE
-            # Štartovacia pozícia vpravo od virtuálneho stredu
             min_start_x = sep_x_center + gap
             
             if not has_minus_night:
                 # PRÍPAD A: Všetky teploty sú kladné
-                # Zarovnanie DOĽAVA -> začínajú presne na min_start_x
                 draw.text((min_start_x, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
             else:
                 # PRÍPAD B: Existuje mínusová teplota
-                # Zarovnanie DOPRAVA voči vypočítanej maximálnej šírke stĺpca
                 min_anchor_right = min_start_x + max_night_width
                 draw.text((min_anchor_right - w_min, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
 
             if day_data['wind']:
-                 # POSUN: Mierne doprava kvôli zarovnaniu teplôt (138 -> 145)
                  draw.text((text_x + 145, current_y + 2), day_data['wind'], font=fonts['tiny'], fill=TEXT_COLOR)
             if day_data['prob'] and day_data['prob'] != "0%":
-                 # POSUN: Mierne doprava (203 -> 210)
                  draw.text((text_x + 210, current_y + 2), day_data['prob'], font=fonts['tiny'], fill=TEXT_COLOR)
             current_y += row_height
     else:
@@ -1115,9 +1115,7 @@ def create_dashboard():
     right_col_x = 350
     max_text_width = WIDTH - right_col_x - 20 
     
-    # ZMENA: Dvojbodka nahradená tromi bodkami
     draw.text((right_col_x, col_y_start), "V tento deň...", font=fonts['regular'], fill=TEXT_COLOR)
-    # ZMENA: Medzera nastavená na 25px pre zhodu s Word of the Day
     right_y = col_y_start + 25
     
     parts = todays_event.split(':', 1)
@@ -1128,44 +1126,33 @@ def create_dashboard():
     else:
         right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", todays_event, fonts)
 
-    # NOVÁ SEKCIA: Word of the Day
+    # NOVÁ SEKCIA: FAKTY (Vedeli ste že...) - nahrádza Word of the Day
     right_y += 15
-    label_wod = "Word of the Day: "
-    draw.text((right_col_x, right_y), label_wod, font=fonts['regular'], fill=TEXT_COLOR)
-    w_label_wod = draw.textlength(label_wod, font=fonts['regular'])
     
-    if wod_word and wod_word != "Unknown":
-        draw.text((right_col_x + w_label_wod, right_y - 2), wod_word, font=fonts['value_18'], fill=TEXT_COLOR)
-        right_y += 25
+    # Kategória spojená s nadpisom
+    label_facts = "Vedeli ste že...?"
+    if fact_category:
+        label_facts += f" ({fact_category})"
         
-        # Definicia
-        if wod_meaning:
-            right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", wod_meaning, fonts)
-            
-        # Priklad (ak existuje) - INTELIGENTNÉ KRESLENIE
-        if wod_example:
-            # 1. Zistime potrebnu vysku pre TV Program
-            tv_height = len(tv_program_list) * 20 + 40
-            tv_padding = 30 # Odstup medzi contentom a TV
-            
-            # 2. Vypocitame, kde by skoncil priklad (SIMULACIA)
-            test_start_y = right_y + 5
-            test_end_y = draw_text_mixed(draw, right_col_x, test_start_y, max_text_width, "", wod_example, fonts, simulate=True)
-            
-            # 3. Skontrolujeme, ci by to neodsunulo TV program prilis nizko (voci FIXNEJ pozicii TV)
-            # TV Program je fixovany na TV_PROGRAM_FIXED_Y = 320
-            # Takze content nesmie ist pod cca 310
-            
-            if test_end_y <= TV_PROGRAM_FIXED_Y - 10:
-                # Zmestí sa, vykreslíme naozaj
-                right_y += 5
-                right_y = draw_text_mixed(draw, right_col_x, right_y, max_text_width, "", wod_example, fonts)
-            else:
-                # Nezmestí sa, preskočíme príklad
-                pass
+    draw.text((right_col_x, right_y), label_facts, font=fonts['regular'], fill=TEXT_COLOR)
+    right_y += 25
+    
+    if fact_text:
+        # Zobrazenie textu faktu
+        # Zvýšená šírka pre zalamovanie (pôvodne 50 -> teraz 60)
+        # Font 'small' je Arial 15. Max šírka stĺpca je cca 430px. 
+        # Priemerne 1 znak = 7-8px. 60 znakov * 7.5 = 450px (trochu na tesno, ale ok)
+        wrapped_fact = textwrap.wrap(fact_text, width=60) 
+        
+        for line in wrapped_fact:
+            # Kontrola, či neprekračujeme do TV programu
+            if right_y > TV_PROGRAM_FIXED_Y - 10:
+                break
+            draw.text((right_col_x, right_y), line, font=fonts['small'], fill=TEXT_COLOR)
+            right_y += 18
             
     else:
-         draw.text((right_col_x, right_y + 25), "Dáta nedostupné", font=fonts['small'], fill=TEXT_COLOR)
+         draw.text((right_col_x, right_y), "Dáta faktov nedostupné", font=fonts['small'], fill=TEXT_COLOR)
          right_y += 45
 
     # TV PROGRAM - FIXNÁ POZÍCIA
