@@ -724,32 +724,34 @@ def scrape_wiki_international_days(day, month):
     return []
 
 def scrape_zones_international_days(day, month):
-    """Vráti 'Medzinárodný deň Dnes' z boxu na zones.sk."""
+    """Vráti 'Medzinárodný deň Dnes' z boxu na zones.sk (všetky výskyty)."""
     url = "https://www.zones.sk/kalendar-udalosti/medzinarodne-dni/"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     
+    days = []
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'utf-8'
         html = response.text
         
-        # Hľadáme špeciálny box pre dnešný deň: <div id='mdni_box'> ... <h2>Názov dňa</h2>
-        match = re.search(r"<div id='mdni_box'>.*?<h2>(.*?)</h2>", html, re.DOTALL | re.IGNORECASE)
+        # Hľadáme všetky nadpisy <h2>, ktoré nasledujú po obrázku/titulku "Medzinárodný deň Dnes".
+        # Tento pattern zaručí, že vyberieme len tie, ktoré sú označené ako dnešné.
+        # Regex: nájdi title='Medzinárodný deň Dnes' ... > potom voliteľné medzery ... potom <h2>(text)</h2>
+        pattern = r"title=['\"]Medzinárodný deň Dnes['\"][^>]*>\s*<h2>(.*?)</h2>"
+        matches = re.findall(pattern, html, re.IGNORECASE | re.DOTALL)
         
-        if match:
-            content = match.group(1)
-            clean_text = remove_html_tags(content).strip()
-            
+        for raw_text in matches:
+            clean_text = remove_html_tags(raw_text).strip()
             # Odstránime rok (napr. " 2026") z konca textu
             clean_text = re.sub(r'\s+\d{4}$', '', clean_text)
             
             if clean_text:
-                return [clean_text]
+                days.append(clean_text)
                 
     except Exception as e:
         print(f"Chyba Zones Int. days (Box): {e}")
         
-    return []
+    return days
 
 def get_combined_international_days(day, month):
     """Kombinuje a deduplikuje dni z Wiki a Zones. Vráti string."""
