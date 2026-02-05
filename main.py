@@ -936,7 +936,8 @@ def create_dashboard():
     if meniny_today and meniny_tomorrow:
         name_text = meniny_today + ","
         max_name_x = 315
-        current_x = left_col_x + w_label
+        # POSUN: Mená posunuté o 3px doprava
+        current_x = left_col_x + w_label + 3
         available_w = max_name_x - current_x
         
         font_candidates = [
@@ -960,8 +961,12 @@ def create_dashboard():
         draw.text((current_x, y_names + selected_offset), name_text, font=selected_font, fill=TEXT_COLOR)
         
         y_tomorrow = y_names + 25
-        txt_tomorrow = "zajtra " + meniny_tomorrow
-        draw.text((left_col_x, y_tomorrow), txt_tomorrow, font=fonts['regular'], fill=TEXT_COLOR)
+        label_tomorrow = "zajtra "
+        draw.text((left_col_x, y_tomorrow), label_tomorrow, font=fonts['small'], fill=TEXT_COLOR)
+        
+        w_label_tom = draw.textlength(label_tomorrow, font=fonts['small'])
+        # POSUN: Meno zajtra posunuté o 3px doprava od slova "zajtra"
+        draw.text((left_col_x + w_label_tom + 3, y_tomorrow), meniny_tomorrow, font=fonts['small'], fill=TEXT_COLOR)
         
     else:
         draw.text((left_col_x, y_names + 25), "Dáta nedostupné", font=fonts['value'], fill=TEXT_COLOR)
@@ -1060,40 +1065,36 @@ def create_dashboard():
             draw.text((text_x, current_y + 19), cleaned_desc, font=fonts['tiny'], fill=TEXT_COLOR)
             
             # --- ÚPRAVA ZAROVNANIA TEPLÔT ---
-            # Definovanie stredovej osi pre oddeľovač
+            # Definovanie stredovej osi pre zarovnanie
             sep_x_center = text_x + 95
-            sep_char = "|"
-            gap = 7 # Pevná medzera od čiary
+            
+            # Zrušený znak "|", zväčšená medzera pre čistý vzhľad
+            gap = 12 
             
             max_t_str = str(day_data['max'])
             min_t_str = str(day_data['min'])
             
-            w_sep = draw.textlength(sep_char, font=fonts['bold_small'])
             w_max = draw.textlength(max_t_str, font=fonts['bold_small'])
             w_min = draw.textlength(min_t_str, font=fonts['bold_small'])
             
-            # 1. Max teplota: Vždy zarovnaná DOPRAVA k oddeľovaču
-            # Kotva je vľavo od oddeľovača s medzerou (gap)
-            max_anchor_x = sep_x_center - (w_sep / 2) - gap
+            # 1. Max teplota: Vždy zarovnaná DOPRAVA k virtuálnemu stredu
+            # Kotva je vľavo od stredu s medzerou (gap)
+            max_anchor_x = sep_x_center - gap
             draw.text((max_anchor_x - w_max, current_y), max_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
             
-            # 2. Oddeľovač: Vycentrovaný
-            draw.text((sep_x_center - w_sep/2, current_y), sep_char, font=fonts['bold_small'], fill=TEXT_COLOR)
+            # 2. Oddeľovač: VYPNUTÝ (nevykresľujeme nič)
             
             # 3. Min teplota: DYNAMICKÉ ZAROVNANIE
-            # Štartovacia pozícia vpravo od oddeľovača
-            min_start_x = sep_x_center + (w_sep / 2) + gap
+            # Štartovacia pozícia vpravo od virtuálneho stredu
+            min_start_x = sep_x_center + gap
             
             if not has_minus_night:
                 # PRÍPAD A: Všetky teploty sú kladné
-                # "nech budu cislice rovnako daleko od tejto predelovej ciary" -> Zarovnanie DOĽAVA (Left Align)
-                # Tým pádom začínajú všetky čísla presne na min_start_x
+                # Zarovnanie DOĽAVA -> začínajú presne na min_start_x
                 draw.text((min_start_x, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
             else:
                 # PRÍPAD B: Existuje mínusová teplota
-                # "odsun cely stlpec o znamienko minus" + zarovnanie jednotiek
-                # Použijeme zarovnanie DOPRAVA (Right Align) voči vypočítanej maximálnej šírke
-                # Tým pádom budú jednotky pod sebou a kladné čísla sa odsunú doprava (o šírku mínusu)
+                # Zarovnanie DOPRAVA voči vypočítanej maximálnej šírke stĺpca
                 min_anchor_right = min_start_x + max_night_width
                 draw.text((min_anchor_right - w_min, current_y), min_t_str, font=fonts['bold_small'], fill=TEXT_COLOR)
 
@@ -1114,7 +1115,8 @@ def create_dashboard():
     right_col_x = 350
     max_text_width = WIDTH - right_col_x - 20 
     
-    draw.text((right_col_x, col_y_start), "V tento deň:", font=fonts['regular'], fill=TEXT_COLOR)
+    # ZMENA: Dvojbodka nahradená tromi bodkami
+    draw.text((right_col_x, col_y_start), "V tento deň...", font=fonts['regular'], fill=TEXT_COLOR)
     # ZMENA: Medzera nastavená na 25px pre zhodu s Word of the Day
     right_y = col_y_start + 25
     
