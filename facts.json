@@ -1,0 +1,2002 @@
+[
+  {
+    "id": 1,
+    "kategoria": "Potraviny",
+    "text": "Med je jedinou potravinou, ktorá sa prakticky nikdy nepokazí. Archeológovia našli v staroegyptských hrobkách nádoby s medom staré tisíce rokov, ktorý bol po zohriatí stále jedlý. Jeho antibakteriálne vlastnosti sú spôsobené extrémne nízkym obsahom vody a prítomnosťou peroxidu vodíka, čo baktériám znemožňuje prežiť."
+  },
+  {
+    "id": 2,
+    "kategoria": "História",
+    "text": "Univerzita v Oxforde je staršia ako Aztécka ríša. Zatiaľ čo výučba v Oxforde začala už v roku 1096, Aztécka ríša vznikla až v roku 1428, čo je rozdiel viac ako 300 rokov. To znamená, že v čase, keď sa v Mexiku kládli základy Tenochtitlánu, v Anglicku už storočia fungovala akademická inštitúcia."
+  },
+  {
+    "id": 3,
+    "kategoria": "Zvieratá",
+    "text": "Chobotnice majú až tri srdcia a modrú krv. Dve srdcia pumpujú krv do žiabier na okysličenie, zatiaľ čo tretie srdce pumpuje krv do zvyšku tela; keď chobotnica pláva, toto tretie srdce sa zastaví, čo ju veľmi vyčerpáva. Modrá farba krvi je spôsobená proteínom hemocyanínom, ktorý na prenos kyslíka využíva meď namiesto železa."
+  },
+  {
+    "id": 4,
+    "kategoria": "Vesmír",
+    "text": "Jeden deň na Venuši trvá dlhšie ako jeden rok na Venuši. Planéte trvá 243 pozemských dní, kým sa otočí okolo svojej osi, ale iba 225 pozemských dní, kým obehne okolo Slnka. Navyše sa otáča v opačnom smere ako väčšina planét, takže Slnko tam vychádza na západe a zapadá na východe."
+  },
+  {
+    "id": 5,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najvyšší počet hradov a zámkov na obyvateľa na svete. Na takom malom území je evidovaných viac ako 180 hradov a 425 kaštieľov, čo svedčí o bohatej a strategickej histórii krajiny. Mnohé z týchto pamiatok dnes slúžia ako múzeá alebo sú zapísané v zozname svetového kultúrneho dedičstva UNESCO."
+  },
+  {
+    "id": 6,
+    "kategoria": "Ľudské telo",
+    "text": "Ľudské kosti sú v pomere k hmotnosti pevnejšie ako oceľ. Kocka kosti s veľkosťou zápalkovej škatuľky dokáže uniesť až 9 ton váhy, čo je približne štvornásobok pevnosti betónu. Táto neuveriteľná pevnosť je výsledkom zložitej vnútornej štruktúry, ktorá kombinuje tvrdé minerály s pružným kolagénom."
+  },
+  {
+    "id": 7,
+    "kategoria": "Príroda",
+    "text": "Banány sú z botanického hľadiska bobule, zatiaľ čo jahody nie. Ešte bizarnejšie je, že stromy, na ktorých banány rastú, sú v skutočnosti obrovské byliny, nie stromy, pretože nemajú drevnatú stonku. Skutočným kmeňom banánovníka je len podzemná hľuza, z ktorej vyrastajú listy tvoriace nepravú stonku."
+  },
+  {
+    "id": 8,
+    "kategoria": "História",
+    "text": "Kleopatra žila časovo bližšie k pristátiu prvého človeka na Mesiaci než k stavbe Veľkej pyramídy v Gíze. Pyramídy boli postavené okolo roku 2560 pred n. l., Kleopatra žila okolo roku 30 pred n. l. a Apollo 11 pristál v roku 1969. Tento fakt ilustruje, aká neuveriteľne dlhá a starobylá bola éra starovekého Egypta."
+  },
+  {
+    "id": 9,
+    "kategoria": "Zvieratá",
+    "text": "Žraloky existovali na Zemi skôr ako stromy. Najstaršie fosílie žralokov sa datujú do obdobia pred 400 miliónmi rokov, zatiaľ čo prvé stromy sa objavili až o 50 miliónov rokov neskôr. Žraloky tak prežili štyri z piatich veľkých masových vymieraní živočíchov v histórii Zeme."
+  },
+  {
+    "id": 10,
+    "kategoria": "Technológie",
+    "text": "Viac ľudí na svete vlastní mobilný telefón než zubnú kefku. Podľa odhadov OSN má prístup k mobilným technológiám viac ako 6 miliárd ľudí, zatiaľ čo základnú hygienu chrupu dodržiava menej ľudí. Tento nepomer ukazuje, ako rýchlo sa digitálne technológie stali nevyhnutnou súčasťou života aj v rozvojových krajinách."
+  },
+  {
+    "id": 11,
+    "kategoria": "Geografia",
+    "text": "Rusko má väčšiu povrchovú plochu ako planéta Pluto. Rozloha Ruska je približne 17 miliónov štvorcových kilometrov, zatiaľ čo povrch Pluta má len asi 16,7 milióna štvorcových kilometrov. Pluto je dokonca menšie ako náš Mesiac, čo bol jeden z dôvodov, prečo bolo preklasifikované na trpasličiu planétu."
+  },
+  {
+    "id": 12,
+    "kategoria": "Zvieratá",
+    "text": "Kravy majú najlepších priateľov a prežívajú stres, keď sú od nich oddelené. Výskumy ukázali, že keď sú kravy v blízkosti svojich preferovaných partnerov, sú pokojnejšie a ich srdcový tep je nižší. Ak ich rozdelíte, ich produkcia mlieka sa môže znížiť v dôsledku emocionálnej nepohody."
+  },
+  {
+    "id": 13,
+    "kategoria": "Vesmír",
+    "text": "Vo vesmíre je úplné ticho, pretože tam nie je žiadna atmosféra, ktorá by prenášala zvukové vlny. Astronauti musia na komunikáciu používať rádiové vlny, ktoré sa dokážu šíriť aj vákuom. Zvuky výbuchov a motorov, ktoré poznáme zo sci-fi filmov, sú teda z fyzikálneho hľadiska nemožné."
+  },
+  {
+    "id": 14,
+    "kategoria": "Slovensko",
+    "text": "Stred Európy sa podľa mnohých geografov nachádza na Slovensku, konkrétne pri kostole sv. Jána v Kremnických Baniach. Aj keď si tento titul nárokujú aj iné krajiny, slovenský bod je jedným z najuznávanejších. Tento geografický stred je označený pamätným kameňom, ktorý pripomína historický význam tohto merania."
+  },
+  {
+    "id": 15,
+    "kategoria": "Ľudské telo",
+    "text": "Váš nos si dokáže zapamätať až 50 000 rôznych vôní. Čuch je tiež najsilnejším zmyslom spojeným s pamäťou, preto nám konkrétna vôňa často okamžite pripomenie spomienku z detstva. Je to spôsobené tým, že čuchový bulbus je priamo prepojený s amygdalou a hipokampom, centrami emócií a pamäti v mozgu."
+  },
+  {
+    "id": 16,
+    "kategoria": "Príroda",
+    "text": "Na Zemi je viac stromov než hviezd v Mliečnej dráhe. Odhaduje sa, že na našej planéte sú približne 3 bilióny stromov, zatiaľ čo naša galaxia obsahuje „len“ 100 až 400 miliárd hviezd. Napriek tomuto vysokému číslu však počet stromov od začiatku ľudskej civilizácie klesol o takmer polovicu."
+  },
+  {
+    "id": 17,
+    "kategoria": "História",
+    "text": "Vojna medzi Zanzibarom a Veľkou Britániou v roku 1896 bola najkratšou vojnou v histórii. Trvala iba 38 minút, po ktorých sa zanzibarský sultán vzdal britským námorným silám. Britské loďstvo počas tejto krátkej doby zničilo sultánov palác a potopilo jeho jedinú bojovú loď."
+  },
+  {
+    "id": 18,
+    "kategoria": "Zaujímavosti",
+    "text": "Lego je najväčším výrobcom pneumatík na svete. Aj keď sú to len miniatúrne gumené pneumatiky pre hračkárske autíčka, ročne ich vyrobia viac ako 300 miliónov kusov, čo prekonáva všetkých výrobcov skutočných pneumatík. Guma použitá na tieto pneumatiky je špeciálne vyvinutá tak, aby sa časom nerozpadala a nešpinila ostatné kocky."
+  },
+  {
+    "id": 19,
+    "kategoria": "Zvieratá",
+    "text": "Vombaty vylučujú trus v tvare kociek. Tento nezvyčajný tvar im pomáha značiť si teritórium, pretože kocky sa nekotúľajú preč z kameňov alebo klád, na ktoré ich umiestnia. Vedci zistili, že tento tvar vzniká vďaka nepravidelným sťahom svalov v poslednej časti ich čriev."
+  },
+  {
+    "id": 20,
+    "kategoria": "Geografia",
+    "text": "Francúzsko zdieľa svoju najdlhšiu hranicu s Brazíliou, nie so žiadnou európskou krajinou. Je to vďaka Francúzskej Guyane, ktorá je zámorským departementom Francúzska v Južnej Amerike. Táto hranica meria 730 kilometrov, čo je viac ako hranica Francúzska so Španielskom."
+  },
+  {
+    "id": 21,
+    "kategoria": "Jazyky",
+    "text": "Najpoužívanejším písmenom v angličtine a mnohých iných jazykoch je písmeno „E“. Naopak, jedno z najmenej používaných písmen je „Q“, ktoré sa v bežnej reči vyskytuje veľmi zriedkavo. Písmeno E je také časté, že na klávesniciach počítačov je umiestnené v najsilnejšej zóne pre ľavú ruku."
+  },
+  {
+    "id": 22,
+    "kategoria": "Slovensko",
+    "text": "Oltár Majstra Pavla v Levoči je najvyšším dreveným gotickým oltárom na svete. Meria úctyhodných 18,6 metra a bol vytvorený bez použitia jediného železného klinca. Celé dielo je vyrezané z lipového dreva a jeho dokončenie trvalo Majstrovi Pavlovi a jeho dielni desať rokov."
+  },
+  {
+    "id": 23,
+    "kategoria": "Veda",
+    "text": "Horúca voda môže zamrznúť rýchlejšie ako studená voda. Tento neintuitívny jav sa nazýva Mpembov efekt a vedci sa dodnes nezhodli na jedinom definitívnom vysvetlení, prečo k tomu dochádza. Jednou z teórií je, že teplá voda sa rýchlejšie odparuje, čím sa zmenšuje jej objem, ktorý musí zamrznúť."
+  },
+  {
+    "id": 24,
+    "kategoria": "Ľudské telo",
+    "text": "Žalúdočná kyselina je dostatočne silná na to, aby rozpustila žiletku. Kyselina chlorovodíková v našom žalúdku má pH 1 až 2, ale sliznica žalúdka sa neustále obnovuje, aby sa sama nestrávila. Tento proces obnovy je taký rýchly, že celá výstelka žalúdka sa vymení približne každé tri až štyri dni."
+  },
+  {
+    "id": 25,
+    "kategoria": "Zvieratá",
+    "text": "Plameniaky nie sú prirodzene ružové, rodia sa sivé. Ich charakteristické sfarbenie pochádza z potravy, konkrétne z kreviet a rias, ktoré obsahujú prírodné farbivá nazývané karotenoidy. Ak by plameniak prestal prijímať túto potravu, jeho perie by postupne vybledlo späť na bielu alebo sivú farbu."
+  },
+  {
+    "id": 26,
+    "kategoria": "História",
+    "text": "Hrdina Napoleon Bonaparte nebol v skutočnosti taký malý, ako sa traduje. Meral približne 168 cm, čo bola v tej dobe priemerná výška; mýtus o jeho malom vzraste vznikol zámenou francúzskych a britských meracích jednotiek. K jeho prezývke „Malý korporál“ prispelo aj to, že bol často obklopený svojou elitnou osobnou strážou, ktorá bola nadpriemerne vysoká."
+  },
+  {
+    "id": 27,
+    "kategoria": "Príroda",
+    "text": "Huby sú geneticky bližšie k zvieratám ako k rastlinám. Podobne ako zvieratá, aj huby prijímajú kyslík a vylučujú oxid uhličitý, a ich bunkové steny obsahujú chitín, ktorý sa nachádza aj v schránkach hmyzu. Na rozdiel od rastlín tiež nedokážu vykonávať fotosyntézu a živiny musia získavať z externých zdrojov."
+  },
+  {
+    "id": 28,
+    "kategoria": "Technológie",
+    "text": "Prvý počítačový vírus na svete vznikol v roku 1971 a volal sa „Creeper“. Nebol škodlivý, len sa presúval medzi počítačmi a zobrazoval správu: „Som Creeper, chyť ma, ak to dokážeš!“ Jeho tvorca, Bob Thomas, chcel len demonštrovať schopnosť programu samostatne sa pohybovať v sieti ARPANET."
+  },
+  {
+    "id": 29,
+    "kategoria": "Zvieratá",
+    "text": "Leňochody sa pohybujú tak pomaly, že im v kožuchu rastú riasy. Tieto riasy im poskytujú nielen maskovanie v zelenom pralese, ale slúžia im občas aj ako zdroj potravy, ktorý olizujú zo srsti. V ich kožuchu žije celý ekosystém hmyzu a mikroorganizmov, ktorý nikde inde nenájdeme."
+  },
+  {
+    "id": 30,
+    "kategoria": "Slovensko",
+    "text": "Bratislava je jediné hlavné mesto na svete, ktoré hraničí s dvoma nezávislými štátmi. Na západe susedí s Rakúskom a na juhu s Maďarskom, čo z nej robí unikátny geopolitický bod. Do roku 1936 dokonca premávala z centra Viedne do centra Bratislavy prímestská električka."
+  },
+  {
+    "id": 31,
+    "kategoria": "Vesmír",
+    "text": "Slnko tvorí 99,86 % celkovej hmotnosti našej slnečnej sústavy. Všetky planéty, mesiace, asteroidy a kométy dohromady tvoria len zlomok zvyšného 0,14 % hmoty. Najväčšiu časť z tohto zvyšku zaberá Jupiter, ktorý je sám o sebe ťažší než všetky ostatné planéty dohromady."
+  },
+  {
+    "id": 32,
+    "kategoria": "Ľudské telo",
+    "text": "Človek je jediný živočích, ktorý sa dokáže červenať. Je to reakcia sympatického nervového systému na sociálne emócie ako sú hanba alebo rozpaky, čo vedie k rozšíreniu ciev v tvári. Charles Darwin označil červenanie za „najľudskejší zo všetkých výrazov“."
+  },
+  {
+    "id": 33,
+    "kategoria": "Geografia",
+    "text": "V Kanade sa nachádza viac jazier ako vo zvyšku sveta dohromady. Krajina má približne 3 milióny jazier, ktoré pokrývajú 9 % celkovej rozlohy Kanady. Väčšina týchto jazier vznikla činnosťou ustupujúcich ľadovcov na konci poslednej doby ľadovej."
+  },
+  {
+    "id": 34,
+    "kategoria": "Zaujímavosti",
+    "text": "Počas spánku človek nič necíti, pretože čuchový zmysel „vypína“. To je dôvod, prečo sú v domácnostiach nevyhnutné požiarne hlásiče, keďže dym spiaceho človeka nezobudí. Mozog počas fázy hlbokého spánku ignoruje signály z čuchových receptorov, aby nebol rušený."
+  },
+  {
+    "id": 35,
+    "kategoria": "Príroda",
+    "text": "Bambus je najrýchlejšie rastúca rastlina na svete. Niektoré druhy bambusu dokážu narásť až o 91 centimetrov za jediný deň, čo je rýchlosť, ktorú môžete takmer vidieť voľným okom. Táto vlastnosť robí z bambusu jeden z najudržateľnejších a najobnoviteľnejších stavebných materiálov."
+  },
+  {
+    "id": 36,
+    "kategoria": "História",
+    "text": "Rimania používali moč na bielenie zubov a pranie oblečenia. Amoniak obsiahnutý v moči má silné čistiace vlastnosti, preto bol v starovekom Ríme cenenou komoditou, na ktorú bola uvalená daň. Cisár Vespasianus vtedy vyslovil slávnu vetu „Pecunia non olet“ – peniaze nesmrdia."
+  },
+  {
+    "id": 37,
+    "kategoria": "Zvieratá",
+    "text": "Vydry morské sa pri spánku držia za ruky, aby ich prúd neodniesol od seba. Často sa tiež zamotávajú do morských rias, ktoré fungujú ako kotva, aby zostali na jednom mieste. Matky vydry takto často spia so svojimi mláďatami na hrudi, kým sú malé."
+  },
+  {
+    "id": 38,
+    "kategoria": "Psychológia",
+    "text": "Peniaze skutočne môžu kúpiť šťastie, ale len do určitej miery. Štúdie ukazujú, že po dosiahnutí príjmu, ktorý pokrýva základné potreby a komfort, sa miera šťastia so zvyšujúcim bohatstvom už výrazne nezvyšuje. Tento bod zlomu sa nazýva „prah nasýtenia“ a líši sa v závislosti od životných nákladov v danej krajine."
+  },
+  {
+    "id": 39,
+    "kategoria": "Slovensko",
+    "text": "Slovenské opálové bane v Dubníku sú najstaršie na svete. Až do objavenia ložísk v Mexiku a Austrálii v 19. storočí boli jediným miestom na svete, kde sa ťažil drahý opál. Najväčší opál z týchto baní, Harlekýn, je dnes uložený v prírodovednom múzeu vo Viedni."
+  },
+  {
+    "id": 40,
+    "kategoria": "Veda",
+    "text": "Diamanty nie sú také vzácne, ako sa zdá, ich cena je výsledkom marketingu. V skutočnosti sú diamanty z uhlíka celkom bežné, no trh s nimi bol desaťročia prísne kontrolovaný spoločnosťou De Beers, aby sa udržala umelo vysoká cena. Slogan „Diamant je navždy“ bol vytvorený v roku 1947 práve na podporu tohto mýtu."
+  },
+  {
+    "id": 41,
+    "kategoria": "Zvieratá",
+    "text": "Modrá veľryba má srdce veľké ako malé osobné auto a človek by mohol plávať v jej tepnách. Jej jazyk váži toľko, čo dospelý slon a je to najväčšie zviera, aké kedy žilo na Zemi. Napriek svojej veľkosti sa živí takmer výlučne drobnými kôrovcami nazývanými krill."
+  },
+  {
+    "id": 42,
+    "kategoria": "Kultúra",
+    "text": "Kečup bol v 30. rokoch 19. storočia predávaný ako liek. Predpokladalo sa, že lieči hnačku, poruchy trávenia a žltačku, a predával sa v tabletkovej forme. Modernú verziu paradajkového kečupu, ako ho poznáme dnes, spopularizoval až Henry Heinz v roku 1876."
+  },
+  {
+    "id": 43,
+    "kategoria": "Vesmír",
+    "text": "Na Saturne a Jupiteri pršia diamanty. Vysoký tlak v atmosférach týchto plynných obrov premieňa uhlík na kryštalické diamanty, ktoré padajú smerom k jadru planéty. Vedci odhadujú, že na Saturne ročne naprší asi 1000 ton diamantov."
+  },
+  {
+    "id": 44,
+    "kategoria": "Ľudské telo",
+    "text": "Odtlačky jazyka je rovnako jedinečný ako odtlačok prsta. Každý človek má unikátnu textúru a tvar jazyka, čo by sa teoreticky dalo využiť na identifikáciu osôb. Na rozdiel od prstov je však jazyk chránený v ústach, takže ho nemožno len tak ľahko zoskenovať alebo zanechať na mieste činu."
+  },
+  {
+    "id": 45,
+    "kategoria": "Príroda",
+    "text": "Mraky vyzerajú ľahké, ale priemerný oblak typu cumulus váži približne 500 ton. To je rovnaká váha ako približne 100 slonov, no vďaka rozptýleniu na obrovskej ploche sa vznášajú. Voda v mrakoch je vo forme mikroskopických kvapôčok, ktoré sú dosť ľahké na to, aby ich unášali vzdušné prúdy."
+  },
+  {
+    "id": 46,
+    "kategoria": "História",
+    "text": "Viktoriánski ľudia sa na fotografiách neusmievali, pretože dlhá expozícia vyžadovala nehybnosť. Udržať úsmev niekoľko minút bolo ťažké, a navyše sa úsmev v tej dobe považoval za znak hlúposti alebo nižšej triedy. Vážny výraz tiež lepšie zakrýval zlé zuby, ktoré boli v tom čase bežné."
+  },
+  {
+    "id": 47,
+    "kategoria": "Geografia",
+    "text": "Najsuchšie miesto na Zemi sa nachádza v Antarktíde, v oblasti zvanej Suché údolia. V niektorých častiach tohto územia nepršalo ani nesnežilo už takmer 2 milióny rokov. Podmienky v týchto údoliach sú tak podobné Marsu, že NASA tam testuje svoje vesmírne sondy."
+  },
+  {
+    "id": 48,
+    "kategoria": "Zvieratá",
+    "text": "Včely dokážu rozpoznať ľudské tváre. Experimenty ukázali, že včely sa dajú vycvičiť na to, aby identifikovali konkrétnu tvár a spojili si ju s odmenou vo forme cukrovej vody. Tento objav dokazuje, že aj hmyz s malým mozgom je schopný komplexného vizuálneho učenia."
+  },
+  {
+    "id": 49,
+    "kategoria": "Slovensko",
+    "text": "Tatranský kamzík je unikátny poddruh, ktorý nežije nikde inde na svete. Po skončení ľadovej doby ostal izolovaný vo Vysokých Tatrách a vyvinul sa odlišne od svojich príbuzných v Alpách. Vďaka prísnej ochrane sa jeho populácia v posledných rokoch stabilizovala a opäť rastie."
+  },
+  {
+    "id": 50,
+    "kategoria": "Technológie",
+    "text": "Nórske kráľovstvo udelilo tučniakovi hodnosť brigádneho generála. Tučniak Nils Olav III., ktorý žije v ZOO v Edinburgu, je maskotom a čestným veliteľom Nórskej kráľovskej gardy. Každý rok ho vojaci navštevujú a slávnostne ho povyšujú, pričom tučniak vykonáva „inšpekciu“ nastúpených jednotiek."
+  },
+  {
+    "id": 51,
+    "kategoria": "História",
+    "text": "Mamuty ešte stále žili na Zemi, keď Egypťania stavali pyramídy. Posledná populácia mamutov na Wrangelovom ostrove vyhynula okolo roku 1650 pred n. l., zatiaľ čo Veľká pyramída v Gíze bola dokončená okolo roku 2560 pred n. l. Tieto mamuty však boli oveľa menšie ako ich pevninskí predkovia v dôsledku ostrovného nanizmu."
+  },
+  {
+    "id": 52,
+    "kategoria": "Slovensko",
+    "text": "Ochtinská aragonitová jaskyňa je svetový unikát. Je jednou z iba troch sprístupnených aragonitových jaskýň na celej planéte; jej výzdoba nepripomína klasické stalaktity, ale skôr snehové vločky alebo koraly. Táto unikátna výzdoba vznikla v uzavretom priestore bez prúdenia vzduchu kryštalizáciou z roztokov."
+  },
+  {
+    "id": 53,
+    "kategoria": "Vesmír",
+    "text": "Západ slnka na Marse je modrý. Zatiaľ čo na Zemi rozptyl svetla v atmosfére vytvára červené a oranžové odtiene, jemný marťanský prach rozptyľuje slnečné svetlo tak, že obloha okolo Slnka sa javí modrá. Tento jav je presným opakom toho, čo vidíme na našej planéte."
+  },
+  {
+    "id": 54,
+    "kategoria": "Zvieratá",
+    "text": "Existuje medúza, ktorá je biologicky nesmrteľná. Turritopsis dohrnii sa dokáže v prípade ohrozenia alebo choroby vrátiť do svojho polypového štádia (mladosti) a začať svoj životný cyklus odznova. Tento proces transdiferenciácie buniek jej umožňuje teoreticky žiť donekonečna, ak ju niečo nezožerie."
+  },
+  {
+    "id": 55,
+    "kategoria": "Ľudské telo",
+    "text": "Bábätká sa rodia bez jabĺčok v kolenách. Namiesto kostí majú v kolenách chrupavku, ktorá sa na pevnú kosť premení až medzi druhým a šiestym rokom života. Táto mäkkosť je dôležitá pre uľahčenie pôrodu a neskôr pomáha tlmiť nárazy, keď sa dieťa učí chodiť a často padá."
+  },
+  {
+    "id": 56,
+    "kategoria": "Technológie",
+    "text": "Spoločnosť Nintendo bola založená už v roku 1889. Viac ako sto rokov pred vznikom Super Maria a Pokémonov začínala ako výrobca ručne maľovaných hracích kariet Hanafuda. Neskôr firma experimentovala s taxislužbou, hodinovým hotelom a instantnou ryžou, kým sa našla v elektronickej zábave."
+  },
+  {
+    "id": 57,
+    "kategoria": "Príroda",
+    "text": "Stromy spolu komunikujú a zdieľajú živiny cez podzemnú sieť húb. Tento fenomén sa nazýva „Wood Wide Web“ a umožňuje starším stromom pomáhať mladším sadeniciam prežiť v tieni. Huby a stromy žijú v symbióze, kde huby poskytujú minerály a vodu výmenou za cukry z fotosyntézy."
+  },
+  {
+    "id": 58,
+    "kategoria": "Geografia",
+    "text": "Austrália je širšia ako Mesiac. Priemer Mesiaca je približne 3 400 km, zatiaľ čo vzdialenosť z východu na západ Austrálie je takmer 4 000 km. Ak by ste položili Mesiac na mapu Austrálie, kontinent by vyčnieval na oboch stranách."
+  },
+  {
+    "id": 59,
+    "kategoria": "Potraviny",
+    "text": "Biela čokoláda technicky nie je čokoláda. Neobsahuje totiž kakaovú sušinu, ale len kakaové maslo, cukor a mlieko, čo ju odlišuje od pravej mliečnej alebo horkej čokolády. Práve absencia kakaového prášku jej dáva typickú smotanovú farbu a jemnejšiu, sladšiu chuť."
+  },
+  {
+    "id": 60,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najstarší maratón v Európe. Medzinárodný maratón mieru v Košiciach sa prvýkrát bežal v roku 1924, čo z neho robí druhý najstarší maratón na svete (po Bostone). Trasa maratónu sa v priebehu rokov menila, ale jeho tradícia nebola prerušená ani počas druhej svetovej vojny."
+  },
+  {
+    "id": 61,
+    "kategoria": "Zvieratá",
+    "text": "Kravy majú regionálne prízvuky. Štúdie ukázali, že bučanie kráv sa mierne líši v závislosti od stáda a regiónu, v ktorom žijú, podobne ako ľudské dialekty. Farmári z rôznych častí Británie si všimli, že ich zvieratá vydávajú mierne odlišné zvuky podľa toho, odkiaľ pochádzajú."
+  },
+  {
+    "id": 62,
+    "kategoria": "História",
+    "text": "Univerzita Harvard bola založená skôr, než bol vynájdený kalkulus. Harvard vznikol v roku 1636, zatiaľ čo Leibniz a Newton formulovali základy diferenciálneho počtu až koncom 17. storočia. To znamená, že prví študenti Harvardu nemohli študovať integrály ani derivácie, pretože vtedy ešte neexistovali."
+  },
+  {
+    "id": 63,
+    "kategoria": "Vesmír",
+    "text": "Astronauti tvrdí, že vesmír má špecifickú vôňu. Po návrate z vychádzky do otvoreného vesmíru popisujú zápach na svojich skafandroch ako pripálený steak, horúci kov alebo splodiny po zváraní. Tento zápach je pravdepodobne spôsobený vysokoenergetickými časticami a ozónom, ktoré reagujú s materiálom skafandra."
+  },
+  {
+    "id": 64,
+    "kategoria": "Technológie",
+    "text": "Prvá webkamera bola vynájdená, aby sledovala kávovar. Vedci na univerzite v Cambridge v roku 1991 nechceli chodiť zbytočne do kuchynky po prázdnu kanvicu, tak na ňu namierili kameru. Napísali program, ktorý prenášal čiernobiely obraz v rozlíšení 128x128 pixelov na ich obrazovky."
+  },
+  {
+    "id": 65,
+    "kategoria": "Ľudské telo",
+    "text": "Ak by ste natiahli všetky krvné cievy dospelého človeka za sebou, obopli by Zem viac ako dvakrát. Ich celková dĺžka sa odhaduje na približne 100 000 kilometrov. Väčšinu tejto dĺžky tvoria mikroskopické kapiláry, ktoré zásobujú kyslíkom každú jednu bunku v tele."
+  },
+  {
+    "id": 66,
+    "kategoria": "Príroda",
+    "text": "Vôňa dažďa má svoje vlastné meno – petrichor. Tento zemitý zápach vzniká, keď kvapky dažďa dopadnú na suchú pôdu a uvoľnia oleje vylučované rastlinami a baktériami. Hlavnou zložkou tejto vône je organická zlúčenina geosmin, ktorú produkuje pôdna baktéria Streptomyces."
+  },
+  {
+    "id": 67,
+    "kategoria": "Slovensko",
+    "text": "Obec Vlkolínec je dodnes trvalo obývanou rezerváciou ľudovej architektúry. Zapísaná v UNESCO, táto dedina nie je skanzenom, ale živým sídlom s pôvodnými drevenicami, kde ľudia stále žijú. Farebné nátery zrubov však pôvodne neslúžili na okrasu, ale vápno malo drevo chrániť pred hmyzom a poveternostnými vplyvmi."
+  },
+  {
+    "id": 68,
+    "kategoria": "Zvieratá",
+    "text": "Motýle ochutnávajú jedlo nohami. Majú na nich chuťové receptory, ktoré im pomáhajú zistiť, či je list, na ktorom pristáli, vhodný na nakladenie vajíčok pre ich húsenice. Akonáhle pristanú na správnej rastline, reflexívne sa im rozvinie sosák, aby mohli sať nektár."
+  },
+  {
+    "id": 69,
+    "kategoria": "Potraviny",
+    "text": "Pôvodné mrkvy boli fialové alebo žlté, nie oranžové. Oranžová mrkva bola vyšľachtená až v 17. storočí v Holandsku, údajne na počesť vládnuceho rodu Oranžských. Táto nová odroda bola nielen politickým gestom, ale ukázala sa byť aj sladšia a chutnejšia ako jej predchodkyne."
+  },
+  {
+    "id": 70,
+    "kategoria": "História",
+    "text": "Najdlhšia vojna v histórii trvala 335 rokov a nemala žiadne obete. Išlo o vojnový stav medzi Holandskom a súostrovím Scilly, ktorý bol oficiálne ukončený mierovou zmluvou až v roku 1986. Na vojnu sa jednoducho zabudlo, kým jeden historik neobjavil, že formálne nikdy nebola ukončená."
+  },
+  {
+    "id": 71,
+    "kategoria": "Vesmír",
+    "text": "Odtlačky topánok astronautov na Mesiaci tam ostanú milióny rokov. Keďže Mesiac nemá atmosféru, vietor ani vodu, neexistuje tam erózia, ktorá by ich zahladila. Jediná vec, ktorá ich môže časom zničiť, sú dopady mikrometeoritov."
+  },
+  {
+    "id": 72,
+    "kategoria": "Geografia",
+    "text": "Mount Everest stále rastie. V dôsledku neustáleho tlaku tektonických dosiek, ktoré tlačia Indiu do Ázie, sa najvyššia hora sveta dvíha približne o 4 milimetre ročne. Zároveň sa však o niečo posúva smerom na severovýchod."
+  },
+  {
+    "id": 73,
+    "kategoria": "Ľudské telo",
+    "text": "Ráno ste vyšší ako večer. Počas dňa gravitácia stláča chrupavky medzi stavcami chrbtice, takže večer môžete byť až o 1 centimeter nižší než po prebudení. Počas spánku v horizontálnej polohe sa tieto medzistavcové platničky opäť hydratujú a vrátia do pôvodného stavu."
+  },
+  {
+    "id": 74,
+    "kategoria": "Zvieratá",
+    "text": "Pštrosie oko je väčšie ako jeho mozog. Tieto obrovské oči im umožňujú vidieť predátory na veľkú vzdialenosť, ale ich inteligencia je v porovnaní s inými vtákmi obmedzená. Pštros nemá zuby, takže prehĺta kamene, ktoré mu v žalúdku pomáhajú drviť potravu."
+  },
+  {
+    "id": 75,
+    "kategoria": "Slovensko",
+    "text": "Na území Slovenska bolo kedysi more. Dôkazom je lokalita Sandberg pri Bratislave, kde sa v pieskovci nachádzajú milióny rokov staré fosílie morských živočíchov, vrátane žraločích zubov. Toto more, nazývané Paratethys, pokrývalo veľkú časť strednej Európy v období treťohôr."
+  },
+  {
+    "id": 76,
+    "kategoria": "Technológie",
+    "text": "Rozloženie klávesnice QWERTY bolo navrhnuté tak, aby sa písacie stroje nezasekávali. Najčastejšie používané dvojice písmen boli umiestnené ďalej od seba, aby sa kladivká stroja pri rýchlom písaní nezrazili. Hoci dnes už mechanické obmedzenia neplatia, toto rozloženie zostalo štandardom kvôli svalovej pamäti používateľov."
+  },
+  {
+    "id": 77,
+    "kategoria": "Príroda",
+    "text": "Existuje jav zvaný „ohnivá dúha“, ktorý v skutočnosti nie je dúhou ani ohňom. Ide o cirkumhorizontálny oblúk vznikajúci lomom svetla na ľadových kryštálikoch v mrakoch vysoko na oblohe. Tento úkaz sa dá pozorovať len vtedy, keď je Slnko veľmi vysoko nad obzorom, aspoň 58 stupňov."
+  },
+  {
+    "id": 78,
+    "kategoria": "História",
+    "text": "Heroín bol pôvodne predávaný ako liek proti kašľu pre deti. Spoločnosť Bayer ho uviedla na trh koncom 19. storočia ako „bezpečnú“ náhradu morfia predtým, než sa zistili jeho extrémne návykové účinky. Názov „heroín“ bol odvodený od nemeckého slova „heroisch“ (hrdinský), pretože pacienti sa po ňom cítili silní a euforickí."
+  },
+  {
+    "id": 79,
+    "kategoria": "Potraviny",
+    "text": "Arašidy nie sú orechy, ale strukoviny. Rastú pod zemou a sú príbuzné fazuli a šošovici, nie vlašským orechom alebo mandliam, ktoré rastú na stromoch. Po odkvitnutí sa stonka kvetu ohne k zemi a zavŕta sa do pôdy, kde plod dozrieva."
+  },
+  {
+    "id": 80,
+    "kategoria": "Vesmír",
+    "text": "Jedna čajová lyžička hmoty z neutrónovej hviezdy by vážila miliardy ton. Tieto hviezdy sú také husté, že hmota o veľkosti kocky cukru by na Zemi vážila toľko, čo celé pohorie. Sú to vlastne pozostatky po výbuchu supernovy, kde gravitácia stlačila protóny a elektróny do neutrónov."
+  },
+  {
+    "id": 81,
+    "kategoria": "Zvieratá",
+    "text": "Kolibríky sú jediné vtáky, ktoré dokážu lietať dozadu. Ich krídla sa pohybujú v tvare osmičky, čo im umožňuje vznášať sa na mieste a manévrovať s neuveriteľnou presnosťou. Tento energeticky náročný let si vyžaduje, aby kolibríky jedli nektár každých 10 až 15 minút."
+  },
+  {
+    "id": 82,
+    "kategoria": "Slovensko",
+    "text": "V Nízkych Tatrách sa nachádza Jaskyňa mŕtvych netopierov. Dostala názov podľa obrovského množstva kostier netopierov, ktoré sa tam našli a niektoré sú staré až 6000 rokov. Je to jediná sprístupnená vysokohorská jaskyňa na Slovensku a prehliadka vyžaduje dobrú fyzickú kondíciu."
+  },
+  {
+    "id": 83,
+    "kategoria": "Ľudské telo",
+    "text": "Je nemožné kýchnuť s otvorenými očami. Ide o nepodmienený reflex, pri ktorom mozog vyšle signál na zatvorenie viečok, pravdepodobne na ochranu očí pred vymrštenými baktériami. Hoci sa traduje, že by vám pri kýchaní mohli „vypadnúť oči“, v skutočnosti sú oči v lebke upevnené príliš pevne na to, aby sa to stalo."
+  },
+  {
+    "id": 84,
+    "kategoria": "Geografia",
+    "text": "Afrika je jediný kontinent, ktorý zasahuje do všetkých štyroch hemisfér. Rozprestiera sa na severnej aj južnej pologuli a pretína ju nultý poludník, takže leží aj na východnej a západnej pologuli. Vďaka tejto polohe má Afrika neuveriteľne rozmanité klimatické pásma, od púští až po dažďové pralesy."
+  },
+  {
+    "id": 85,
+    "kategoria": "Technológie",
+    "text": "Email je starší ako World Wide Web. Prvý email bol odoslaný už v roku 1971 Rayom Tomlinsonom, zatiaľ čo webové stránky (WWW) vznikli až v roku 1989. Tomlinson bol tiež ten, kto si vybral symbol @ na oddelenie mena používateľa od názvu počítača."
+  },
+  {
+    "id": 86,
+    "kategoria": "Príroda",
+    "text": "Rieka Amazonka nemá ani jeden most. Nie je to preto, že by bola príliš široká, ale preto, že väčšinu roka tečie cez dažďový prales s riedkym osídlením, kde mosty jednoducho nie sú potrebné. Ľudia sa cez rieku prepravujú loďami a kompa je pre miestnych obyvateľov bežným dopravným prostriedkom."
+  },
+  {
+    "id": 87,
+    "kategoria": "História",
+    "text": "V roku 1518 zasiahla Štrasburg „tanečná morová epidémia“. Stovky ľudí tancovali v uliciach bez prestávky niekoľko dní, pričom mnohí z nich zomreli na vyčerpanie alebo infarkt. Dodnes nie je jasné, čo to spôsobilo, ale teórie hovoria o hromadnej hystérii alebo otrave námeľom."
+  },
+  {
+    "id": 88,
+    "kategoria": "Zvieratá",
+    "text": "Odtlačky prstov koaly sú takmer na nerozoznanie od ľudských. Sú si tak podobné, že v minulosti dokonca zmiatli policajných vyšetrovateľov na miestach činu v Austrálii. Koaly sú jedny z mála zvierat mimo primátov, ktoré majú jedinečné papilárne línie na prstoch."
+  },
+  {
+    "id": 89,
+    "kategoria": "Potraviny",
+    "text": "Väčšina „wasabi“, ktoré dostanete k sushi, je len ofarbený chren. Pravé wasabi je veľmi drahé a ťažké na pestovanie, preto sa bežne nahrádza zmesou bežného chrenu, horčice a zeleného farbiva. Skutočné wasabi stráca svoju ostrosť do 15 minút po nastrúhaní, preto sa musí podávať okamžite."
+  },
+  {
+    "id": 90,
+    "kategoria": "Vesmír",
+    "text": "Svetlo, ktoré nás dnes hreje, vzniklo v jadre Slnka pred tisíckami rokov. Fotónu trvá desaťtisíce rokov, kým sa dostane z hustého jadra na povrch Slnka, no potom k Zemi doletí za 8 minút. Táto dlhá cesta je spôsobená neustálymi zrážkami fotónov s atómami vo vnútri Slnka."
+  },
+  {
+    "id": 91,
+    "kategoria": "Slovensko",
+    "text": "V Banskej Štiavnici bola založená prvá technická vysoká škola na svete. Banícka akadémia vznikla v roku 1762 rozhodnutím Márie Terézie a stala sa vzorom pre iné technické školy v Európe. Študovali tu odborníci z celého sveta, ktorí neskôr priniesli nové technológie do baníctva v iných krajinách."
+  },
+  {
+    "id": 92,
+    "kategoria": "Ľudské telo",
+    "text": "Strávime približne 10 % nášho bdelého času so zatvorenými očami len kvôli žmurkaniu. Priemerne človek žmurkne 15 až 20-krát za minútu, čo slúži na zvlhčovanie a čistenie oka. Mozog počas žmurknutia na zlomok sekundy vypne zrakové vnímanie, aby sme nevideli svet v tme."
+  },
+  {
+    "id": 93,
+    "kategoria": "Technológie",
+    "text": "Prvá počítačová myš bola vyrobená z dreva. Vynašiel ju Douglas Engelbart v roku 1964 a mala len jedno tlačidlo a dve kovové kolieska na spodnej strane. Engelbart ju nazval „myš“, pretože kábel trčiaci zo zadnej časti pripomínal chvost hlodavca."
+  },
+  {
+    "id": 94,
+    "kategoria": "Geografia",
+    "text": "Rusko má 11 časových pásiem. Je to taká rozsiahla krajina, že keď na jednom konci ľudia raňajkujú, na druhom konci sa už chystajú spať. Zaujímavé je, že Čína, hoci je tiež obrovská, používa oficiálne len jedno časové pásmo pre celú krajinu."
+  },
+  {
+    "id": 95,
+    "kategoria": "Príroda",
+    "text": "Najväčší žijúci organizmus na Zemi je huba. Podhubie václavky smrekovej v Oregone (USA) sa rozkladá na ploche takmer 9 štvorcových kilometrov a jej vek sa odhaduje na 2400 rokov. Väčšina tohto gigantického organizmu je skrytá pod zemou, viditeľné sú len plodnice na jeseň."
+  },
+  {
+    "id": 96,
+    "kategoria": "Zvieratá",
+    "text": "Vydry majú svoje obľúbené kamienky. Nosia si ich v špeciálnom „vrecku“ pod pazuchou a používajú ich na otváranie tvrdých schránok mäkkýšov. Niektoré vydry si ten istý kamienok chránia celý život a dokonca sa s ním hrajú ako s hračkou."
+  },
+  {
+    "id": 97,
+    "kategoria": "História",
+    "text": "Austrálska armáda raz prehrala vojnu proti vtákom. V roku 1932 viedli vojaci operáciu proti premnoženým pštrosovitým vtákom emu, ale vtáky boli príliš rýchle a odolné, takže armáda musela ustúpiť. Emu sa naučili rozptýliť do malých skupín, čo znemožnilo efektívne použitie guľometov."
+  },
+  {
+    "id": 98,
+    "kategoria": "Potraviny",
+    "text": "Pizza Hawaii nevznikla na Havaji, ale v Kanade. Vymyslel ju grécky imigrant Sam Panopoulos v roku 1962, ktorý len experimentoval s konzervovaným ananásom. Názov „Hawaii“ pochádzal priamo z plechovky ananásu, ktorú vtedy použil."
+  },
+  {
+    "id": 99,
+    "kategoria": "Vesmír",
+    "text": "Saturn má menšiu hustotu ako voda. Ak by existovala dostatočne veľká vaňa s vodou, táto obrovská plynná planéta by v nej plávala ako nafukovacia lopta. Je to jediná planéta v našej slnečnej sústave, ktorá má túto vlastnosť."
+  },
+  {
+    "id": 100,
+    "kategoria": "Zaujímavosti",
+    "text": "Nie je možné hmkať si melódiu, ak si držíte nos. Skúste to – na vytvorenie zvuku pri hmkaní musí vzduch prúdiť cez nosovú dutinu, čo pri zapchatom nose nie je možné. Hlasivky potrebujú prúdenie vzduchu na to, aby vibrovali a vytvárali tón."
+  },
+  {
+    "id": 101,
+    "kategoria": "Zvieratá",
+    "text": "Krevety majú srdce umiestnené v hlave. Okrem toho majú otvorený obehový systém, čo znamená, že nemajú tepny a ich orgány plávajú priamo v krvi. V hlave majú umiestnené aj ďalšie dôležité orgány, ako napríklad žalúdok."
+  },
+  {
+    "id": 102,
+    "kategoria": "Slovensko",
+    "text": "Kremnická mincovňa je jedným z najstarších nepretržite fungujúcich podnikov na svete. Mince sa tu razia už od roku 1328, teda takmer 700 rokov. Okrem slovenských eur sa tu vyrábajú aj meny pre desiatky iných krajín sveta."
+  },
+  {
+    "id": 103,
+    "kategoria": "Ľudské telo",
+    "text": "Jazylka je jediná kosť v ľudskom tele, ktorá nie je spojená s žiadnou inou kosťou. Je voľne zavesená na svaloch a väzoch v oblasti krku a pomáha nám pri rozprávaní a prehĺtaní. Vďaka svojej polohe a krehkosti je jej zlomenina častým dôkazom pri vyšetrovaní úmrtí uškrtením."
+  },
+  {
+    "id": 104,
+    "kategoria": "Vesmír",
+    "text": "Olympus Mons na Marse je najvyššia hora v slnečnej sústave. Je to vyhasnutá sopka, ktorá je takmer trikrát vyššia ako Mount Everest, dosahuje výšku okolo 22 kilometrov. Jej základňa je taká široká, že by pokryla takmer celé územie Francúzska."
+  },
+  {
+    "id": 105,
+    "kategoria": "Technológie",
+    "text": "Prvé logo spoločnosti Apple nezobrazovalo odhryznuté jablko, ale Isaaca Newtona sediaceho pod stromom. Bolo však príliš zložité na tlač, preto ho Jobs nechal o rok neskôr zmeniť. Nové, minimalistické logo dúhového jablka sa stalo jedným z najznámejších symbolov v histórii marketingu."
+  },
+  {
+    "id": 106,
+    "kategoria": "História",
+    "text": "Kukurica bola pre Mayov posvätná a verili, že prví ľudia boli stvorení z kukuričného cesta. Táto plodina bola taká dôležitá, že mali aj boha kukurice. Mayovia dokonca deformovali lebky svojich detí, aby pripomínali tvar kukuričného klasu."
+  },
+  {
+    "id": 107,
+    "kategoria": "Príroda",
+    "text": "Venušina mucholapka vie „počítať“. Aby pasca sklapla, hmyz sa musí dotknúť dvoch rôznych chĺpkov v priebehu 20 sekúnd; to zabraňuje zbytočnému zatváraniu pri dopade kvapiek dažďa. Ak sa hmyz hýbe ďalej, rastlina začne produkovať tráviace enzýmy až po piatom dotyku."
+  },
+  {
+    "id": 108,
+    "kategoria": "Slovensko",
+    "text": "Najvyšší gotický oltár na svete v Levoči bol takmer zničený červotočmi. V 50. rokoch 20. storočia musel prejsť komplexnou rekonštrukciou, aby sa zachránil pre ďalšie generácie. Reštaurátori museli drevo spevniť a odstrániť tisíce dierok po hmyze."
+  },
+  {
+    "id": 109,
+    "kategoria": "Zvieratá",
+    "text": "Tigrie pruhy nie sú len na srsti, ale aj na koži. Keby ste tigra oholili (čo sa neodporúča), stále by bol pruhovaný; vzor je pre každého jedinca jedinečný ako odtlačok prsta. Tieto pruhy im pomáhajú maskovať sa vo vysokej tráve tým, že rozbíjajú obrys ich tela."
+  },
+  {
+    "id": 110,
+    "kategoria": "Geografia",
+    "text": "Antarktída je najväčšia púšť na svete. Púšť je definovaná množstvom zrážok, nie teplotou alebo pieskom, a vnútrozemie Antarktídy je extrémne suché. Ročne tam spadne menej zrážok (vo forme snehu) ako v Sahare."
+  },
+  {
+    "id": 111,
+    "kategoria": "Potraviny",
+    "text": "Uhorky sú technicky ovocie, rovnako ako paradajky alebo tekvice. Z botanického hľadiska vyrastajú z kvetu rastliny a obsahujú semená. V kuchyni ich však považujeme za zeleninu kvôli ich chuti a spôsobu prípravy."
+  },
+  {
+    "id": 112,
+    "kategoria": "Ľudské telo",
+    "text": "Ľudské oko dokáže rozoznať približne 10 miliónov rôznych farieb. Ženy majú často lepšiu schopnosť rozlišovať jemné odtiene farieb vďaka genetickej výbave na chromozóme X. Niektorí ľudia, nazývaní tetrachromati, majú dokonca štvrtý typ čapíkov v oku a vidia milióny ďalších farieb."
+  },
+  {
+    "id": 113,
+    "kategoria": "Vesmír",
+    "text": "Ak by ste vo vesmíre spojili dva kusy rovnakého kovu, natrvalo by sa zvarili dohromady. Tento jav sa nazýva „studené zváranie“ a na Zemi sa nedeje kvôli oxidácii povrchu kovov vzduchom. Vo vákuu však atómy kovov nevedia, že patria k rôznym kusom, a spoja sa."
+  },
+  {
+    "id": 114,
+    "kategoria": "História",
+    "text": "Rimania niekedy pili krv gladiátorov v nádeji, že získajú ich silu a odvahu. Verilo sa tiež, že to môže liečiť epilepsiu. Tento zvyk bol taký rozšírený, že po zákaze gladiátorských zápasov ľudia začali chodiť na popraviská po krv odsúdených."
+  },
+  {
+    "id": 115,
+    "kategoria": "Slovensko",
+    "text": "Studený gejzír v Herľanoch je európskym unikátom. Voda z neho strieka do výšky až 20 metrov v pravidelných intervaloch, pričom nejde o termálnu vodu, ale o vodu s oxidom uhličitým. Gejzír bol aktivovaný umelým vrtom v roku 1872 a dodnes je aktívny, hoci intervaly erupcií sa časom predlžujú."
+  },
+  {
+    "id": 116,
+    "kategoria": "Zvieratá",
+    "text": "Žirafa má rovnaký počet krčných stavcov ako človek – sedem. Rozdiel je len v tom, že stavce žirafy sú obrovské, každý môže merať až 25 centimetrov. Vďaka tomu môže žirafa dosiahnuť na lístie na vrcholkoch stromov, kam sa iné bylinožravce nedostanú."
+  },
+  {
+    "id": 117,
+    "kategoria": "Technológie",
+    "text": "Nokia začínala v 19. storočí ako továreň na výrobu papiera. Neskôr vyrábala gumáky a káble, kým sa v 80. rokoch 20. storočia preorientovala na mobilné telefóny. Ikonická melódia Nokia Tune je úryvkom z valčíka od španielskeho skladateľa Francisca Tárregu."
+  },
+  {
+    "id": 118,
+    "kategoria": "Príroda",
+    "text": "Jahody sú jediné ovocie, ktoré má semienka na povrchu. Priemerná jahoda má na sebe približne 200 malých semienok. Z botanického hľadiska tieto \"semienka\" sú v skutočnosti malé jednotlivé plody a červená dužina je len zhrubnuté kvetné lôžko."
+  },
+  {
+    "id": 119,
+    "kategoria": "Geografia",
+    "text": "Mŕtve more je najnižšie položené miesto na súši. Jeho hladina sa nachádza viac ako 430 metrov pod úrovňou svetového oceánu a voda je taká slaná, že v nej nemôžu žiť ryby. Vďaka vysokej hustote vody sa v ňom človek nemôže potopiť, ale len sa vznáša na hladine."
+  },
+  {
+    "id": 120,
+    "kategoria": "Ľudské telo",
+    "text": "Nechty na rukách rastú približne štyrikrát rýchlejšie ako nechty na nohách. Najrýchlejšie rastie necht na prostredníku vašej dominantnej ruky. Rýchlosť rastu ovplyvňuje aj ročné obdobie, v lete rastú nechty o niečo rýchlejšie ako v zime."
+  },
+  {
+    "id": 121,
+    "kategoria": "Slovensko",
+    "text": "Slovenský kras ukrýva najväčší stalagmit v miernom pásme. Nachádza sa v Krásnohorskej jaskyni, meria 34 metrov a volá sa „Kvapľom rožňavských jaskyniarov“. Dlhé roky bol zapísaný v Guinnessovej knihe rekordov ako najväčší na svete, kým ho nepredbehli iné objavy."
+  },
+  {
+    "id": 122,
+    "kategoria": "História",
+    "text": "Vikingovia nenosili prilby s rohmi. Tento obraz vznikol až v 19. storočí vďaka kostýmovým návrhárom pre opery Richarda Wagnera; v boji by boli rohy nepraktické. Skutočné vikingské prilby boli jednoduché, okrúhle a často mali chránič nosa."
+  },
+  {
+    "id": 123,
+    "kategoria": "Potraviny",
+    "text": "Zmrzlina môže spôsobiť „brain freeze“ (zamrznutie mozgu), čo je v skutočnosti obranná reakcia tela. Rýchle ochladenie podnebia spôsobí rozšírenie ciev v hlave, čo vyvolá náhlu bolesť. Najlepším spôsobom, ako to zastaviť, je pritlačiť jazyk na podnebie, aby sa opäť zahrialo."
+  },
+  {
+    "id": 124,
+    "kategoria": "Vesmír",
+    "text": "Do Slnka by sa zmestilo viac ako 1,3 milióna planét veľkosti Zeme. Slnko je také obrovské, že jeho gravitačná sila drží pokope celú slnečnú sústavu. Napriek svojej veľkosti je Slnko len priemernou hviezdou v porovnaní s inými gigantmi vo vesmíre."
+  },
+  {
+    "id": 125,
+    "kategoria": "Zvieratá",
+    "text": "Delfíny spia len jednou polovicou mozgu naraz. Druhá polovica zostáva bdelá, aby mohli dávať pozor na predátory a pravidelne sa vynárať pre nádych. Počas tohto polovičného spánku majú zvyčajne jedno oko otvorené a druhé zatvorené."
+  },
+  {
+    "id": 126,
+    "kategoria": "Technológie",
+    "text": "Prvý mobilný telefón vážil takmer 1 kilogram. Motorola DynaTAC 8000X z roku 1983 stála takmer 4000 dolárov a batéria vydržala len 30 minút hovoru. Nabíjanie tohto „tehlového“ telefónu trvalo neuveriteľných 10 hodín."
+  },
+  {
+    "id": 127,
+    "kategoria": "Príroda",
+    "text": "Ananásu trvá približne dva roky, kým vyrastie a dozreje. Každá rastlina zvyčajne vyprodukuje len jeden plod za sezónu, čo vysvetľuje, prečo boli v minulosti ananásy symbolom bohatstva. V 18. storočí si ľudia ananásy často prenajímali na večierky len ako dekoráciu, pretože boli príliš drahé na jedenie."
+  },
+  {
+    "id": 128,
+    "kategoria": "Slovensko",
+    "text": "Rodičia kráľa pop-artu Andyho Warhola pochádzali z malej slovenskej dedinky Miková. Samotný Warhol sa už narodil v USA, ale jeho korene sú na východnom Slovensku. V Medzilaborciach dnes sídli Múzeum moderného umenia Andyho Warhola, ktoré vlastní druhú najväčšiu zbierku jeho diel na svete."
+  },
+  {
+    "id": 129,
+    "kategoria": "Ľudské telo",
+    "text": "Pri kýchaní vyletuje vzduch z nosa rýchlosťou až 160 km/h. Preto sa baktérie a vírusy môžu šíriť na veľké vzdialenosti, ak si nezakryjete ústa. Kýchnutie je v podstate explozívne vypudenie vzduchu, ktoré má vyčistiť dýchacie cesty od dráždivých látok."
+  },
+  {
+    "id": 130,
+    "kategoria": "História",
+    "text": "Šampanské vynašli Angličania, nie Francúzi. Anglickí vedci popísali metódu výroby šumivého vína už v roku 1662, teda desaťročia predtým, ako s ňou začal experimentovať mních Dom Pérignon. Pérignon sa v skutočnosti snažil bublinky z vína odstrániť, pretože ich považoval za vadu."
+  },
+  {
+    "id": 131,
+    "kategoria": "Geografia",
+    "text": "Island sa každý rok rozširuje približne o 5 centimetrov. Leží totiž na hranici dvoch tektonických dosiek (Severoamerickej a Eurázijskej), ktoré sa od seba pomaly vzďaľujú. Tento geologický pohyb je dôvodom vysokej sopečnej aktivity a množstva geotermálnych prameňov na ostrove."
+  },
+  {
+    "id": 132,
+    "kategoria": "Zvieratá",
+    "text": "Pandy veľké strávia jedením bambusu 10 až 16 hodín denne. Keďže bambus má nízku výživovú hodnotu, musia ho zjesť obrovské množstvo (až 12 kg denne), aby prežili. Ich tráviaci systém je stále nastavený na mäsožravú stravu, preto dokážu stráviť len asi 17 % skonzumovaného bambusu."
+  },
+  {
+    "id": 133,
+    "kategoria": "Potraviny",
+    "text": "Jablká plávajú vo vode, pretože sú z 25 % tvorené vzduchom. Vzduchové bubliny sú zachytené medzi bunkami dužiny, čo z nich robí ideálne ovocie na hru „lovenie jabĺk“. Táto vlastnosť tiež pomáha pri ich distribúcii v prírode, keďže môžu plávať po riekach."
+  },
+  {
+    "id": 134,
+    "kategoria": "Vesmír",
+    "text": "Mesiac sa od Zeme pomaly vzďaľuje. Každý rok sa posunie o približne 3,8 centimetra ďalej, čo postupne spomaľuje rotáciu Zeme a predlžuje naše dni. Tento jav je spôsobený slapovými silami a interakciou medzi oceánmi Zeme a gravitáciou Mesiaca."
+  },
+  {
+    "id": 135,
+    "kategoria": "Slovensko",
+    "text": "Najdlhší celodrevený zastrešený most v Európe je v Kolárove. Meria 86 metrov a vedie cez Malý Dunaj k plávajúcemu vodnému mlynu. Most bol postavený v 90. rokoch 20. storočia a je obľúbenou turistickou atrakciou regiónu."
+  },
+  {
+    "id": 136,
+    "kategoria": "Technológie",
+    "text": "Prvá doména .com bola zaregistrovaná v roku 1985. Išlo o adresu symbolics.com a existuje dodnes, čím predbehla gigantov ako IBM či HP. V tom čase nikto netušil, že internet sa stane globálnym fenoménom a domény budú mať obrovskú hodnotu."
+  },
+  {
+    "id": 137,
+    "kategoria": "Ľudské telo",
+    "text": "Vaše srdce udrie približne 100 000-krát za deň. Za celý život priemernej dĺžky vykoná srdce viac ako 2,5 miliardy úderov bez jedinej prestávky na oddych. Srdce je taký výkonný sval, že energiu, ktorú vyprodukuje za deň, by stačila na pohon nákladného auta na vzdialenosť 32 kilometrov."
+  },
+  {
+    "id": 138,
+    "kategoria": "Príroda",
+    "text": "Dúha je v skutočnosti celý kruh. Zo zeme zvyčajne vidíme len oblúk, pretože nám vo výhľade bráni horizont, ale z lietadla sa dá niekedy vidieť dúha v plnom kruhovom tvare. Stred tohto kruhu je vždy presne oproti Slnku."
+  },
+  {
+    "id": 139,
+    "kategoria": "História",
+    "text": "Titanik mal štyri komíny, ale fungovali iba tri. Štvrtý komín bol pridaný len kvôli estetike a prestíži, aby loď vyzerala mohutnejšie a vyváženejšie; slúžil len na ventiláciu kuchyne. Stavitelia verili, že lode so štyrmi komínmi pôsobia na cestujúcich bezpečnejšie a rýchlejšie."
+  },
+  {
+    "id": 140,
+    "kategoria": "Zvieratá",
+    "text": "Slony sú jediné cicavce, ktoré nedokážu skákať. Ich kosti v nohách smerujú priamo nadol a nemajú „pružinu“, ktorá by im umožnila odraziť sa od zeme; pri ich váhe by si navyše polámali kosti. Napriek tomu dokážu veľmi ticho chodiť a sú výborní plavci."
+  },
+  {
+    "id": 141,
+    "kategoria": "Slovensko",
+    "text": "Prvá verejná parková záhrada v strednej Európe vznikla v Bratislave. Sad Janka Kráľa na brehu Dunaja bol založený už v rokoch 1774 – 1776. Pôvodne mal tvar barokovej hviezdy, ktorú tvorili aleje stromov, a tento pôdorys je čiastočne zachovaný dodnes."
+  },
+  {
+    "id": 142,
+    "kategoria": "Geografia",
+    "text": "Istanbul je jediné mesto na svete, ktoré sa rozkladá na dvoch kontinentoch. Úžina Bospor ho delí na európsku a ázijskú časť, ktoré spájajú mosty a tunely. Vďaka tejto polohe bol Istanbul v histórii dôležitým centrom obchodu a kultúry medzi Východom a Západom."
+  },
+  {
+    "id": 143,
+    "kategoria": "Technológie",
+    "text": "Slovo „robot“ vymyslel brat Karla Čapka, Josef. Karel Čapek ho prvýkrát použil vo svojej divadelnej hre R.U.R. v roku 1920; pôvodne ich chcel volať „laboři“. Slovo pochádza zo slovanského výrazu „robota“, čo znamenalo ťažkú prácu alebo nevoľníctvo."
+  },
+  {
+    "id": 144,
+    "kategoria": "Potraviny",
+    "text": "McDonald's kedysi skúšal predávať špagety. V 70. rokoch v Taliansku ponúkali jedlo s názvom McSpaghetti, ale neujalo sa a z ponuky bolo stiahnuté. Zákazníci jednoducho nechodili do fast-foodu na cestoviny, ktoré si vedeli urobiť lepšie doma."
+  },
+  {
+    "id": 145,
+    "kategoria": "Vesmír",
+    "text": "Halleyho kométa je viditeľná zo Zeme len raz za 75-76 rokov. Je to jediná krátkoperiodická kométa, ktorú môže človek vidieť voľným okom dvakrát za život; najbližšie sa vráti v roku 2061. Záznamy o jej pozorovaní siahajú až do roku 240 pred n. l."
+  },
+  {
+    "id": 146,
+    "kategoria": "Ľudské telo",
+    "text": "Zdieľame 50 % našej DNA s banánmi. Hoci to znie bizarne, mnoho základných génov potrebných na bunkové funkcie a replikáciu je rovnakých u všetkých živých organizmov. Táto podobnosť dokazuje, že všetok život na Zemi má spoločného predka."
+  },
+  {
+    "id": 147,
+    "kategoria": "Príroda",
+    "text": "Najstarší známy žijúci strom na svete má viac ako 4 800 rokov. Je to borovica dlhoveká v Kalifornii s menom Metuzalem a jej presná poloha je tajná, aby ju turisti nepoškodili. Tento strom klíčil už v čase, keď Egypťania stavali prvé pyramídy."
+  },
+  {
+    "id": 148,
+    "kategoria": "Zvieratá",
+    "text": "Mravce nikdy nespia v našom zmysle slova. Namiesto toho si počas dňa dávajú stovky krátkych „mikrospánkov“ trvajúcich asi minútu, čo im umožňuje pracovať takmer nepretržite. Vďaka tomu je kolónia stále aktívna a chránená."
+  },
+  {
+    "id": 149,
+    "kategoria": "Slovensko",
+    "text": "Slovenský orloj v Starej Bystrici je jediný orloj na svete, ktorý ukazuje pravý slnečný čas. Je zároveň najväčšou drevenou sochou na Slovensku. Jeho srdcom je astroláb, ktorý presne ukazuje polohu Slnka, Mesiaca a hviezd."
+  },
+  {
+    "id": 150,
+    "kategoria": "História",
+    "text": "V roku 1913 žili Hitler, Stalin, Trockij, Tito a Freud v tom istom čase vo Viedni. Často bývali len pár ulíc od seba a teoreticky sa mohli stretnúť v tých istých kaviarňach. Viedeň bola v tom čase intelektuálnym a politickým centrom Európy."
+  },
+  {
+    "id": 151,
+    "kategoria": "Technológie",
+    "text": "Prvý pevný disk od IBM z roku 1956 mal kapacitu len 5 MB a vážil viac ako tonu. Na jeho prepravu bolo potrebné nákladné lietadlo. Dnes sa do zariadenia menšieho ako necht zmestí tisíckrát viac dát."
+  },
+  {
+    "id": 152,
+    "kategoria": "Geografia",
+    "text": "Sahara nebola vždy púšťou. Pred 6000 rokmi to bola úrodná savana s riekami a jazerami, kde žili hrochy a žirafy; zmena klímy ju však premenila na vyprahnutú krajinu. Vedci predpokladajú, že táto zmena sa cyklicky opakuje každých 20 000 rokov v dôsledku zmeny sklonu zemskej osi."
+  },
+  {
+    "id": 153,
+    "kategoria": "Potraviny",
+    "text": "Syr je najčastejšie kradnutá potravina na svete. Asi 4 % všetkého vyrobeného syra sa ukradne, čo je viac ako pri alkohole, čokoláde alebo mäse. Dôvodom je jeho vysoká cena, ľahká predajnosť na čiernom trhu a relatívne malá veľkosť balení."
+  },
+  {
+    "id": 154,
+    "kategoria": "Zvieratá",
+    "text": "Netopiere sú jediné cicavce, ktoré dokážu skutočne lietať. Lietajúce veveričky alebo iné zvieratá v skutočnosti len plachtia vzduchom. Krídla netopierov sú v podstate predĺžené prsty potiahnuté tenkou kožnou blanou."
+  },
+  {
+    "id": 155,
+    "kategoria": "Vesmír",
+    "text": "Hviezdy v skutočnosti nežmurkajú. Tento efekt spôsobuje zemská atmosféra, ktorá láme svetlo prichádzajúce z hviezd; vo vesmíre svietia hviezdy stabilným jasom. Čím bližšie je hviezda k obzoru, tým viac bliká, pretože jej svetlo prechádza hrubšou vrstvou vzduchu."
+  },
+  {
+    "id": 156,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najvyššiu kostolnú vežu v strednej Európe (mimo Nemecka). Veža kostola v Spišskej Novej Vsi meria 87 metrov a má sedem hodinových ciferníkov. Táto neogotická veža je dominantou námestia a ponúka výhľad na celé mesto a Tatry."
+  },
+  {
+    "id": 157,
+    "kategoria": "Ľudské telo",
+    "text": "Ľudské telo v tme slabo svieti. Ide o bioluminiscenciu spôsobenú chemickými reakciami v bunkách, ale svetlo je 1000-krát slabšie, než dokáže zachytiť naše oko. Najintenzívnejšie svietime popoludní, najmä v oblasti tváre."
+  },
+  {
+    "id": 158,
+    "kategoria": "Príroda",
+    "text": "Voda je jediná látka, ktorá sa na Zemi prirodzene vyskytuje vo všetkých troch skupenstvách. Môžeme ju nájsť ako plyn (para), kvapalinu (voda) aj pevnú látku (ľad) súčasne. Táto unikátna vlastnosť je kľúčová pre fungovanie klimatického systému našej planéty."
+  },
+  {
+    "id": 159,
+    "kategoria": "História",
+    "text": "Thomas Edison nevynašiel žiarovku ako prvý. Vylepšil už existujúce návrhy iných vynálezcov a vytvoril prvú komerčne použiteľnú žiarovku s dlhou životnosťou. Jeho kľúčovým prínosom bolo nájdenie správneho materiálu pre vlákno (zuhoľnatený bambus), ktorý vydržal svietiť stovky hodín."
+  },
+  {
+    "id": 160,
+    "kategoria": "Technológie",
+    "text": "Google sa pôvodne mal volať „BackRub“. Zakladatelia tento názov zmenili na Google, čo je slovná hračka s matematickým termínom „googol“ (číslo 1 so 100 nulami). Tento názov mal symbolizovať ich cieľ usporiadať obrovské množstvo informácií na internete."
+  },
+  {
+    "id": 161,
+    "kategoria": "Zvieratá",
+    "text": "Psy dokážu vycítiť rakovinu a iné choroby z dychu človeka. Ich čuch je taký citlivý, že dokážu rozpoznať chemické zmeny v tele v ranných štádiách ochorenia. Špeciálne vycvičené psy majú v diagnostike niektorých typov rakoviny úspešnosť porovnateľnú s laboratórnymi testami."
+  },
+  {
+    "id": 162,
+    "kategoria": "Potraviny",
+    "text": "Croissant nepochádza z Francúzska, ale z Rakúska. Pečivo v tvare polmesiaca (Kipferl) vzniklo vo Viedni na oslavu víťazstva nad Osmanskou ríšou. Do Francúzska ho priniesla až Mária Antoinetta, kde ho miestni pekári vylepšili použitím lístkového cesta."
+  },
+  {
+    "id": 163,
+    "kategoria": "Slovensko",
+    "text": "Čičmianske ornamenty na dreveniciach boli pôvodne funkčné. Vápenný náter mal chrániť drevo pred vlhkosťou a slnečným žiarením, až neskôr sa z toho stala estetická tradícia. Motívy týchto malieb sú inšpirované miestnou výšivkou a každý dom má svoje unikátne vzory."
+  },
+  {
+    "id": 164,
+    "kategoria": "Vesmír",
+    "text": "Prvým živým tvorom na obežnej dráhe Zeme bol pes Lajka. Bohužiaľ, Lajka let v roku 1957 neprežila, pretože vtedy ešte neexistovala technológia na návrat z obežnej dráhy. Jej obeť však dokázala, že živý organizmus môže prežiť stav beztiaže, čo otvorilo cestu pre lety ľudí."
+  },
+  {
+    "id": 165,
+    "kategoria": "Ľudské telo",
+    "text": "Mýtus, že vlasy a nechty rastú aj po smrti, je nepravdivý. V skutočnosti sa koža po smrti scvrkáva a ustupuje v dôsledku dehydratácie, čo opticky predlžuje nechty a vlasy. Rast buniek vyžaduje energiu a kyslík, ktoré po smrti nie sú k dispozícii."
+  },
+  {
+    "id": 166,
+    "kategoria": "Geografia",
+    "text": "Kanada má najdlhšie pobrežie na svete. Meria viac ako 202 000 kilometrov, takže ak by ste chceli prejsť okolo celej Kanady pešo, trvalo by vám to niekoľko rokov. Pobrežie Kanady je také dlhé, že obmýva tri rôzne oceány: Atlantický, Tichý a Severný ľadový."
+  },
+  {
+    "id": 167,
+    "kategoria": "História",
+    "text": "Veľký požiar v Londýne v roku 1666 zničil 80 % mesta, ale oficiálne pri ňom zahynulo len 6 ľudí. Oheň však paradoxne pomohol zastaviť morovú epidémiu, lebo zabil potkany. Skutočný počet obetí bol pravdepodobne vyšší, ale úmrtia chudobných ľudí sa vtedy často nezaznamenávali."
+  },
+  {
+    "id": 168,
+    "kategoria": "Technológie",
+    "text": "Celý internet váži približne toľko ako jedna jahoda. Ak by sme zrátali hmotnosť všetkých elektrónov, ktoré nesú dáta v internete, dostali by sme len asi 50 gramov. Napriek tejto malej hmotnosti je to infraštruktúra, ktorá drží pohromade moderný svet."
+  },
+  {
+    "id": 169,
+    "kategoria": "Príroda",
+    "text": "Snežienky dokážu vytvárať vlastné teplo. Aby sa mohli pretlačiť cez sneh a rozkvitnúť skoro na jar, dokážu roztopiť sneh okolo svojej stonky. Tento proces sa nazýva termogenéza a umožňuje im začať rásť skôr ako iným rastlinám."
+  },
+  {
+    "id": 170,
+    "kategoria": "Zvieratá",
+    "text": "Mačky necítia sladkú chuť. Chýba im gén pre tento typ chuťových receptorov, preto ich sladkosti nelákajú (ak ich jedia, je to skôr kvôli tuku). Sú to prísni mäsožravci, takže schopnosť detekovať cukor pre nich nebola evolučne dôležitá."
+  },
+  {
+    "id": 171,
+    "kategoria": "Slovensko",
+    "text": "Obec Čierny Balog má raritnú železničku, ktorá prechádza priamo cez futbalové ihrisko. Počas zápasov musí vlak niekedy prejsť popred tribúnu a prerušiť hru. Táto Čiernohronská železnica je svetovým unikátom a láka turistov z celého sveta."
+  },
+  {
+    "id": 172,
+    "kategoria": "Potraviny",
+    "text": "Muškátový oriešok môže byť vo veľkých dávkach halucinogénny. Obsahuje látku myristicín, ktorá môže spôsobiť nevoľnosť a závraty, ak sa skonzumuje vo veľkom množstve. V bežných kuchynských dávkach je však úplne bezpečný a dodáva jedlám príjemnú arómu."
+  },
+  {
+    "id": 173,
+    "kategoria": "Vesmír",
+    "text": "Jupiter má najmenej 95 mesiacov. Najväčší z nich, Ganymedes, je dokonca väčší ako planéta Merkúr a má vlastné magnetické pole. Vedci predpokladajú, že pod ľadovým povrchom ďalšieho mesiaca, Európy, sa nachádza oceán tekutej vody."
+  },
+  {
+    "id": 174,
+    "kategoria": "Ľudské telo",
+    "text": "Najsilnejším svalom v ľudskom tele (v pomere k veľkosti) je žuvací sval. Dokáže vyvinúť tlak pri zahryznutí až 90 kilogramov na stoličkách. Ak by sme brali do úvahy silu ťahu, najsilnejší by bol lýtkový sval."
+  },
+  {
+    "id": 175,
+    "kategoria": "Geografia",
+    "text": "Vatikán je najmenší štát na svete. Má rozlohu len 0,44 km² a menej ako 1000 obyvateľov, no má vlastnú poštu, banku, rozhlasovú stanicu aj armádu (Švajčiarsku gardu). Celý štát sa dá prejsť pešo za menej ako hodinu."
+  },
+  {
+    "id": 176,
+    "kategoria": "História",
+    "text": "Mladý Julius Caesar bol raz unesený pirátmi. Keď mu oznámili výšku výkupného, urazil sa, že je príliš nízka, a prikázal im, aby ju viac ako zdvojnásobili. Po prepustení splnil svoj sľub, vrátil sa s flotilou a pirátov dal popraviť."
+  },
+  {
+    "id": 177,
+    "kategoria": "Technológie",
+    "text": "Logo prehliadača Firefox nezobrazuje líšku, ale pandu červenú. „Firefox“ je anglický preklad čínskeho názvu pre túto malú šelmu, ktorá je v logu stočená do klbka. Dizajnéri sa však pri tvorbe loga inšpirovali skôr tvarom líšky, pretože panda sa ťažšie štylizovala."
+  },
+  {
+    "id": 178,
+    "kategoria": "Zvieratá",
+    "text": "Šváby dokážu prežiť bez hlavy aj niekoľko týždňov. Keďže dýchajú cez otvory v tele a majú decentralizovaný nervový systém, zomrú nakoniec len od smädu a hladu. Navyše sú schopné prežiť aj vysoké dávky radiácie, čo z nich robí jedny z najodolnejších tvorov."
+  },
+  {
+    "id": 179,
+    "kategoria": "Slovensko",
+    "text": "Jánošíka nepopravili zavesením za rebro v Terchovej, ale v Liptovskom Mikuláši. Legenda o háku bola spopularizovaná až neskôr štúrovcami a románmi. Súdne záznamy uvádzajú, že bol popravený 17. marca 1713 po tom, čo bol obvinený z lúpeží a stykov s povstalcami."
+  },
+  {
+    "id": 180,
+    "kategoria": "Príroda",
+    "text": "Oheň nevrhá tieň. Plameň je zdrojom svetla, a hoci horúci vzduch môže lámať svetlo a vytvárať na stene chvenie, samotný oheň tieň nemá (pokiaľ nie je svetlo za ním extrémne silné). Je to preto, že plameň je priehľadný plyn, ktorý sám vyžaruje fotóny."
+  },
+  {
+    "id": 181,
+    "kategoria": "Potraviny",
+    "text": "Hranolky v skutočnosti pochádzajú z Belgicka, nie z Francúzska. Americkí vojaci ich počas prvej svetovej vojny nazvali „French fries“, pretože v belgickej armáde sa hovorilo po francúzsky. V Belgicku sú hranolky národným jedlom a tradične sa podávajú s majonézou."
+  },
+  {
+    "id": 182,
+    "kategoria": "Vesmír",
+    "text": "Jeden skafander NASA stojí približne 12 miliónov dolárov. Väčšinu tejto sumy tvorí batoh a riadiaci systém, ktorý udržuje astronauta nažive v extrémnych podmienkach. Skafander je v podstate malá, samostatná vesmírna loď tvarovaná na ľudské telo."
+  },
+  {
+    "id": 183,
+    "kategoria": "Ľudské telo",
+    "text": "Väčšina prachu vo vašej domácnosti nie je tvorená odumretou kožou. To je mýtus; prach tvorí najmä špina zvonku, vlákna z oblečenia a kobercov, peľ a sadze. Množstvo odumretej kože v prachu sa líši, ale zvyčajne tvorí len malú časť celkového objemu."
+  },
+  {
+    "id": 184,
+    "kategoria": "História",
+    "text": "V stredoveku mohli byť zvieratá súdené za zločiny. Existujú záznamy o súdnych procesoch s prasatami, potkanmi či hmyzom, ktoré mali dokonca pridelených obhajcov. Tieto procesy sa brali veľmi vážne a zvieratá mohli byť odsúdené na smrť alebo vyhnanstvo."
+  },
+  {
+    "id": 185,
+    "kategoria": "Geografia",
+    "text": "Najhlbšie miesto na Zemi, Mariánska priekopa, je hlbšie ako výška Everestu. Ak by sme Everest položili na dno priekopy, jeho vrchol by bol stále viac ako 2 kilometre pod hladinou. Tlak na dne je taký obrovský, že by rozdrvil človeka ako plechovku."
+  },
+  {
+    "id": 186,
+    "kategoria": "Technológie",
+    "text": "Prvé video na YouTube sa volá „Me at the zoo“ (Ja v zoo). Nahral ho spoluzakladateľ Jawed Karim v roku 2005 a trvá len 18 sekúnd, počas ktorých hovorí o slonoch. Video bolo natočené v ZOO v San Diegu a dodnes je dostupné na platforme."
+  },
+  {
+    "id": 187,
+    "kategoria": "Slovensko",
+    "text": "Kaštieľ v Betliari je jediný na Slovensku, ktorý sa zachoval s pôvodným zariadením a zbierkami. Nikdy nebol vyrabovaný a ukrýva aj vzácnu knižnicu či exotické trofeje. Rodina Andrássyovcov tu zhromaždila predmety z celého sveta, vrátane múmie z Egypta."
+  },
+  {
+    "id": 188,
+    "kategoria": "Zvieratá",
+    "text": "Samička modlivky niekedy po párení zožerie samčeka. Robí to kvôli získaniu energie potrebnej na vývoj vajíčok, hoci sa to nedeje tak často, ako sa traduje. V prírode sa to stáva asi v 15 až 30 % prípadov, najmä ak je samička hladná."
+  },
+  {
+    "id": 189,
+    "kategoria": "Príroda",
+    "text": "Snehové vločky nie sú vždy unikátne. Hoci je pravdepodobnosť malá, vedci už našli dve identické snehové vločky, najmä ak sú veľmi malé a jednoduché. Pri zložitejších tvaroch je však šanca na zhodu takmer nulová kvôli nekonečným variáciám kryštalizácie."
+  },
+  {
+    "id": 190,
+    "kategoria": "Potraviny",
+    "text": "Čokoláda bola kedysi používaná ako platidlo. Starí Aztékovia a Mayovia si kakaové bôby cenili natoľko, že nimi platili za tovar a služby. Dokonca existovali falšovatelia, ktorí vyrábali falošné bôby z hliny alebo vosku."
+  },
+  {
+    "id": 191,
+    "kategoria": "Vesmír",
+    "text": "Ak by ste spadli do čiernej diery, natiahlo by vás to ako špagetu. Tento jav sa odborne nazýva „špagetifikácia“ a je spôsobený extrémnym rozdielom v gravitácii pôsobiacej na nohy a hlavu. Gravitačná sila pri nohách by bola o toľko silnejšia než pri hlave, že by vás to roztrhalo na atómy."
+  },
+  {
+    "id": 192,
+    "kategoria": "Ľudské telo",
+    "text": "Človek je ráno o niečo ľahší ako večer. Počas noci stratíme vodu dýchaním a potením, čo môže urobiť rozdiel aj pol kilogramu. Tento úbytok hmotnosti je však len dočasný a po raňajkách a rehydratácii sa váha vráti."
+  },
+  {
+    "id": 193,
+    "kategoria": "História",
+    "text": "Bratislavský hrad v roku 1811 vyhorel kvôli nepozornosti vojakov. Oheň vznikol v kasárňach a silný vietor ho rozšíril na celý hrad a podhradie; ruina chátrala viac ako 140 rokov. Rekonštrukcia sa začala až v 50. rokoch 20. storočia a hrad získal svoju dnešnú podobu."
+  },
+  {
+    "id": 194,
+    "kategoria": "Technológie",
+    "text": "Japonské železnice používajú modré svetlá na staniciach na upokojenie ľudí. Zistilo sa, že modré osvetlenie znižuje počet pokusov o samovraždu a kriminalitu. Psychologický efekt modrej farby údajne navodzuje pocit pokoja a stability."
+  },
+  {
+    "id": 195,
+    "kategoria": "Geografia",
+    "text": "Nauru je jediná republika na svete bez oficiálneho hlavného mesta. Vládne budovy sa nachádzajú v okrese Yaren, ale ústavne nie je definované ako metropola. Nauru je zároveň najmenšou ostrovnou krajinou na svete s rozlohou len 21 km²."
+  },
+  {
+    "id": 196,
+    "kategoria": "Slovensko",
+    "text": "Na Slovensku máme viac ako 6000 jaskýň. Väčšina z nich sa nachádza v Slovenskom krase a Nízkych Tatrách, no verejnosti je sprístupnených len niekoľko z nich. Mnohé jaskyne boli objavené až v posledných desaťročiach a stále sa nachádzajú nové priestory."
+  },
+  {
+    "id": 197,
+    "kategoria": "Zvieratá",
+    "text": "Krokodíly nedokážu vyplaziť jazyk. Je pevne prirastený k spodnej časti tlamy, čo im znemožňuje robiť grimasy, ale pomáha pri prehĺtaní veľkých kusov potravy pod vodou. Aligátory sú na tom rovnako, čo je jeden zo spôsobov, ako ich odlíšiť od iných plazov."
+  },
+  {
+    "id": 198,
+    "kategoria": "Potraviny",
+    "text": "Froot Loops cereálie majú všetky rovnakú chuť. Napriek rôznym farbám (červená, žltá, modrá atď.) výrobca potvrdil, že všetky krúžky chutia identicky ako zmes ovocia. Rozdiel je len vo farbivách, ktoré nemajú vplyv na samotnú arómu."
+  },
+  {
+    "id": 199,
+    "kategoria": "Príroda",
+    "text": "Blesk obsahuje toľko energie, že by dokázal opiecť 100 000 hrianok naraz. Teplota blesku je päťkrát vyššia ako teplota na povrchu Slnka. Napriek tejto obrovskej energii trvá výboj len zlomok sekundy, takže jeho využitie v praxi je zatiaľ nemožné."
+  },
+  {
+    "id": 200,
+    "kategoria": "Vesmír",
+    "text": "Pluto ešte nestihlo obehnúť Slnko od svojho objavenia. Bolo objavené v roku 1930 a jeden obeh mu trvá 248 pozemských rokov, takže prvý „plutónsky rok“ dokončí až v roku 2178. To znamená, že od času, keď sme ho objavili, až po jeho vyradenie zo zoznamu planét, prešlo len malú časť svojej dráhy."
+  },
+  {
+    "id": 201,
+    "kategoria": "Ľudské telo",
+    "text": "Váš mozog je aktívnejší, keď spíte, než keď sledujete televíziu. Počas spánku mozog intenzívne spracováva informácie a ukladá spomienky, zatiaľ čo pri pasívnom sledovaní TV je jeho aktivita utlmená. Snívanie je pre mozog náročný proces, ktorý vyžaduje veľa energie."
+  },
+  {
+    "id": 202,
+    "kategoria": "Slovensko",
+    "text": "Slovensko je svetovou veľmocou vo výrobe áut. V prepočte na obyvateľa sa u nás vyrobí najviac automobilov na svete, čo nám vyslúžilo prezývku „Detroit Európy“. Sídlia tu závody veľkých automobiliek ako Volkswagen, Kia, Stellantis a Jaguar Land Rover."
+  },
+  {
+    "id": 203,
+    "kategoria": "Zvieratá",
+    "text": "Vydry sa držia za ruky aj keď spia vo vode, aby sa neodplavili. Často sa obalia do chalúh, ktoré slúžia ako prírodná kotva, a vytvárajú takzvané „plte“ z viacerých jedincov. Toto správanie je nielen praktické, ale posilňuje aj sociálne väzby v skupine."
+  },
+  {
+    "id": 204,
+    "kategoria": "História",
+    "text": "V starovekom Egypte si ľudia na znak smútku za uhynutou mačkou holili obočie. Mačky boli posvätné a ich zabitie, aj neúmyselné, sa trestalo smrťou. Egypťania verili, že mačky prinášajú šťastie a chránia domácnosť pred zlými duchmi."
+  },
+  {
+    "id": 205,
+    "kategoria": "Veda",
+    "text": "Ak by ste odstránili všetok prázdny priestor z atómov, ktoré tvoria všetkých ľudí na Zemi, celá ľudská populácia by sa zmestila do objemu kocky cukru. Hmota je totiž tvorená prevažne prázdnotou, pričom jadro atómu je v porovnaní s celým atómom miniatúrne. Táto hyper-hustá kocka by však vážila miliardy ton."
+  },
+  {
+    "id": 206,
+    "kategoria": "Príroda",
+    "text": "Jablká, hrušky, čerešne, slivky, marhule a broskyne patria do rodiny ružovitých. Sú teda botanickými príbuznými ruží, čo vidno najmä na tvare ich kvetov. Všetky tieto rastliny majú päťpočetné kvety, ktoré sú typické pre túto čeľaď."
+  },
+  {
+    "id": 207,
+    "kategoria": "Zaujímavosti",
+    "text": "Zapaľovač bol vynájdený skôr ako zápalky. Prvý mechanický zapaľovač (Döbereinerova lampa) vznikol v roku 1823, zatiaľ čo trecie zápalky vynašiel John Walker až v roku 1826. Tento prvý zapaľovač bol však veľký, nebezpečný a používal vodík."
+  },
+  {
+    "id": 208,
+    "kategoria": "Slovensko",
+    "text": "Bratislavské rožky sú chránené Európskou úniou ako zaručená tradičná špecialita. Ich história siaha do 16. storočia a musia mať presne stanovený tvar (podkova pre makové, C pre orechové). Povrch rožka musí byť mramorovaný, čo sa dosiahne potretím žĺtkom pred pečením."
+  },
+  {
+    "id": 209,
+    "kategoria": "Vesmír",
+    "text": "Na Mesiaci sú extrémne teplotné výkyvy. Teplota sa tam pohybuje od +127 °C na slnku počas dňa až po -173 °C v noci. Keďže Mesiac nemá atmosféru, ktorá by teplo zadržiavala, povrch sa po západe slnka okamžite ochladí."
+  },
+  {
+    "id": 210,
+    "kategoria": "Technológie",
+    "text": "Symbol @ (zavináč) sa používal už v stredoveku. Pôvodne slúžil obchodníkom ako skratka pre mernú jednotku „amfora“ alebo predložku „ad“ (k, pri), dávno pred vznikom emailov. Dnes je tento symbol neoddeliteľnou súčasťou našej digitálnej identity."
+  },
+  {
+    "id": 211,
+    "kategoria": "Zvieratá",
+    "text": "Ľadové medvede majú čiernu kožu. Ich srsť nie je biela, ale priehľadná a dutá, čo jej umožňuje odrážať svetlo a vyzerať bielo, zatiaľ čo čierna koža pohlcuje teplo zo slnka. Táto kombinácia je dokonalou adaptáciou na prežitie v arktickej zime."
+  },
+  {
+    "id": 212,
+    "kategoria": "Geografia",
+    "text": "V Japonsku existuje ostrov, ktorý obývajú takmer výlučne králiky. Ostrov Okunošima je plný tisícok krotkých králikov, ktoré nemajú prirodzených predátorov. Predpokladá sa, že sú to potomkovia králikov, ktorí boli na ostrov privezení počas druhej svetovej vojny."
+  },
+  {
+    "id": 213,
+    "kategoria": "Ľudské telo",
+    "text": "Váš žalúdok sa červená, keď sa červenáte vy. Keď ste v rozpakoch, uvoľní sa adrenalín, ktorý rozšíri cievy nielen v tvári, ale aj v sliznici žalúdka. To vysvetľuje, prečo často cítime „motýle v bruchu“ alebo nevoľnosť pri silných emóciách."
+  },
+  {
+    "id": 214,
+    "kategoria": "Slovensko",
+    "text": "Na Slovensku máme sopku, ktorá je najmladšia v strednej Európe. Je to sopka Putikov vŕšok pri Novej Bani a svedčí o sopečnej činnosti spred „len“ 100 000 rokov. Hoci je dnes už vyhasnutá, jej lávové prúdy sú stále viditeľné v okolitej krajine."
+  },
+  {
+    "id": 215,
+    "kategoria": "História",
+    "text": "Keď Kolumbus objavil Ameriku, myslel si, že je v Indii, a preto nazval pôvodných obyvateľov „Indiáni“. Nikdy si nepriznal, že objavil nový kontinent. Až Amerigo Vespucci neskôr pochopil, že ide o „Nový svet“, a preto bola Amerika pomenovaná po ňom."
+  },
+  {
+    "id": 216,
+    "kategoria": "Veda",
+    "text": "Sklo je v skutočnosti amorfná pevná látka. Hoci vyzerá pevne, jeho molekulárna štruktúra je neusporiadaná podobne ako v kvapaline, ale pohybuje sa príliš pomaly na to, aby sme to videli. Preto sa staré tabule skla v oknách kostolov zdajú byť naspodku hrubšie, hoci to je často len dôsledok výrobného procesu."
+  },
+  {
+    "id": 217,
+    "kategoria": "Zvieratá",
+    "text": "Vrana si dokáže zapamätať tvár človeka, ktorý jej ublížil, a naučiť to aj ostatné vrany. Táto zášť môže trvať celé roky a prenášať sa na ďalšie generácie. Vrany sú známe svojou inteligenciou a schopnosťou riešiť zložité problémy."
+  },
+  {
+    "id": 218,
+    "kategoria": "Potraviny",
+    "text": "Medové pečivo (perníky) sa pôvodne používalo na liečenie žalúdočných ťažkostí. Koreniny ako zázvor, škorica a klinčeky mali pomáhať tráveniu. Mnísi v stredoveku ich piekli práve pre ich liečivé účinky a dlhú trvanlivosť."
+  },
+  {
+    "id": 219,
+    "kategoria": "Vesmír",
+    "text": "V našej galaxii je možno až 40 miliárd planét podobných Zemi. Znamená to, že šanca na existenciu iného života je štatisticky veľmi vysoká. Tieto exoplanéty sa nachádzajú v takzvanej obývateľnej zóne, kde by mohla existovať voda v kvapalnom skupenstve."
+  },
+  {
+    "id": 220,
+    "kategoria": "Slovensko",
+    "text": "Most SNP v Bratislave nemá v rieke Dunaj ani jeden pilier. Celá váha mosta visí na oceľových lanách upevnených na jedinom pylóne na brehu. Vďaka tejto unikátnej konštrukcii bol v roku 2001 vyhlásený za stavbu storočia na Slovensku."
+  },
+  {
+    "id": 221,
+    "kategoria": "Technológie",
+    "text": "Prvý budík mohol zazvoniť len o štvrtej ráno. Vynašiel ho Levi Hutchins v roku 1787 len pre seba, aby nezaspal do práce, a nebolo možné ho nastaviť na iný čas. Až o 60 rokov neskôr si francúzsky vynálezca patentoval nastaviteľný budík."
+  },
+  {
+    "id": 222,
+    "kategoria": "Zvieratá",
+    "text": "Slimáky môžu spať až tri roky. Ak sú podmienky nepriaznivé (napríklad extrémne sucho), zatvoria sa do ulity a upadnú do dlhodobej hybernácie. Počas tohto obdobia spomalia svoj metabolizmus na minimum, aby šetrili energiu."
+  },
+  {
+    "id": 223,
+    "kategoria": "História",
+    "text": "V starom Ríme sa soľ používala ako platidlo pre vojakov. Odtiaľ pochádza anglické slovo „salary“ (plat) a fráza „soľ nad zlato“. Soľ bola vtedy kľúčová na konzervovanie potravín, preto mala vysokú hodnotu."
+  },
+  {
+    "id": 224,
+    "kategoria": "Príroda",
+    "text": "Niektoré druhy bambusu kvitnú len raz za 60 až 120 rokov. Zaujímavé je, že všetky rastliny daného druhu na celom svete vykvitnú v rovnakom čase, bez ohľadu na klímu. Po vykvitnutí a vytvorení semien rastlina zvyčajne uhynie, čo vedie k masívnemu odumieraniu bambusových lesov."
+  },
+  {
+    "id": 225,
+    "kategoria": "Ľudské telo",
+    "text": "Človek má v ústach viac baktérií, než je ľudí na Zemi. Väčšina z nich je neškodná a pomáha nám pri trávení a ochrane pred infekciami. Pravidelné čistenie zubov pomáha udržiavať rovnováhu tohto mikrobiómu a predchádzať zubnému kazu."
+  },
+  {
+    "id": 226,
+    "kategoria": "Geografia",
+    "text": "Najkratší názov obce na svete je „Å“. Takéto dediny sa nachádzajú v Nórsku aj vo Švédsku; slovo „Å“ v staroseverčine znamená potok alebo rieka. Turisti často kradnú značky s názvom obce, preto ich musia úrady pravidelne nahrádzať."
+  },
+  {
+    "id": 227,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najväčšiu zásobáreň pitnej vody v strednej Európe. Žitný ostrov je obrovská podzemná nádrž, ktorá by dokázala zásobovať pitnou vodou viacero krajín. Táto voda je navyše mimoriadne kvalitná a nevyžaduje zložité úpravy."
+  },
+  {
+    "id": 228,
+    "kategoria": "Zvieratá",
+    "text": "Hrochy zabijú v Afrike viac ľudí ako levy, žraloky či krokodíly. Sú extrémne teritoriálne a napriek svojej hmotnosti dokážu na súši bežať rýchlejšie ako človek. Útočia na lode, ktoré narušia ich priestor, a ich silné čeľuste dokážu rozdrviť aj kanoe."
+  },
+  {
+    "id": 229,
+    "kategoria": "Vesmír",
+    "text": "Vesmírna stanica ISS obehne Zem každých 90 minút. Astronauti na palube tak vidia východ a západ slnka 16-krát za jeden pozemský deň. Aby si udržali normálny spánkový cyklus, musia sa riadiť umelým časovým rozvrhom podľa greenwichského času."
+  },
+  {
+    "id": 230,
+    "kategoria": "Technológie",
+    "text": "Vaša mikrovlnka spotrebuje viac energie na zobrazovanie času v pohotovostnom režime, než na samotné zohrievanie jedla počas svojej životnosti. Väčšinu času totiž len čaká na pokyn, zatiaľ čo samotný ohrev trvá zvyčajne len pár minút denne. Odpojenie spotrebičov zo zásuvky môže preto ušetriť prekvapivé množstvo elektriny."
+  },
+  {
+    "id": 231,
+    "kategoria": "História",
+    "text": "Albert Einstein odmietol ponuku stať sa prezidentom Izraela. V roku 1952 mu túto funkciu ponúkli, ale on ju s vďakou odmietol s tým, že na to nemá vlohy ani skúsenosti. Tvrdil, že vie narábať s rovnicami, ale nie s ľuďmi."
+  },
+  {
+    "id": 232,
+    "kategoria": "Príroda",
+    "text": "V Austrálii existuje jazero, ktoré je prirodzene ružové. Jazero Hillier si zachováva svoju žuvačkovo-ružovú farbu vďaka špecifickým mikroriasam a baktériám. Farba je trvalá a nemení sa ani vtedy, keď naberiete vodu do pohára."
+  },
+  {
+    "id": 233,
+    "kategoria": "Slovensko",
+    "text": "Slovenská filharmónia sídli v budove Reduty, ktorá bola kedysi sýpkou. V 18. storočí na tomto mieste stála sýpka, ktorú neskôr prestavali na honosnú budovu pre kultúrne podujatia. Dnes je Reduta jednou z najkrajších historických budov v Bratislave."
+  },
+  {
+    "id": 234,
+    "kategoria": "Ľudské telo",
+    "text": "Kyselina v mravcoch a žihľave je tá istá. Kyselina mravčia spôsobuje pálenie pri popŕhlení žihľavou aj pri uhryznutí mravcom. Rastliny aj hmyz ju používajú ako účinnú chemickú obranu proti predátorom."
+  },
+  {
+    "id": 235,
+    "kategoria": "Zvieratá",
+    "text": "Pstrosy dokážu bežať rýchlosťou až 70 km/h. Ich kopy sily sú smrteľné a dokážu nimi zabiť aj leva. Sú to najrýchlejšie bežiace dvojnohé živočíchy na planéte."
+  },
+  {
+    "id": 236,
+    "kategoria": "Potraviny",
+    "text": "Vlašské orechy sú jedným z najstarších druhov stromových potravín známych človeku. Konzumovali sa už 7000 rokov pred naším letopočtom. Rimania ich nazývali „Jupiterove žalude“ a považovali ich za jedlo bohov."
+  },
+  {
+    "id": 237,
+    "kategoria": "Veda",
+    "text": "Zvuk sa vo vode šíri štyrikrát rýchlejšie ako vo vzduchu. Preto majú veľryby a iné morské živočíchy schopnosť komunikovať na obrovské vzdialenosti. Voda je hustejšia ako vzduch, čo umožňuje zvukovým vlnám prenášať energiu efektívnejšie."
+  },
+  {
+    "id": 238,
+    "kategoria": "Slovensko",
+    "text": "Slovenský jazyk sa často nazýva „slovanským esperantom“. Je to preto, že je pre ostatných Slovanov (Poliakov, Čechov, Chorvátov) relatívne najzrozumiteľnejší. Jeho centrálna poloha v rámci slovanských jazykov z neho robí akýsi most medzi západnými, východnými a južnými slovanskými jazykmi."
+  },
+  {
+    "id": 239,
+    "kategoria": "História",
+    "text": "Piráti nosili pásku cez oko, aby lepšie videli v tme. Keď prešli z jasnej paluby do tmavého podpalubia, odkryli si zakryté oko, ktoré už bolo adaptované na tmu. Umožnilo im to okamžite bojovať alebo pracovať bez čakania, kým si zrak zvykne na prítmie."
+  },
+  {
+    "id": 240,
+    "kategoria": "Technológie",
+    "text": "Prvé mobilné telefóny stáli toľko ako auto. V roku 1983 stál prvý komerčný mobil 3 995 dolárov, čo by dnes po zohľadnení inflácie bolo viac ako 10 000 dolárov. Boli považované za luxusný symbol statusu pre bohatých podnikateľov."
+  },
+  {
+    "id": 241,
+    "kategoria": "Zvieratá",
+    "text": "Albatrosy dokážu spať počas letu. Majú schopnosť „zamknúť“ krídla v roztiahnutej polohe a nechať jednu polovicu mozgu odpočívať, zatiaľ čo plachtia nad oceánom. Vďaka tomu môžu stráviť na mori celé roky bez toho, aby sa dotkli pevniny."
+  },
+  {
+    "id": 242,
+    "kategoria": "Geografia",
+    "text": "Najdlhší názov mesta na svete má Bangkok. Jeho oficiálny ceremoniálny názov v thajčine má 168 písmen a opisuje ho ako mesto anjelov a sídlo smaragdového Budhu. Miestni ho však bežne nazývajú len „Krung Thep“, čo je skrátená verzia."
+  },
+  {
+    "id": 243,
+    "kategoria": "Ľudské telo",
+    "text": "Pri úsmeve zapájate 17 svalov, pri mračení až 43. Takže z fyziologického hľadiska je menej namáhavé sa usmievať, než sa mračiť. Smiech navyše uvoľňuje endorfíny, ktoré zlepšujú náladu a znižujú stres."
+  },
+  {
+    "id": 244,
+    "kategoria": "Slovensko",
+    "text": "Na Slovensku máme raritu – kamenné gule v Megoňkách. Tieto obrovské pieskovcové gule pripomínajúce delové gule vznikli prirodzeným geologickým procesom, hoci sa o nich šíria legendy. Podobné útvary sa nachádzajú len na niekoľkých miestach na svete, napríklad v Kostarike."
+  },
+  {
+    "id": 245,
+    "kategoria": "Príroda",
+    "text": "Niektoré stromy v Amazónii „krvácajú“. Strom Dračia krv pri narezaní kôry roní tmavočervenú živicu, ktorá sa používa v medicíne a ako farbivo. Táto miazga má silné antiseptické účinky a domorodci ju po stáročia využívajú na liečbu rán."
+  },
+  {
+    "id": 246,
+    "kategoria": "Vesmír",
+    "text": "Venuša je najteplejšia planéta v slnečnej sústave, hoci nie je najbližšie k Slnku. Jej hustá atmosféra plná skleníkových plynov zadržiava teplo tak efektívne, že teplota dosahuje 462 °C. Tento extrémny skleníkový efekt je varovaním pre klimatické zmeny na Zemi."
+  },
+  {
+    "id": 247,
+    "kategoria": "História",
+    "text": "V stredoveku sa verilo, že spermia obsahuje malého človiečika. Teória preformizmu tvrdila, že v každej spermii je miniatúrny hotový človek (homunkulus), ktorý len potrebuje vyrásť. Až vynález mikroskopu a ďalšie objavy v biológii túto mylnú predstavu vyvrátili."
+  },
+  {
+    "id": 248,
+    "kategoria": "Zvieratá",
+    "text": "Morský koník je jediné zviera, kde rodí samec. Samička nakladie vajíčka do vaku na bruchu samca, ktorý ich oplodní, vynosí a nakoniec porodí mláďatá. Po pôrode je však jeho úloha skončená a o mláďatá sa ďalej nestará."
+  },
+  {
+    "id": 249,
+    "kategoria": "Technológie",
+    "text": "Bluetooth je pomenovaný po vikingskom kráľovi. Harald „Modrozub“ Gormsson zjednotil dánske kmene, rovnako ako technológia Bluetooth mala zjednotiť komunikáciu medzi zariadeniami. Logo Bluetooth je dokonca kombináciou runových znakov pre H a B."
+  },
+  {
+    "id": 250,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najhustejšiu sieť turistických značiek na svete. Systém značenia chodníkov farebnými pásikmi je u nás mimoriadne prepracovaný a inšpiroval mnoho iných krajín. Klub slovenských turistov sa o tieto značky stará už viac ako 100 rokov."
+  },
+  {
+    "id": 251,
+    "kategoria": "Ľudské telo",
+    "text": "Vaše uši a nos nikdy neprestanú rásť. Je to spôsobené gravitáciou, ktorá vekom naťahuje chrupavku, a tým, že chrupavka na rozdiel od kostí rastie po celý život. Preto majú starší ľudia často viditeľne väčšie uši a nosy."
+  },
+  {
+    "id": 252,
+    "kategoria": "Zaujímavosti",
+    "text": "Papiereň v Harmanci vyrába legendárny toaletný papier už viac ako 100 rokov. Značka „Harmanec“ sa v Československu stala synonymom pre toaletný papier. Pôvodne sa papier vyrábal skladaný, až neskôr sa prešlo na moderné rolky."
+  },
+  {
+    "id": 253,
+    "kategoria": "Veda",
+    "text": "Banány sú rádioaktívne. Obsahujú draslík-40, ktorý je rádioaktívnym izotopom, ale množstvo je také zanedbateľné, že by ste museli zjesť 10 miliónov banánov naraz, aby vás to ohrozilo. Geigerove počítače však dokážu túto slabú radiáciu zachytiť."
+  },
+  {
+    "id": 254,
+    "kategoria": "Zvieratá",
+    "text": "Gorily vedia spievať. Keď sú spokojné pri jedle, často si hmkania a vydávajú melodické zvuky, ktoré vedci označujú ako „spievanie pri jedle“. Je to spôsob, ako vyjadrujú radosť a zároveň dávajú ostatným najavo, že je čas jedla."
+  },
+  {
+    "id": 255,
+    "kategoria": "História",
+    "text": "Pôvodné olympijské hry v Grécku sa konali nahé. Atléti súťažili bez oblečenia, aby ukázali krásu ľudského tela a vzdali hold bohom; slovo „gymnastika“ pochádza z gréckeho „gymnos“ – nahý. Ženy mali na tieto hry prísny zákaz vstupu, dokonca aj ako diváčky."
+  },
+  {
+    "id": 256,
+    "kategoria": "Slovensko",
+    "text": "V Košiciach bol nájdený jeden z najväčších zlatých pokladov v Európe. Košický zlatý poklad obsahuje 2920 zlatých mincí, reťaze a medaily z 15. až 17. storočia. Bol objavený náhodou pri kopaní základov budovy v roku 1935."
+  },
+  {
+    "id": 257,
+    "kategoria": "Príroda",
+    "text": "Existuje huba, ktorá chutí ako kura. Sírovec obyčajný (Laetiporus sulphureus) je jedlá drevokazná huba, ktorá sa po úprave textúrou aj chuťou podobá na kuracie mäso. V angličtine sa jej preto hovorí „Chicken of the Woods“ (kura z lesa)."
+  },
+  {
+    "id": 258,
+    "kategoria": "Vesmír",
+    "text": "Na Marse vážite menej ako na Zemi. Ak na Zemi vážite 100 kg, na Marse by ste vážili len 38 kg kvôli slabšej gravitácii. To by umožnilo astronautom skákať oveľa vyššie a nosiť ťažšie vybavenie bez väčšej námahy."
+  },
+  {
+    "id": 259,
+    "kategoria": "Technológie",
+    "text": "Prvá SMS správa na svete znela „Veselé Vianoce“. Bola odoslaná 3. decembra 1992 z počítača na mobilný telefón v sieti Vodafone. Príjemcom bol riaditeľ spoločnosti, ktorý na správu nemohol odpovedať, lebo telefóny vtedy nemali klávesnicu na písanie."
+  },
+  {
+    "id": 260,
+    "kategoria": "Ľudské telo",
+    "text": "Odtlačky prstov sa vyvíjajú už v maternici. Vznikajú okolo 10. týždňa tehotenstva vďaka tlaku plodovej vody a pohybom plodu, preto majú aj jednovaječné dvojčatá odlišné odtlačky. Tieto línie zostávajú nezmenené po celý život a slúžia ako spoľahlivý identifikačný znak."
+  },
+  {
+    "id": 261,
+    "kategoria": "Zvieratá",
+    "text": "Veveričky neúmyselne sadia tisíce stromov ročne. Zahrabávajú si orechy na horšie časy, ale na mnohé z nich zabudnú, a tie potom vyklíčia v nové stromy. Týmto spôsobom prispievajú k obnove lesov a šíreniu rôznych druhov drevín."
+  },
+  {
+    "id": 262,
+    "kategoria": "Slovensko",
+    "text": "Slovensko je druhou najlesnatejšou krajinou v strednej Európe (po Rakúsku). Lesy pokrývajú viac ako 41 % územia štátu, čo je výrazne nad európskym priemerom. Vďaka tomu máme bohatú faunu vrátane veľkých šeliem ako medvede, vlky a rysy."
+  },
+  {
+    "id": 263,
+    "kategoria": "Geografia",
+    "text": "Mongolsko je najredšie osídlená nezávislá krajina na svete. Na obrovskom území žije len niečo vyše 3 miliónov ľudí, čo predstavuje hustotu približne 2 obyvatelia na km². Väčšina obyvateľov stále žije kočovným spôsobom života v tradičných jurtách."
+  },
+  {
+    "id": 264,
+    "kategoria": "História",
+    "text": "Kečup sa predával v 19. storočí ako extrakt z paradajok na liečbu plešatosti a bolesti nôh. Až neskôr sa stal populárnym dochucovadlom. Jeho pôvodný recept pochádza z Číny a obsahoval fermentované ryby, nie paradajky."
+  },
+  {
+    "id": 265,
+    "kategoria": "Veda",
+    "text": "Vzduch, ktorý dýchame, je zmesou. Obsahuje 78 % dusíka, 21 % kyslíka a zvyšné 1 % tvoria argón, oxid uhličitý a iné plyny. Kyslík je pre nás životne dôležitý, ale čistý 100% kyslík by bol pre pľúca pri dlhodobom dýchaní toxický."
+  },
+  {
+    "id": 266,
+    "kategoria": "Potraviny",
+    "text": "Čajové vrecúško bolo vynájdené náhodou. Obchodník Thomas Sullivan posielal vzorky čaju v hodvábnych vrecúškach a zákazníci si mysleli, že sa majú lúhovať priamo v nich. Keď si uvedomil tento omyl, začal vrecúška vyrábať cielene, čím spôsobil revolúciu v príprave čaju."
+  },
+  {
+    "id": 267,
+    "kategoria": "Zvieratá",
+    "text": "Mravčiar zje denne až 35 000 mravcov. Nemá žiadne zuby, ale používa dlhý lepkavý jazyk, ktorý dokáže vymrštiť až 160-krát za minútu. Aby sa vyhol bolestivým uhryznutiam, pri každom mravenisku sa zdrží len krátko."
+  },
+  {
+    "id": 268,
+    "kategoria": "Slovensko",
+    "text": "Demänovská jaskyňa slobody je najnavštevovanejšou jaskyňou na Slovensku. Objavili ju v roku 1921 a vyniká bohatou sintrovou výzdobou rôznych farieb. Je súčasťou obrovského jaskynného systému, ktorý meria desiatky kilometrov."
+  },
+  {
+    "id": 269,
+    "kategoria": "Technológie",
+    "text": "QWERTY klávesnica spomaľuje písanie. Bola navrhnutá tak, aby spomalila pisárov na mechanických strojoch a zabránila zasekávaniu kláves, no tento dizajn pretrval dodnes. Existujú efektívnejšie rozloženia, ako napríklad Dvorak, ale zvyk ľudí je príliš silný na zmenu."
+  },
+  {
+    "id": 270,
+    "kategoria": "Vesmír",
+    "text": "Slnko je biele, nie žlté. Keď ho vidíme cez atmosféru, modré svetlo sa rozptýli a Slnko sa javí žlté alebo červené, ale z vesmíru vyzerá ako žiariaca biela guľa. Naše oči sú však prispôsobené práve na toto spektrum svetla."
+  },
+  {
+    "id": 271,
+    "kategoria": "Ľudské telo",
+    "text": "Kosti sú živé tkanivo. Neustále sa v nich odbúrava stará hmota a tvorí nová; každých približne 10 rokov máte v podstate úplne novú kostru. Tento proces remodelácie pomáha opravovať mikroskopické poškodenia a udržiavať kosti silné."
+  },
+  {
+    "id": 272,
+    "kategoria": "Zvieratá",
+    "text": "Papagáje dokážu nielen imitovať reč, ale aj rozumieť kontextu. Africký papagáj sivý menom Alex dokázal pomenovať farby, tvary a počty predmetov. Jeho inteligencia bola porovnateľná s inteligenciou päťročného dieťaťa."
+  },
+  {
+    "id": 273,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má vlastnú „púšť“. Na Záhorí sa nachádza viate piesky (Šranecké piesky), ktoré pripomínajú púštnu krajinu a rastú tam vzácne pieskomilné rastliny. Táto oblasť bola dlho využívaná ako vojenský výcvikový priestor."
+  },
+  {
+    "id": 274,
+    "kategoria": "História",
+    "text": "Vojnové lode sa v minulosti maľovali na ružovo. Lord Mountbatten počas druhej svetovej vojny veril, že ružová farba („Mountbatten Pink“) robí lode pri západe a východe slnka menej viditeľnými. Hoci teória znela dobre, v praxi sa ukázalo, že lode boli počas dňa až príliš nápadné."
+  },
+  {
+    "id": 275,
+    "kategoria": "Geografia",
+    "text": "V Nórsku existuje mesto s názvom Hell (Peklo). V zime tam mrzne, takže fráza „keď zamrzne peklo“ tam naberá doslovný význam. Turisti sa tam radi fotia pred nápisom „Hell Gods-Expedition“ (Peklo – Expedícia tovaru)."
+  },
+  {
+    "id": 276,
+    "kategoria": "Zvieratá",
+    "text": "Zebry majú pruhy na zmätenie hmyzu. Výskumy ukázali, že muchy tse-tse a ovady majú problém pristáť na pruhovanom povrchu, čo chráni zebry pred chorobami. Tento optický klam funguje tak, že hmyz nedokáže správne odhadnúť vzdialenosť a rýchlosť."
+  },
+  {
+    "id": 277,
+    "kategoria": "Technológie",
+    "text": "Wi-Fi nemá žiadny význam. Skratka neznamená „Wireless Fidelity“, ako sa mnohí domnievajú; je to len marketingový názov, ktorý nemal žiadny konkrétny význam. Tvorcovia chceli len chytľavý názov, ktorý by sa rýmoval so slovom Hi-Fi."
+  },
+  {
+    "id": 278,
+    "kategoria": "Slovensko",
+    "text": "Lipa kráľa Mateja v Bojniciach má viac ako 700 rokov. Podľa povesti pod ňou kráľ Matej Korvín usporadúval hostiny a písal listiny; je jedným z najstarších stromov u nás. Strom je dnes už dutý a spevnený, ale stále žije a každú jar vyháňa nové listy."
+  },
+  {
+    "id": 279,
+    "kategoria": "Potraviny",
+    "text": "Medovina je pravdepodobne najstarší alkoholický nápoj na svete. Ľudia ju vyrábali a pili už pred tisíckami rokov, skôr ako pivo alebo víno. V mnohých kultúrach bola považovaná za nápoj nesmrteľnosti a afrodiziakum."
+  },
+  {
+    "id": 280,
+    "kategoria": "Veda",
+    "text": "Blesky môžu udrieť dvakrát na to isté miesto. Empire State Building v New Yorku zasiahne blesk priemerne 23-krát ročne, niekedy aj viackrát počas jednej búrky. Vysoké budovy totiž fungujú ako obrovské hromozvody, ktoré blesky priťahujú."
+  },
+  {
+    "id": 281,
+    "kategoria": "Ľudské telo",
+    "text": "Človek je jediný tvor, ktorý spí na chrbte. Ostatné zvieratá spia na boku alebo na bruchu; spánok na chrbte u ľudí zvyšuje riziko chrápania a spánkového apnoe. Táto poloha je možná vďaka tvaru našej chrbtice a hrudného koša."
+  },
+  {
+    "id": 282,
+    "kategoria": "Zvieratá",
+    "text": "Tuniak modroplutvý môže plávať rýchlosťou až 70 km/h. Je to jedna z najrýchlejších a najsilnejších rýb v oceáne, dokáže preplávať tisíce kilometrov. Jeho svaly sú uspôsobené na vytrvalosť, vďaka čomu dokáže udržať vysokú telesnú teplotu aj v studenej vode."
+  },
+  {
+    "id": 283,
+    "kategoria": "Slovensko",
+    "text": "V Čičmanoch sú domy maľované vzormi, ktoré pripomínajú výšivky. Tieto geometrické ornamenty sa stali jedným zo symbolov slovenskej ľudovej kultúry a boli aj na olympijskom oblečení. Celá dedina je pamiatkovou rezerváciou a unikátom ľudovej architektúry."
+  },
+  {
+    "id": 284,
+    "kategoria": "História",
+    "text": "Napoleonovu armádu nezničili len Rusi, ale aj vši. Analýza DNA z uniforiem ukázala, že mnohí vojaci trpeli týfusom a zákopovou horúčkou, ktoré prenášali vši. Tieto choroby zabili viac vojakov ako samotné boje počas ústupu z Moskvy."
+  },
+  {
+    "id": 285,
+    "kategoria": "Vesmír",
+    "text": "Zem nie je dokonalá guľa. Kvôli rotácii je na rovníku mierne vydutá, takže má tvar splošteného sferoidu (geoidu). Rozdiel medzi rovníkovým a polárnym polomerom je približne 21 kilometrov."
+  },
+  {
+    "id": 286,
+    "kategoria": "Technológie",
+    "text": "Prvý MP3 prehrávač vznikol v roku 1998. Mal kapacitu len 32 MB, čo stačilo asi na 6 pesničiek, a volal sa MPMan F10. iPod prišiel na trh až o tri roky neskôr a spôsobil revolúciu vďaka väčšej pamäti a lepšiemu dizajnu."
+  },
+  {
+    "id": 287,
+    "kategoria": "Príroda",
+    "text": "Niektoré ryby vedia meniť pohlavie. Klauni (ako Nemo) sa rodia ako samci, ale dominantný samec sa môže zmeniť na samicu, ak vodkyňa skupiny uhynie. Tento proces je nezvratný a zabezpečuje prežitie rodu."
+  },
+  {
+    "id": 288,
+    "kategoria": "Slovensko",
+    "text": "V obci Krahule je geografický stred Európy (ďalší z kandidátov). Obyvatelia sú na to hrdí a miesto je označené pamätným kameňom. Tento bod vypočítali nemeckí geografi pri výstavbe železnice."
+  },
+  {
+    "id": 289,
+    "kategoria": "Zvieratá",
+    "text": "Vlci majú unikátne zavýjanie. Každý vlk má svoj špecifický hlas, vďaka čomu sa členovia svorky dokážu rozpoznať aj na veľkú vzdialenosť. Zavýjanie slúži aj na označenie teritória a varovanie iných svoriek."
+  },
+  {
+    "id": 290,
+    "kategoria": "Ľudské telo",
+    "text": "Vaše srdce sa prispôsobuje hudbe, ktorú počúvate. Tepová frekvencia a krvný tlak sa môžu meniť v závislosti od rytmu a tempa hudby. Pomalá klasická hudba srdce upokojuje, zatiaľ čo rýchle techno ho zrýchľuje."
+  },
+  {
+    "id": 291,
+    "kategoria": "História",
+    "text": "V 17. storočí boli tulipány drahšie ako domy. Počas „tulipánovej mánie“ v Holandsku sa jedna cibuľka vzácneho tulipánu predávala za cenu luxusného domu v Amsterdame. Táto ekonomická bublina nakoniec praskla a mnohých ľudí priviedla na mizinu."
+  },
+  {
+    "id": 292,
+    "kategoria": "Veda",
+    "text": "Oheň sa vo vesmíre správa inak. Bez gravitácie plameň netiahne dohora, ale tvorí guľu, ktorá horí pomalšie a pri nižšej teplote. Tento jav vedci skúmajú na ISS, aby zlepšili požiarnu bezpečnosť vo vesmíre."
+  },
+  {
+    "id": 293,
+    "kategoria": "Slovensko",
+    "text": "Najdlhší železničný tunel na Slovensku je Čremošniansky tunel. Meria takmer 4,7 kilometra a bol postavený v 30. rokoch 20. storočia. Spája Banskú Bystricu s Turcom a je technickým unikátom svojej doby."
+  },
+  {
+    "id": 294,
+    "kategoria": "Zvieratá",
+    "text": "Mačky strávia 70 % svojho života spaním. Zvyšných 30 % času venujú hygiene, lovu, hraniu a jedeniu. Tento spánkový režim je dedičstvom po ich divokých predkoch, ktorí potrebovali šetriť energiu na lov."
+  },
+  {
+    "id": 295,
+    "kategoria": "Technológie",
+    "text": "Klávesová skratka Ctrl+Alt+Del bola pôvodne myslená ako vtip. Bill Gates priznal, že to bola chyba dizajnu a že na prihlásenie by malo stačiť jedno tlačidlo. Pôvodne slúžila len na reštartovanie počítača vývojármi, ale nakoniec sa dostala do finálnej verzie Windowsu."
+  },
+  {
+    "id": 296,
+    "kategoria": "Geografia",
+    "text": "Jazero Bajkal obsahuje 20 % všetkej sladkej vody na svete. Je to najhlbšie a najstaršie jazero na Zemi, v ktorom žijú stovky endemických druhov. Voda v ňom je taká čistá, že v zime vidieť do hĺbky desiatok metrov."
+  },
+  {
+    "id": 297,
+    "kategoria": "Ľudské telo",
+    "text": "Zívanie je nákazlivé aj pre psov. Keď vidí pes zívať svojho majiteľa, je veľmi pravdepodobné, že začne zívať aj on, čo svedčí o istej forme empatie. Tento jav bol pozorovaný aj u šimpanzov, čo naznačuje, že zívanie má sociálnu funkciu."
+  },
+  {
+    "id": 298,
+    "kategoria": "Slovensko",
+    "text": "Na Slovensku sa nachádza prvá, stále funkčná, konská železnica v Uhorsku. Spájala Bratislavu a Trnavu a jej budova dodnes stojí v Bratislave. Cesta z Bratislavy do Trnavy vtedy trvala niekoľko hodín, čo bolo na tú dobu veľmi rýchle."
+  },
+  {
+    "id": 299,
+    "kategoria": "Potraviny",
+    "text": "Vanilka pochádza z orchidey. Je to jediná orchidea, ktorá produkuje jedlé plody, a jej opeľovanie je také náročné, že sa väčšinou robí ručne. Preto je pravá vanilka jedným z najdrahších korení na svete."
+  },
+  {
+    "id": 300,
+    "kategoria": "Vesmír",
+    "text": "Vesmír nie je úplne čierny. Keby naše oči videli všetky druhy žiarenia, obloha by žiarila, pretože je plná kozmického mikrovlnného pozadia – pozostatku po Veľkom tresku. Toto žiarenie k nám prichádza rovnomerne zo všetkých smerov."
+  },
+  {
+    "id": 301,
+    "kategoria": "História",
+    "text": "Pytagoras nemal rád fazuľu. Slávny matematik a filozof zakazoval svojim žiakom jesť fazuľu, pretože veril, že v nej sídlia duše mŕtvych. Niektoré legendy hovoria, že zomrel, keď odmietol prebehnúť cez fazuľové pole pri úteku pred nepriateľmi."
+  },
+  {
+    "id": 302,
+    "kategoria": "Príroda",
+    "text": "Niektoré druhy bambusu dokážu prerásť betón. Ich rastová sila je taká obrovská, že sa dokážu pretlačiť cez asfaltové chodníky alebo základy budov. To z bambusu robí nielen rýchlo rastúcu rastlinu, ale aj potenciálne invazívny druh v mestskej zástavbe."
+  },
+  {
+    "id": 303,
+    "kategoria": "Slovensko",
+    "text": "Najväčší drevený sud na víno na Slovensku je v obci Viničky. Zmestí sa doň viac ako 100 000 litrov vína. Nachádza sa v historickej pivnici a je ozdobený rezbárskymi dielami."
+  },
+  {
+    "id": 304,
+    "kategoria": "Zvieratá",
+    "text": "Včely medonosné vedia tancovať. Komunikujú polohu zdroja potravy pomocou „včelieho tanca“, ktorým ukazujú smer a vzdialenosť kvetov. Ostatné včely sledujú tento tanec a podľa neho presne vedia, kam majú letieť."
+  },
+  {
+    "id": 305,
+    "kategoria": "Ľudské telo",
+    "text": "Máte v tele toľko železa, že by sa z neho dal vyrobiť 7-centimetrový klinec. Väčšina železa je viazaná v hemoglobíne v červených krvinkách. Nedostatok železa vedie k anémii, únave a slabosti."
+  },
+  {
+    "id": 306,
+    "kategoria": "Technológie",
+    "text": "Prvý iPhone nemal obchod s aplikáciami (App Store). Steve Jobs pôvodne nechcel, aby vývojári tretích strán vytvárali aplikácie pre iPhone, zmenil názor až neskôr. Myslel si, že webové aplikácie v prehliadači Safari budú stačiť."
+  },
+  {
+    "id": 307,
+    "kategoria": "Veda",
+    "text": "Voda mrzne v závislosti od tlaku. Pri veľmi vysokom tlaku môže voda zostať tekutá aj pri teplotách pod nulou, alebo naopak, zamrznúť pri vyššej teplote. Tento jav sa nazýva fázový diagram vody a má rôzne formy ľadu."
+  },
+  {
+    "id": 308,
+    "kategoria": "Geografia",
+    "text": "V Čile je miesto, kde nikdy nepršalo. Púšť Atacama je taká suchá, že niektoré meteorologické stanice tam nikdy nezaznamenali dážď. Napriek tomu tam žijú mikroorganizmy, ktoré získavajú vlhkosť len z hmly."
+  },
+  {
+    "id": 309,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má vlastný „Mŕtve more“. Voda v kúpeľoch Podhájska má zloženie veľmi podobné vode z Mŕtveho mora a má liečivé účinky. Táto geotermálna voda vyviera z hĺbky 1900 metrov a je pozostatkom treťohorného mora."
+  },
+  {
+    "id": 310,
+    "kategoria": "História",
+    "text": "Koloseum v Ríme bolo pôvodne zaplaviteľné. Rimania ho dokázali napustiť vodou a usporadúvať v ňom námorné bitky (naumachie) s malými loďami. Tento zložitý hydraulický systém bol neskôr nahradený podzemnými chodbami pre gladiátorov a zvieratá."
+  },
+  {
+    "id": 311,
+    "kategoria": "Zvieratá",
+    "text": "Škorpióny pod UV svetlom svietia. Ich exoskelet obsahuje látky, ktoré fluoreskujú na modrozeleno, čo vedcom pomáha pri ich hľadaní v noci. Dôvod tejto vlastnosti nie je úplne jasný, ale môže im pomáhať pri rozpoznávaní úkrytov."
+  },
+  {
+    "id": 312,
+    "kategoria": "Potraviny",
+    "text": "Najdrahšia káva na svete sa získava z trusu cibetiek. Káva Kopi Luwak prechádza tráviacim traktom cibetky, čo jej údajne dodáva jedinečnú chuť. Tráviace enzýmy zvieraťa znižujú horkosť kávových zŕn."
+  },
+  {
+    "id": 313,
+    "kategoria": "Vesmír",
+    "text": "Na Venuši sneží kov. Vo vysokých vrstvách atmosféry kondenzujú pary olova a bizmutu a padajú na povrch ako kovový sneh. Tieto „vločky“ však pokrývajú vrcholy hôr, kde je teplota o niečo nižšia ako v nížinách."
+  },
+  {
+    "id": 314,
+    "kategoria": "Ľudské telo",
+    "text": "Ľudský mozog spotrebuje 20 % kyslíka a kalórií tela, hoci tvorí len asi 2 % telesnej hmotnosti. Je to energeticky najnáročnejší orgán. Aj keď nič nerobíte, váš mozog stále pracuje na udržiavaní základných funkcií tela."
+  },
+  {
+    "id": 315,
+    "kategoria": "Slovensko",
+    "text": "Najvyššie položená kadibudka (suché WC) na Slovensku je pod Rysmi. Je vo výške 2250 m n. m. a ponúka panoramatický výhľad cez presklenú stenu. Je to obľúbená atrakcia pre turistov, ktorí vystupujú na Chatu pod Rysmi."
+  },
+  {
+    "id": 316,
+    "kategoria": "Technológie",
+    "text": "Slovo „spam“ pochádza z názvu konzervovaného mäsa. V skeči skupiny Monty Python sa slovo „spam“ opakovalo tak často, že sa stalo synonymom pre nevyžiadanú poštu. Pôvodné mäso SPAM je skratkou pre „Spiced Ham“ (korenená šunka)."
+  },
+  {
+    "id": 317,
+    "kategoria": "Príroda",
+    "text": "Kokosová palma nie je strom. Botanicky ide o obrovskú bylinu a kokosový orech je vlastne kôstkovica, podobne ako broskyňa. Palma nemá letokruhy ani kôru ako bežné stromy, jej kmeň je tvorený zvyškami listov."
+  },
+  {
+    "id": 318,
+    "kategoria": "Zvieratá",
+    "text": "Netopiere pri vylietavaní z jaskyne vždy zatáčajú doľava. Vedci presne nevedia prečo, ale tento jav je pozorovaný u väčšiny druhov netopierov. Môže to súvisieť s aerodynamikou alebo orientáciou podľa magnetického poľa Zeme."
+  },
+  {
+    "id": 319,
+    "kategoria": "História",
+    "text": "Starí Gréci nepoužívali slovo pre modrú farbu. V Homérových eposoch sa more opisuje ako „vínovočervené“; modrá bola vnímaná skôr ako odtieň tmavej alebo čiernej. Schopnosť vnímať a pomenovať modrú farbu sa v jazykoch vyvinula až neskôr."
+  },
+  {
+    "id": 320,
+    "kategoria": "Slovensko",
+    "text": "V Bratislave sa korunovalo 11 uhorských kráľov a 8 kráľovien. Dóm sv. Martina bol korunovačným kostolom Uhorska takmer 300 rokov. Najznámejšou panovníčkou korunovanou v Bratislave bola Mária Terézia."
+  },
+  {
+    "id": 321,
+    "kategoria": "Veda",
+    "text": "Voda má pamäť? Nie, to je pseudovedecký mýtus. Molekuly vody sa neustále preskupujú v priebehu pikosekúnd a neukladajú informácie o látkach, ktoré v nej boli rozpustené. Tento koncept bol vyvrátený mnohými vedeckými experimentmi."
+  },
+  {
+    "id": 322,
+    "kategoria": "Geografia",
+    "text": "Grónsko je v skutočnosti ľadové a Island je zelený. Názvy si vraj vymenili Vikingovia, aby prilákali osadníkov na „zelené“ Grónsko a odradili ich od Islandu. Iná teória hovorí, že klíma v Grónsku bola v čase osídlenia teplejšia."
+  },
+  {
+    "id": 323,
+    "kategoria": "Zvieratá",
+    "text": "Mravce vedia pestovať huby. Niektoré druhy mravcov (strihači listov) si v mravenisku vytvárajú „farmy“, kde na rozžutých listoch pestujú špeciálne huby pre potravu. O tieto huby sa starajú ako skutoční farmári, odstraňujú burinu a hnojí ich."
+  },
+  {
+    "id": 324,
+    "kategoria": "Ľudské telo",
+    "text": "Vaše srdce je umiestnené v strede hrudníka, nie naľavo. Je len mierne naklonené doľava, preto tam cítime tep silnejšie. Ľavá komora je väčšia a silnejšia, pretože pumpuje krv do celého tela, čo prispieva k tomuto pocitu."
+  },
+  {
+    "id": 325,
+    "kategoria": "Technológie",
+    "text": "Facebook je modrý, pretože Mark Zuckerberg je farboslepý na červenú a zelenú. Modrá je farba, ktorú vidí najlepšie a najjasnejšie. Tento náhodný výber farby sa stal ikonickým prvkom značky po celom svete."
+  },
+  {
+    "id": 326,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najväčší riečny ostrov v Európe – Žitný ostrov. Je obklopený Malým Dunajom a Dunajom a je mimoriadne úrodný. Zároveň ukrýva pod zemou obrovské zásoby pitnej vody."
+  },
+  {
+    "id": 327,
+    "kategoria": "História",
+    "text": "Prvé slnečné okuliare nosili sudcovia v Číne v 12. storočí. Neboli na ochranu pred slnkom, ale mali zakryť výraz očí, aby nikto nevidel ich emócie počas súdnych procesov. Boli vyrobené z dymového kremeňa."
+  },
+  {
+    "id": 328,
+    "kategoria": "Vesmír",
+    "text": "Prstenec Jupitera je takmer neviditeľný. Na rozdiel od Saturnu sú prstence Jupitera tvorené tmavým prachom, nie ľadom, preto ich objavili až sondy Voyager. Sú veľmi tenké a skladajú sa z častíc vyvrhnutých z mesiacov pri nárazoch meteoritov."
+  },
+  {
+    "id": 329,
+    "kategoria": "Potraviny",
+    "text": "Čipsy vznikli z pomsty. Kuchár George Crum ich vyrobil v roku 1853 pre náročného zákazníka, ktorý sa sťažoval na hrubé hranolky; nakrájal zemiaky na priesvitné plátky a osmažil ich. Zákazníkovi však chutili a stali sa hitom reštaurácie."
+  },
+  {
+    "id": 330,
+    "kategoria": "Zvieratá",
+    "text": "Kozy majú obdĺžnikové zreničky. To im umožňuje mať zorné pole až 320 stupňov a vidieť predátory prichádzajúce takmer z akéhokoľvek smeru. Keď sklonia hlavu k paši, ich oči sa v jamkách pootočia, aby zreničky zostali horizontálne."
+  },
+  {
+    "id": 331,
+    "kategoria": "Slovensko",
+    "text": "Hrad Červený Kameň má najväčšie pivnice v strednej Európe. Boli postavené ako sklady medi pre rod Fuggerovcov, ale nakoniec sa na tento účel takmer nevyužívali. Pivnice sú také obrovské, že sa tam zmestí aj kamión."
+  },
+  {
+    "id": 332,
+    "kategoria": "Veda",
+    "text": "Teplá voda váži menej ako studená voda. Keď sa voda zohrieva, jej molekuly sa pohybujú rýchlejšie a rozťahujú sa, čím sa znižuje jej hustota. Preto teplá voda v bazéne stúpa nahor a studená klesá ku dnu."
+  },
+  {
+    "id": 333,
+    "kategoria": "Ľudské telo",
+    "text": "Človek dokáže prežiť bez jedla aj 3 týždne, ale bez vody len pár dní. Telo dokáže čerpať energiu z tukových zásob, ale dehydratácia rýchlo poškodzuje orgány. Smrť smädom je jednou z najťažších, pretože zlyhávajú obličky a mozog sa zmenšuje."
+  },
+  {
+    "id": 334,
+    "kategoria": "Technológie",
+    "text": "Prvá počítačová hra sa volala „Tennis for Two“. Vznikla v roku 1958 a hrala sa na obrazovke osciloskopu. Vyvinul ju fyzik William Higinbotham, aby zabavil návštevníkov v laboratóriu."
+  },
+  {
+    "id": 335,
+    "kategoria": "Geografia",
+    "text": "Rieka Níl tečie na sever. Je to jedna z mála veľkých riek, ktoré tečú z juhu na sever, vlieva sa do Stredozemného mora. Táto skutočnosť bola kľúčová pre staroveký Egypt, pretože umožňovala plavbu proti prúdu pomocou vetra."
+  },
+  {
+    "id": 336,
+    "kategoria": "Slovensko",
+    "text": "V obci Poltár sa nachádza historický kamenný most z tureckých čias. Je to tretí najstarší zachovaný most tohto typu na Slovensku. Most bol dôležitou spojnicou na obchodnej ceste."
+  },
+  {
+    "id": 337,
+    "kategoria": "Zvieratá",
+    "text": "Psy majú tri viečka. Tretie viečko (žmurka) je ukryté vo vnútornom kútiku oka a pomáha chrániť oko a udržiavať ho vlhké. Ak je viditeľné, môže to signalizovať zdravotný problém."
+  },
+  {
+    "id": 338,
+    "kategoria": "História",
+    "text": "V 19. storočí sa vyrábali protézy zubov zo zubov mŕtvych vojakov. Po bitke pri Waterloo boli zuby padlých vojakov vysoko ceneným tovarom pre zubárov. Tieto protézy sa dokonca nazývali „Waterloo Teeth“."
+  },
+  {
+    "id": 339,
+    "kategoria": "Príroda",
+    "text": "Kukurica je ľudský výtvor. Vznikla šľachtením divokej trávy teosinte pred tisíckami rokov v Mexiku; divoká kukurica v prírode neexistuje. Bez pomoci človeka by sa kukurica nedokázala rozmnožovať, pretože jej zrná sú pevne uchytené na klase."
+  },
+  {
+    "id": 340,
+    "kategoria": "Vesmír",
+    "text": "V súhvezdí Raka je planéta tvorená diamantmi. Planéta 55 Cancri e je bohatá na uhlík a vedci predpokladajú, že jej vnútro tvorí obrovský diamant. Vzhľadom na jej veľkosť by hodnota tohto diamantu bola nevyčísliteľná."
+  },
+  {
+    "id": 341,
+    "kategoria": "Ľudské telo",
+    "text": "Vaša pečeň sa dokáže dorásť. Je to jediný vnútorný orgán s takou schopnosťou regenerácie; aj keď prídete o 75 % pečene, dokáže dorásť do pôvodnej veľkosti. Táto schopnosť je kľúčová pre možnosť transplantácie pečene od živých darcov."
+  },
+  {
+    "id": 342,
+    "kategoria": "Slovensko",
+    "text": "Najdlhšia slovenská rieka je Váh. Meria 403 kilometrov a vzniká sútokom Bieleho a Čierneho Váhu pri Kráľovej Lehote. Váh preteká cez celé severné a západné Slovensko, kým sa vlije do Dunaja."
+  },
+  {
+    "id": 343,
+    "kategoria": "Technológie",
+    "text": "Prvý digitálny fotoaparát vážil 3,6 kg. Vyrobila ho firma Kodak v roku 1975, mal rozlíšenie 0,01 megapixelu a uloženie fotky na kazetu trvalo 23 sekúnd. Iróniou je, že Kodak neskôr zbankrotoval práve preto, že podcenil nástup digitálnej fotografie."
+  },
+  {
+    "id": 344,
+    "kategoria": "Zvieratá",
+    "text": "Žraloky nemajú kosti. Ich kostra je tvorená výlučne chrupavkou, čo ich robí ľahšími a pružnejšími vo vode. Jedinou časťou ich tela, ktorá skamenie, sú zuby, preto ich nachádzame ako fosílie najčastejšie."
+  },
+  {
+    "id": 345,
+    "kategoria": "Potraviny",
+    "text": "Voda v kokose je sterilná. Vnútri neporušeného orecha je voda bez baktérií a v núdzových prípadoch sa v minulosti používala ako náhrada krvnej plazmy. Má totiž podobné zloženie elektrolytov ako ľudská krv."
+  },
+  {
+    "id": 346,
+    "kategoria": "História",
+    "text": "V starovekom Grécku sa hádzanie jablka po niekom považovalo za vyznanie lásky. Ak dotyčný jablko chytil, znamenalo to, že city prijíma. Jablko bolo symbolom Afrodity, bohyne lásky."
+  },
+  {
+    "id": 347,
+    "kategoria": "Veda",
+    "text": "Svetlo z centra Slnka na jeho povrch cestuje tisíce rokov, ale zo Slnka na Zem len 8 minút. Fotóny v hustej plazme Slnka narážajú do častíc a blúdia. Akonáhle sa dostanú na povrch, letia vesmírom rýchlosťou svetla bez prekážok."
+  },
+  {
+    "id": 348,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najvyšší počet minerálnych prameňov na obyvateľa. Je ich tu evidovaných viac ako 1600. Každý prameň má iné chemické zloženie a liečivé účinky."
+  },
+  {
+    "id": 349,
+    "kategoria": "Geografia",
+    "text": "Mount Everest má „zónu smrti“. Nad výškou 8000 metrov je tak málo kyslíka, že ľudské telo tam nedokáže dlhodobo prežiť a pomaly umiera. Horolezci sa v tejto zóne môžu zdržať len krátko, inak riskujú edém mozgu alebo pľúc."
+  },
+  {
+    "id": 350,
+    "kategoria": "Zvieratá",
+    "text": "Vtákopysk nemá žalúdok. Jeho pažerák vedie priamo do čriev; je to jeden z najpodivnejších cicavcov, ktorý kladie vajcia a má jedovaté ostrohy. Evolučne stratil žalúdok, pretože jeho potrava nepotrebuje zložité trávenie kyselinami."
+  },
+  {
+    "id": 351,
+    "kategoria": "Ľudské telo",
+    "text": "Máte unikátny odtlačok ucha. Podobne ako prsty alebo jazyk, aj tvar ucha je u každého človeka jedinečný a dá sa použiť na identifikáciu. Kriminalisti niekedy využívajú odtlačky uší zanechané na dverách alebo oknách pri vlámaní."
+  },
+  {
+    "id": 352,
+    "kategoria": "Technológie",
+    "text": "GPS je zadarmo vďaka americkej armáde. Systém vyvinulo ministerstvo obrany USA a v 80. rokoch ho sprístupnilo civilistom po tragédii letu KAL 007. Pôvodne bol signál pre civilistov úmyselne zhoršený, ale v roku 2000 bolo toto obmedzenie zrušené."
+  },
+  {
+    "id": 353,
+    "kategoria": "Slovensko",
+    "text": "Bojnický zámok patril kedysi firme Baťa. Ján Baťa ho kúpil v roku 1939 a plánoval v ňom vybudovať školu pre obuvníkov a rekreačné stredisko. Po vojne bol však majetok znárodnený a plány sa neuskutočnili."
+  },
+  {
+    "id": 354,
+    "kategoria": "Príroda",
+    "text": "Dážďovky majú 5 párov „sŕdc“. Sú to vlastne aortálne oblúky, ktoré pumpujú krv do celého tela. Ak dážďovku preseknete, obe časti zvyčajne neprežijú, prežije len tá s hlavou, ak sú orgány nepoškodené."
+  },
+  {
+    "id": 355,
+    "kategoria": "História",
+    "text": "V roku 1930 BBC v správach oznámila, že „nie sú žiadne správy“. Namiesto správ potom hrali klavírnu hudbu. Dnes, v dobe internetu a 24-hodinového spravodajstva, je niečo také nepredstaviteľné."
+  },
+  {
+    "id": 356,
+    "kategoria": "Vesmír",
+    "text": "Zem je jediná planéta v slnečnej sústave, ktorá nie je pomenovaná po rímskom alebo gréckom bohovi. Názov pochádza zo staroanglického a germánskeho slova pre pôdu. Všetky ostatné planéty nesú mená božstiev ako Mars (boh vojny) alebo Venuša (bohyňa lásky)."
+  },
+  {
+    "id": 357,
+    "kategoria": "Zvieratá",
+    "text": "Chameleón nemení farbu, aby splynul s prostredím. Farbu mení podľa nálady, teploty a svetla, alebo aby komunikoval s inými chameleónmi. Keď je chameleón nahnevaný alebo sa bojí, zvyčajne stmavne, zatiaľ čo pri párení hýri pestrými farbami."
+  },
+  {
+    "id": 358,
+    "kategoria": "Potraviny",
+    "text": "Koriander chutí niektorým ľuďom ako mydlo. Je to spôsobené genetickou variáciou, ktorá ovplyvňuje vnímanie aldehydov v tejto bylinke. Pre týchto ľudí je konzumácia koriandra nepríjemným zážitkom, zatiaľ čo ostatní ho milujú."
+  },
+  {
+    "id": 359,
+    "kategoria": "Slovensko",
+    "text": "Slovensko je jedna z mála krajín, kde rastú divoké orchidey. V našej prírode môžeme nájsť desiatky druhov vstavačovitých rastlín, ktoré sú chránené. Najkrajšou z nich je črievičník papučkový, ktorý pripomína malú topánku."
+  },
+  {
+    "id": 360,
+    "kategoria": "Ľudské telo",
+    "text": "Vaše telo vyprodukuje denne asi liter slín. Sliny sú nevyhnutné na trávenie, ochranu zubov a zvlhčovanie ústnej dutiny. Bez slín by sme nedokázali poriadne prehltnúť jedlo ani cítiť jeho chuť."
+  },
+  {
+    "id": 361,
+    "kategoria": "Technológie",
+    "text": "Prvý film v histórii trval len 2 sekundy. Volal sa „Scéna v záhrade Roundhay“ a natočil ho Louis Le Prince v roku 1888. Zobrazuje ľudí chodiacich v kruhu v záhrade a je najstarším zachovaným filmovým záznamom."
+  },
+  {
+    "id": 362,
+    "kategoria": "Geografia",
+    "text": "Brazília je taká veľká, že jej hranica s Francúzskom (cez Francúzsku Guyanu) je dlhšia ako jej pobrežie Atlantiku? Nie, to je mýtus, ale hranica s Francúzskom je skutočne jej najdlhšou hranicou s európskym štátom. Francúzska Guyana je integrálnou súčasťou Francúzska, takže technicky susedí Brazília s EÚ."
+  },
+  {
+    "id": 363,
+    "kategoria": "História",
+    "text": "Viktoriánske Anglicko malo „budíčkov“. Boli to ľudia, ktorí chodili ráno po uliciach a dlhými tyčami klopali na okná, aby zobudili robotníkov do práce. Títo profesionálni budiči boli lacnejší ako mechanické budíky, ktoré boli vtedy luxusom."
+  },
+  {
+    "id": 364,
+    "kategoria": "Zvieratá",
+    "text": "Hady nemajú viečka. Ich oči sú chránené priehľadnou šupinou (okuliar), ktorá sa zvlieka spolu s kožou. Preto hady vyzerajú, že na vás neustále uprene zízajú a nikdy nežmurkajú."
+  },
+  {
+    "id": 365,
+    "kategoria": "Slovensko",
+    "text": "Najvyšší bod Bratislavy nie je Kamzík, ale Devínska Kobyla. Má výšku 514 m n. m. a ponúka výhľad do Rakúska aj Maďarska. Na jej vrchole bola nedávno postavená nová vyhliadková veža v tvare modlivky."
+  },
+  {
+    "id": 366,
+    "kategoria": "Veda",
+    "text": "Voda vriaca v mikrovlnke môže „vybuchnúť“. Ak je voda v hladkej nádobe, môže sa prehriať nad bod varu bez bublania a pri pohnutí náhle vykypieť. Tento jav sa nazýva utajený var a môže spôsobiť vážne popáleniny."
+  },
+  {
+    "id": 367,
+    "kategoria": "Potraviny",
+    "text": "Mandle sú členom rodiny broskýň. To, čo jeme, je jadro kôstky plodu, ktorý vyzerá ako malá, zelená a nejedlá broskyňa. Mandľovník a broskyňa sú si geneticky veľmi blízke a dajú sa navzájom štepiť."
+  },
+  {
+    "id": 368,
+    "kategoria": "Vesmír",
+    "text": "Astronauti na Mesiaci nemôžu pískať. Tlak v skafandri je príliš nízky na to, aby sa dal vytvoriť zvuk pískania perami. Jeden astronaut to skúšal a potvrdil, že napriek snahe nevydal ani hlások."
+  },
+  {
+    "id": 369,
+    "kategoria": "Ľudské telo",
+    "text": "Ľudia sú jediní primáty, ktorí nemajú srsť na dlaniach a chodidlách. Ale máme rovnaký počet chlpov na tele ako šimpanzy, len sú jemnejšie a svetlejšie. Väčšina našich chlpov je taká malá, že ich voľným okom takmer nevidíme."
+  },
+  {
+    "id": 370,
+    "kategoria": "Slovensko",
+    "text": "V Bardejove je radničné námestie zapísané v UNESCO. Je to jedno z najzachovalejších stredovekých miest na Slovensku s gotickou bazilikou. Bardejov bol v stredoveku dôležitým obchodným centrom a slobodným kráľovským mestom."
+  },
+  {
+    "id": 371,
+    "kategoria": "Zvieratá",
+    "text": "Včelia kráľovná kladie až 2000 vajíčok denne. To je viac, ako je jej vlastná telesná váha. Počas sezóny sa takmer nezastaví a o jej kŕmenie sa starajú robotnice."
+  },
+  {
+    "id": 372,
+    "kategoria": "Technológie",
+    "text": "Ethernetový kábel sa nazýva podľa éteru. V 19. storočí fyzici verili, že vesmír je vyplnený „éterom“, ktorý prenáša svetlo; Ethernet mal prenášať dáta. Hoci teória éteru bola vyvrátená, názov prežil v počítačových sieťach."
+  },
+  {
+    "id": 373,
+    "kategoria": "História",
+    "text": "Adolf Hitler bol nominovaný na Nobelovu cenu mieru. V roku 1939 ho nominoval švédsky politik ako iróniu, ale nominácia bola rýchlo stiahnutá. Mnoho ľudí tento sarkastický krok nepochopilo a vyvolalo to pobúrenie."
+  },
+  {
+    "id": 374,
+    "kategoria": "Geografia",
+    "text": "Fínsko má najviac sáun na svete. Na 5,5 milióna obyvateľov pripadá viac ako 2 milióny sáun; sú v domoch, bytoch, firmách a dokonca aj v parlamente. Saunovanie je neoddeliteľnou súčasťou fínskej kultúry a životného štýlu."
+  },
+  {
+    "id": 375,
+    "kategoria": "Príroda",
+    "text": "Lotosový kvet je symbolom čistoty, pretože sa sám čistí. Jeho listy majú mikroštruktúru, ktorá odpudzuje vodu a špinu (lotosový efekt). Kvapky vody sa po liste skotúľajú a zoberú so sebou všetok prach, takže rastlina je stále čistá."
+  },
+  {
+    "id": 376,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má unikátny systém značenia cyklotrás. Cyklistické „C“ značky sú slovenskou špecialitou, ktorá sa postupne zavádza aj inde. Tento systém umožňuje jednoduchú orientáciu aj v zložitom teréne."
+  },
+  {
+    "id": 377,
+    "kategoria": "Zvieratá",
+    "text": "Slony smútia za mŕtvymi. Boli pozorované, ako sa dotýkajú kostí uhynutých slonov a prejavujú známky depresie a smútku. Majú vynikajúcu pamäť a dokážu rozpoznať pozostatky členov svojej rodiny aj po rokoch."
+  },
+  {
+    "id": 378,
+    "kategoria": "Ľudské telo",
+    "text": "Váš malíček je zodpovedný za 50 % sily vášho úchopu. Bez malíčka by ste mali výrazne slabší stisk ruky. Spolu s prstenníkom zabezpečuje stabilitu úchopu, zatiaľ čo palec a ukazovák slúžia na presnosť."
+  },
+  {
+    "id": 379,
+    "kategoria": "Vesmír",
+    "text": "Urán sa otáča na boku. Jeho os rotácie je naklonená o 98 stupňov, takže sa po obežnej dráhe „kotúľa“ ako sud. Tento extrémny sklon bol pravdepodobne spôsobený nárazom obrovského telesa v ranej histórii slnečnej sústavy."
+  },
+  {
+    "id": 380,
+    "kategoria": "Technológie",
+    "text": "Prvý webový server bol počítač NeXT v CERNe. Mal na sebe nálepku: „Tento stroj je server. NEVYPÍNAŤ!“ Tim Berners-Lee na ňom spustil prvú webovú stránku v histórii a položil tak základy internetu."
+  },
+  {
+    "id": 381,
+    "kategoria": "Potraviny",
+    "text": "Huby portobello, šampiňóny a cremini sú tá istá huba. Líšia sa len vekom; šampiňóny sú najmladšie, cremini stredné a portobello najstaršie. Čím je huba staršia, tým má výraznejšiu chuť a mäsitejšiu štruktúru."
+  },
+  {
+    "id": 382,
+    "kategoria": "Slovensko",
+    "text": "Na Slovensku máme najväčšiu sochu koňa na svete. Nachádza sa v Šamoríne v areáli x-bionic sphere a je vytvorená z tisícok nerezových plátkov. Socha s názvom „Kolos“ váži 20 ton a meria takmer 9 metrov."
+  },
+  {
+    "id": 383,
+    "kategoria": "História",
+    "text": "Titanic mal bazén. Bol to prvý bazén na lodi, naplnený slanou vodou z oceánu; dnes je stále plný vody, ale na dne Atlantiku. Bol určený len pre cestujúcich prvej triedy a v tej dobe bol považovaný za vrchol luxusu."
+  },
+  {
+    "id": 384,
+    "kategoria": "Zvieratá",
+    "text": "Sovy nemôžu hýbať očami. Ich oči sú valcovité a pevne uchytené v lebke, preto musia otáčať celou hlavou až o 270 stupňov. Táto adaptácia im umožňuje vidieť priestorovo a presne odhadovať vzdialenosť koristi."
+  },
+  {
+    "id": 385,
+    "kategoria": "Veda",
+    "text": "Vzduch má váhu. V priemernej miestnosti váži vzduch približne 50 až 80 kilogramov, čo je váha dospelého človeka. Tento tlak vzduchu na nás neustále pôsobí, ale necítime ho, pretože vnútorný tlak nášho tela je rovnaký."
+  },
+  {
+    "id": 386,
+    "kategoria": "Geografia",
+    "text": "San Maríno je najstaršia republika na svete. Bola založená v roku 301 n. l. a dodnes si zachovala svoju nezávislosť. Jej ústava, napísaná v roku 1600, je najstaršou stále platnou ústavou na svete."
+  },
+  {
+    "id": 387,
+    "kategoria": "Ľudské telo",
+    "text": "Čkanie je pozostatok po našich obojživelných predkoch. Je to kŕč bránice, ktorý u žubrienok slúži na prepínanie dýchania žiabrami a pľúcami. Mozgový signál, ktorý to spúšťa, zostal v našej evolučnej výbave, hoci už pre nás nemá význam."
+  },
+  {
+    "id": 388,
+    "kategoria": "Slovensko",
+    "text": "V obci Skalité je most, ktorý nevedie nikam. Most Valy je najvyšším mostom na Slovensku (84 m), ale dlho bol nedostavaný a končil v poli. Dnes je už súčasťou diaľnice D3 a je plne funkčný."
+  },
+  {
+    "id": 389,
+    "kategoria": "Technológie",
+    "text": "Linux poháňa väčšinu internetu. Väčšina serverov, superpočítačov a smartfónov (Android) beží na jadre Linux, nie na Windowse. Jeho otvorený kód umožňuje vývojárom prispôsobiť si ho presne podľa potrieb."
+  },
+  {
+    "id": 390,
+    "kategoria": "Zvieratá",
+    "text": "Pštrosy nestrkajú hlavu do piesku. Je to mýtus; v skutočnosti si v nebezpečenstve ľahnú na zem a natiahnu krk, aby splynuli s terénom. Z diaľky to potom vyzerá, akoby mali hlavu v zemi, ale v skutočnosti len ležia."
+  },
+  {
+    "id": 391,
+    "kategoria": "Potraviny",
+    "text": "Citróny plávajú, limetky sa potopia. Limetky majú vyššiu hustotu ako citróny, preto klesnú na dno pohára s vodou. Tento trik sa dá využiť pri príprave efektných nápojov."
+  },
+  {
+    "id": 392,
+    "kategoria": "História",
+    "text": "V stredoveku sa futbal hral s prasacím mechúrom. Hra bola často násilná a v Anglicku bola niekoľkokrát zakázaná kráľovským dekrétom. Pravidlá neboli jasne stanovené a zápasy sa často končili hromadnými bitkami medzi dedinami."
+  },
+  {
+    "id": 393,
+    "kategoria": "Vesmír",
+    "text": "Mars má najväčší kaňon v slnečnej sústave. Valles Marineris je dlhý 4000 km, široký 200 km a hlboký až 7 km. Ak by bol na Zemi, siahal by od Los Angeles až po New York."
+  },
+  {
+    "id": 394,
+    "kategoria": "Slovensko",
+    "text": "Slovensko je jedna z mála krajín, ktorá má v ústave zakotvenú ochranu vody. Voda je strategická surovina a jej vývoz do zahraničia je (až na výnimky) zakázaný. Tento zákon bol prijatý na ochranu bohatých zásob podzemnej vody pred komerčným zneužitím."
+  },
+  {
+    "id": 395,
+    "kategoria": "Ľudské telo",
+    "text": "Máte viac kostí ako dospelý, keď ste dieťa. Rodíme sa s cca 300 kosťami, ktoré sa vekom zrastajú (napr. lebka, panva) na finálnych 206. Tento proces zrastania pokračuje až do dospelosti, pričom poslednou kosťou, ktorá zrastie, je kľúčna kosť."
+  },
+  {
+    "id": 396,
+    "kategoria": "Zvieratá",
+    "text": "Korytnačky vedia dýchať zadkom. Niektoré druhy vodných korytnačiek dokážu počas zimovania pod vodou absorbovať kyslík cez kloaku. Tento proces sa nazýva kloakálne dýchanie a umožňuje im prežiť pod ľadom celé mesiace."
+  },
+  {
+    "id": 397,
+    "kategoria": "Technológie",
+    "text": "Prvé videoherné konzoly nemali pamäť. Hry ako Pong boli len elektronické obvody, ktoré generovali signál priamo na obrazovku. Každá zmena v hre vyžadovala fyzickú zmenu v zapojení obvodov."
+  },
+  {
+    "id": 398,
+    "kategoria": "Príroda",
+    "text": "Mucholapka podivná pochádza len z jedného miesta na Zemi. Rastie divoko iba v malom okruhu v Severnej a Južnej Karolíne v USA. Všetky ostatné mucholapky, ktoré kúpite v obchode, sú vypestované umelo zo semien alebo tkanivových kultúr."
+  },
+  {
+    "id": 399,
+    "kategoria": "Geografia",
+    "text": "Monako je menšie ako Central Park v New Yorku. Celé kniežatstvo má rozlohu len 2 km², zatiaľ čo park má 3,4 km². Napriek svojej malosti je Monako jedným z najbohatších štátov na svete."
+  },
+  {
+    "id": 400,
+    "kategoria": "Slovensko",
+    "text": "Slovensko má najstarší verejný park v strednej Európe - Sad Janka Kráľa. Založený bol v rokoch 1774 – 1776 a je obľúbeným miestom oddychu Bratislavčanov. Pôvodne sa volal Bruckenau a jeho baroková kompozícia alejí je zachovaná dodnes."
+  }
+]
