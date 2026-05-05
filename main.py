@@ -1,4 +1,3 @@
-```python
 import datetime
 import textwrap
 import requests
@@ -221,5 +220,3 @@ if __name__ == "__main__":
     dashboard = create_dashboard()
     dashboard.save("dashboard_output.bmp")
     print("Dashboard bol úspešne uložený do súboru dashboard_output.bmp")
-
-```
