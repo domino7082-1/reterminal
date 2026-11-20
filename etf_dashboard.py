@@ -6,10 +6,11 @@ import time
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-# --- KONFIGURÁCIA (zhodná s main.py pre reTerminal E1001) ---
+# --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
 HEIGHT = 480
-MODE = '1'
+RENDER_MODE = 'L'       # Kreslíme v odtieňoch sivej pre hladšie kontúry písma
+THRESHOLD_1BIT = 128    # Symetrický prah prevodu do ostrého 1-bit BMP (bez ditheringu)
 BACKGROUND_COLOR = 255  # Biela
 TEXT_COLOR = 0          # Čierna
 
@@ -106,37 +107,56 @@ FIXED_HOLIDAYS_SK = {
 
 
 def get_fonts():
+    """Uprednostní DejaVu Sans (čitateľnejší na E-Ink), záloha lokálny Arial."""
     fonts = {}
+    font_candidates = [
+        (
+            os.path.join(BASE_DIR, "DejaVuSans-Bold.ttf"),
+            os.path.join(BASE_DIR, "DejaVuSans.ttf"),
+        ),
+        (
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        ),
+        (
+            "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        ),
+        (
+            os.path.join(BASE_DIR, "arialbd.ttf"),
+            os.path.join(BASE_DIR, "arial.ttf"),
+        ),
+    ]
+
+    font_bold = None
+    font_reg = None
+    for cand_b, cand_r in font_candidates:
+        if os.path.exists(cand_b) and os.path.exists(cand_r):
+            font_bold, font_reg = cand_b, cand_r
+            break
+
     try:
-        font_bold = os.path.join(BASE_DIR, "arialbd.ttf")
-        font_reg = os.path.join(BASE_DIR, "arial.ttf")
+        if not font_bold or not font_reg:
+            raise IOError("Fonty nenájdené")
 
-        if not os.path.exists(font_bold) and os.path.exists(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        ):
-            font_bold = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-            font_reg = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-
-        fonts["header"] = ImageFont.truetype(font_bold, 19)
+        fonts["header"] = ImageFont.truetype(font_bold, 18)
         fonts["header_mid_15"] = ImageFont.truetype(font_bold, 15)
         fonts["header_mid_13"] = ImageFont.truetype(font_bold, 13)
         fonts["header_mid_12"] = ImageFont.truetype(font_bold, 12)
-        fonts["header_date"] = ImageFont.truetype(font_reg, 15)
+        fonts["header_date"] = ImageFont.truetype(font_reg, 14)
         fonts["price"] = ImageFont.truetype(font_bold, 21)
         fonts["ticker"] = ImageFont.truetype(font_bold, 15)
         fonts["sec_title"] = ImageFont.truetype(font_bold, 13)
         fonts["bold_13"] = ImageFont.truetype(font_bold, 13)
         fonts["bold_12"] = ImageFont.truetype(font_bold, 12)
-        fonts["bold_11"] = ImageFont.truetype(font_bold, 11)
         fonts["reg_13"] = ImageFont.truetype(font_reg, 13)
         fonts["reg_12"] = ImageFont.truetype(font_reg, 12)
-        fonts["reg_11"] = ImageFont.truetype(font_reg, 11)
     except IOError:
         default = ImageFont.load_default()
         keys = [
             "header", "header_mid_15", "header_mid_13", "header_mid_12",
             "header_date", "price", "ticker", "sec_title", "bold_13",
-            "bold_12", "bold_11", "reg_13", "reg_12", "reg_11",
+            "bold_12", "reg_13", "reg_12",
         ]
         fonts = {k: default for k in keys}
     return fonts
@@ -246,7 +266,6 @@ def get_header_nameday_or_holiday(now):
     today_date = now.date()
     key = (today_date.month, today_date.day)
 
-    # Dni, keď v slovenskom kalendári nemá meniny nikto -> rovno sviatok
     if key in NO_NAMEDAY_HOLIDAYS:
         return f"Sviatok: {NO_NAMEDAY_HOLIDAYS[key]}"
 
@@ -266,7 +285,7 @@ def get_header_nameday_or_holiday(now):
     return ""
 
 
-# --- FORMÁTOVANIE A TEXT S OPRAVOU ZNAMIENKA MÍNUS ---
+# --- FORMÁTOVANIE A TEXT S ČISTÝM ODSTUPOM ZNAMIENKA MÍNUS ---
 
 def fmt_eur(val, with_symbol=True):
     s = f"{val:.2f}".replace(".", ",") if abs(val) >= 100 else f"{val:.3f}".replace(".", ",")
@@ -280,7 +299,7 @@ def fmt_pct(val, show_plus=True, decimals=1):
     return f"{sign}{val:.{decimals}f}".replace(".", ",") + "%"
 
 
-def measure_text_clean(draw, text, font, minus_gap=2):
+def measure_text_clean(draw, text, font, minus_gap=1):
     """Zmeria šírku textu s rovnakým odstupom znamienka mínus ako pri kreslení."""
     if "-" not in text:
         return draw.textlength(text, font=font)
@@ -294,8 +313,8 @@ def measure_text_clean(draw, text, font, minus_gap=2):
     return total
 
 
-def draw_text_clean(draw, x, y, text, font, fill=TEXT_COLOR, align="left", minus_gap=2):
-    """Vykreslí text s čistým 2 px odstupom za znamienkom mínus (pre ostrý 1-bit E-Ink)."""
+def draw_text_clean(draw, x, y, text, font, fill=TEXT_COLOR, align="left", minus_gap=1):
+    """Vykreslí text s jemným odstupom za znamienkom mínus pre ostrý E-Ink výstup."""
     total_w = measure_text_clean(draw, text, font, minus_gap=minus_gap)
     if align == "right":
         cur_x = x - total_w
@@ -342,7 +361,6 @@ def get_return_over_days(points, latest_price, days_back):
     latest_ts = points[-1][0]
     target_ts = latest_ts - days_back * 86400
 
-    # Ak história fondu nesiaha dostatočne ďaleko (tolerancia 14 dní)
     if points[0][0] > target_ts + 14 * 86400:
         return None
 
@@ -428,7 +446,6 @@ def fetch_etf_data(cfg):
                 if r1y is not None:
                     perf_1y = r1y
 
-                # 52-týždňové minimum a maximum
                 lows_1y = [
                     float(raw_lows[i])
                     for i in range(min(len(timestamps), len(raw_lows)))
@@ -478,7 +495,6 @@ def fetch_etf_data(cfg):
     except Exception as e:
         print(f"Chyba sťahovania {symbol}: {e} (používam záložné dáta)")
 
-    # Konzistencia hraníc
     if price > ath:
         ath = price
         ath_date_str = get_now_bratislava().strftime("%m/%y")
@@ -522,7 +538,7 @@ def fetch_etf_data(cfg):
     }
 
 
-# --- KRESLIACE POMOCNÉ FUNKCIE (1-BIT E-INK) ---
+# --- KRESLIACE POMOCNÉ FUNKCIE (E-INK) ---
 
 def draw_dashed_hline(draw, x0, x1, y, dash=3, gap=4, color=TEXT_COLOR):
     x = x0
@@ -594,18 +610,19 @@ def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
     # Štítok "6M" priradený zvonka vpravo hore vedľa grafu
     tag_x0 = x1
     tag_y0 = y0
-    tag_x1 = x1 + 24
-    tag_y1 = y0 + 16
+    tag_x1 = x1 + 26
+    tag_y1 = y0 + 18
     draw.rectangle([tag_x0, tag_y0, tag_x1, tag_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=1)
-    w_6m = draw.textlength("6M", font=fonts["bold_11"])
-    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_6m) / 2.0, tag_y0 + 2), "6M", font=fonts["bold_11"], fill=TEXT_COLOR)
+    w_6m = draw.textlength("6M", font=fonts["bold_12"])
+    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_6m) / 2.0, tag_y0 + 2), "6M", font=fonts["bold_12"], fill=TEXT_COLOR)
 
 
 # --- HLAVNÉ VYKRESLENIE DASHBOARDU ---
 
 def create_etf_dashboard():
-    img = Image.new(MODE, (WIDTH, HEIGHT), BACKGROUND_COLOR)
-    draw = ImageDraw.Draw(img)
+    # Krok 2: vykreslíme v odtieňoch sivej ('L') pre čisté kontúry písma
+    img_gray = Image.new(RENDER_MODE, (WIDTH, HEIGHT), BACKGROUND_COLOR)
+    draw = ImageDraw.Draw(img_gray)
     fonts = get_fonts()
     now = get_now_bratislava()
 
@@ -620,14 +637,14 @@ def create_etf_dashboard():
     draw.rectangle([(0, 0), (WIDTH, header_h)], fill=TEXT_COLOR)
 
     title_left = "ETF PORTFÓLIO · XETRA"
-    draw.text((14, 12), title_left, font=fonts["header"], fill=BACKGROUND_COLOR)
+    draw.text((14, 13), title_left, font=fonts["header"], fill=BACKGROUND_COLOR)
     left_end_x = 14 + draw.textlength(title_left, font=fonts["header"])
 
     days_short = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
     date_right = f"{days_short[now.weekday()]} {now.strftime('%d.%m.%Y  %H:%M')}"
     w_date = draw.textlength(date_right, font=fonts["header_date"])
     right_start_x = WIDTH - w_date - 14
-    draw.text((right_start_x, 14), date_right, font=fonts["header_date"], fill=BACKGROUND_COLOR)
+    draw.text((right_start_x, 15), date_right, font=fonts["header_date"], fill=BACKGROUND_COLOR)
 
     # Stred hlavičky: aktuálne meniny alebo sviatok (dynamické škálovanie bez prekrytia)
     if header_mid_text:
@@ -658,7 +675,7 @@ def create_etf_dashboard():
         )
 
     # ==========================================================
-    # B. ĽAVÝ HLAVNÝ STĹPEC: 4 ETF FONDY (x = 0..504, y = 48..452)
+    # B. ĽAVÝ HLAVNÝ STĹPEC: 4 ETF FONDY (x = 0..488, y = 48..452)
     # ==========================================================
     row_h = 101
     start_y = 48
@@ -666,36 +683,36 @@ def create_etf_dashboard():
     for idx, e in enumerate(etfs):
         ry = start_y + idx * row_h
 
-        # 1. Ticker badge + región + názov + ATH + 52T ukazovateľ (x = 12..184)
+        # 1. Ticker badge + región + názov + ATH + 52T ukazovateľ (x = 12..166)
         badge_w = 58
         draw.rectangle([12, ry + 10, 12 + badge_w, ry + 32], fill=TEXT_COLOR)
         tw = draw.textlength(e["ticker"], font=fonts["ticker"])
         draw.text(
-            (12 + (badge_w - tw) / 2.0, ry + 13),
+            (12 + (badge_w - tw) / 2.0, ry + 12),
             e["ticker"],
             font=fonts["ticker"],
             fill=BACKGROUND_COLOR,
         )
-        draw.text((77, ry + 13), e["region"], font=fonts["bold_12"], fill=TEXT_COLOR)
+        draw.text((76, ry + 14), e["region"], font=fonts["bold_12"], fill=TEXT_COLOR)
         draw.text((12, ry + 37), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
 
         ath_txt = f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})"
         draw.text((12, ry + 56), ath_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
 
         # 52-týždňový rozsah (vizuálna pozícia v pásme)
-        draw.text((12, ry + 77), "52T:", font=fonts["reg_11"], fill=TEXT_COLOR)
-        bar_x0, bar_x1, bar_y = 40, 176, ry + 83
+        draw.text((12, ry + 76), "52T:", font=fonts["reg_12"], fill=TEXT_COLOR)
+        bar_x0, bar_x1, bar_y = 44, 164, ry + 83
         draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=TEXT_COLOR, width=2)
         draw.line([(bar_x0, bar_y - 4), (bar_x0, bar_y + 4)], fill=TEXT_COLOR, width=1)
         draw.line([(bar_x1, bar_y - 4), (bar_x1, bar_y + 4)], fill=TEXT_COLOR, width=1)
         marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
         draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 2. Čistý 6M Sparkline graf s prerušovanou čiarou ATH a štítkom 6M vpravo hore (x = 188..356, štítok 356..380)
-        draw_sparkline_clean(draw, 188, ry + 11, 356, ry + 89, e["series"], e["ath"], fonts)
+        # 2. Čistý 6M Sparkline graf s prerušovanou čiarou ATH a štítkom 6M (x = 172..330, štítok 330..356)
+        draw_sparkline_clean(draw, 172, ry + 11, 330, ry + 89, e["series"], e["ath"], fonts)
 
-        # 3. Cena, Dnes a štítok "Na ATH" (x = 372..500)
-        right_anchor = 500
+        # 3. Cena, Dnes a štítok "Na ATH" (x = 362..486)
+        right_anchor = 486
         price_str = fmt_eur(e["price"])
         draw_text_clean(draw, right_anchor, ry + 9, price_str, fonts["price"], align="right")
 
@@ -703,7 +720,7 @@ def create_etf_dashboard():
         draw_text_clean(draw, right_anchor, ry + 38, day_str, fonts["bold_13"], align="right")
 
         # Štítok "Na ATH" (koľko % rastu treba na návrat na historické maximum)
-        box_x0, box_y0, box_x1, box_y1 = 372, ry + 62, right_anchor, ry + 88
+        box_x0, box_y0, box_x1, box_y1 = 362, ry + 62, right_anchor, ry + 88
         is_deep = e["needed_gain_pct"] >= 15.0
         if e["needed_gain_pct"] < 0.05:
             na_ath_lbl = "NA MAXIME"
@@ -728,17 +745,17 @@ def create_etf_dashboard():
         )
 
         if idx < len(etfs) - 1:
-            draw.line([(12, ry + row_h), (500, ry + row_h)], fill=TEXT_COLOR, width=1)
+            draw.line([(12, ry + row_h), (486, ry + row_h)], fill=TEXT_COLOR, width=1)
 
     # ==========================================================
     # C. VERTIKÁLNA ODDEĽOVACIA ČIARA
     # ==========================================================
-    draw.line([(509, header_h + 8), (509, HEIGHT - 32)], fill=TEXT_COLOR, width=3)
+    draw.line([(496, header_h + 8), (496, HEIGHT - 32)], fill=TEXT_COLOR, width=3)
 
     # ==========================================================
-    # D. PRAVÝ ŠTATISTICKÝ PANEL (x = 519..788) — BEZ DUPLICÍT
+    # D. PRAVÝ ŠTATISTICKÝ PANEL (x = 506..788) — ZVÄČŠENÉ PÍSMO (12–13 px)
     # ==========================================================
-    rx = 519
+    rx = 506
     rx_end = 788
 
     # --- Sekcia 1: POKLES OD ATH (s priemerom v hlavičke) ---
@@ -750,7 +767,7 @@ def create_etf_dashboard():
 
     max_dd_abs = max([abs(e["drawdown_pct"]) for e in etfs] + [20.0])
     scale_max = max(25.0, math.ceil(max_dd_abs / 5.0) * 5.0)
-    bar_left = 566
+    bar_left = 554
     bar_right = 728
     bar_max_w = bar_right - bar_left
 
@@ -758,8 +775,8 @@ def create_etf_dashboard():
         if ref_pct <= scale_max:
             ref_x = bar_left + int((ref_pct / scale_max) * bar_max_w)
             draw_dashed_vline(draw, ref_x, 73, 162, dash=2, gap=3)
-            draw_text_clean(draw, ref_x, 164, f"-{int(ref_pct)}%", fonts["reg_11"], align="center")
-    draw.text((bar_left - 4, 164), "0%", font=fonts["reg_11"], fill=TEXT_COLOR)
+            draw_text_clean(draw, ref_x, 163, f"-{int(ref_pct)}%", fonts["reg_12"], align="center")
+    draw.text((bar_left - 4, 163), "0%", font=fonts["reg_12"], fill=TEXT_COLOR)
 
     for idx, e in enumerate(etfs):
         by = 76 + idx * 22
@@ -784,51 +801,51 @@ def create_etf_dashboard():
     draw.line([(rx, s2_y + 18), (rx_end, s2_y + 18)], fill=TEXT_COLOR, width=1)
 
     th_y = s2_y + 22
-    col_1m_r = 620
-    col_3m_r = 676
-    col_6m_r = 732
+    col_1m_r = 606
+    col_3m_r = 665
+    col_6m_r = 724
     col_1y_r = rx_end
 
-    draw.text((rx, th_y), "Fond", font=fonts["bold_11"], fill=TEXT_COLOR)
+    draw.text((rx, th_y), "Fond", font=fonts["bold_12"], fill=TEXT_COLOR)
     for title, anchor in [("1M", col_1m_r), ("3M", col_3m_r), ("6M", col_6m_r), ("1R", col_1y_r)]:
-        draw_text_clean(draw, anchor, th_y, title, fonts["bold_11"], align="right")
-    draw.line([(rx, th_y + 16), (rx_end, th_y + 16)], fill=TEXT_COLOR, width=1)
+        draw_text_clean(draw, anchor, th_y, title, fonts["bold_12"], align="right")
+    draw.line([(rx, th_y + 17), (rx_end, th_y + 17)], fill=TEXT_COLOR, width=1)
 
     for idx, e in enumerate(etfs):
         ty = th_y + 21 + idx * 20
         draw.text((rx, ty), e["ticker"], font=fonts["bold_12"], fill=TEXT_COLOR)
-        draw_text_clean(draw, col_1m_r, ty + 1, fmt_pct(e["perf_1m"]), fonts["reg_11"], align="right")
-        draw_text_clean(draw, col_3m_r, ty + 1, fmt_pct(e["perf_3m"]), fonts["reg_11"], align="right")
-        draw_text_clean(draw, col_6m_r, ty + 1, fmt_pct(e["perf_6m"]), fonts["reg_11"], align="right")
-        draw_text_clean(draw, col_1y_r, ty + 1, fmt_pct(e["perf_1y"]), fonts["bold_11"], align="right")
+        draw_text_clean(draw, col_1m_r, ty, fmt_pct(e["perf_1m"]), fonts["reg_12"], align="right")
+        draw_text_clean(draw, col_3m_r, ty, fmt_pct(e["perf_3m"]), fonts["reg_12"], align="right")
+        draw_text_clean(draw, col_6m_r, ty, fmt_pct(e["perf_6m"]), fonts["reg_12"], align="right")
+        draw_text_clean(draw, col_1y_r, ty, fmt_pct(e["perf_1y"]), fonts["bold_12"], align="right")
 
     # --- Sekcia 3: ROČNÉ ROZPÄTIE (52T) ---
     s3_y = 320
     draw.text((rx, s3_y), "ROČNÉ ROZPÄTIE (52T)", font=fonts["sec_title"], fill=TEXT_COLOR)
-    draw_text_clean(draw, rx_end, s3_y + 2, "(EUR)", fonts["reg_11"], align="right")
+    draw_text_clean(draw, rx_end, s3_y + 1, "(EUR)", fonts["reg_12"], align="right")
     draw.line([(rx, s3_y + 18), (rx_end, s3_y + 18)], fill=TEXT_COLOR, width=1)
 
     r3_h_y = s3_y + 22
-    col_min_r = 642
-    col_max_r = 716
+    col_min_r = 634
+    col_max_r = 712
     col_dna_r = rx_end
 
-    draw.text((rx, r3_h_y), "Fond", font=fonts["bold_11"], fill=TEXT_COLOR)
+    draw.text((rx, r3_h_y), "Fond", font=fonts["bold_12"], fill=TEXT_COLOR)
     for title, anchor in [("Min", col_min_r), ("Max", col_max_r), ("Od dna", col_dna_r)]:
-        draw_text_clean(draw, anchor, r3_h_y, title, fonts["bold_11"], align="right")
-    draw.line([(rx, r3_h_y + 16), (rx_end, r3_h_y + 16)], fill=TEXT_COLOR, width=1)
+        draw_text_clean(draw, anchor, r3_h_y, title, fonts["bold_12"], align="right")
+    draw.line([(rx, r3_h_y + 17), (rx_end, r3_h_y + 17)], fill=TEXT_COLOR, width=1)
 
     for idx, e in enumerate(etfs):
         ty = r3_h_y + 21 + idx * 20
         draw.text((rx, ty), e["ticker"], font=fonts["bold_12"], fill=TEXT_COLOR)
         draw_text_clean(
-            draw, col_min_r, ty + 1, fmt_eur(e["low_52w"], with_symbol=False), fonts["reg_11"], align="right"
+            draw, col_min_r, ty, fmt_eur(e["low_52w"], with_symbol=False), fonts["reg_12"], align="right"
         )
         draw_text_clean(
-            draw, col_max_r, ty + 1, fmt_eur(e["high_52w"], with_symbol=False), fonts["reg_11"], align="right"
+            draw, col_max_r, ty, fmt_eur(e["high_52w"], with_symbol=False), fonts["reg_12"], align="right"
         )
         draw_text_clean(
-            draw, col_dna_r, ty + 1, fmt_pct(e["from_low_pct"], show_plus=True), fonts["bold_11"], align="right"
+            draw, col_dna_r, ty, fmt_pct(e["from_low_pct"], show_plus=True), fonts["bold_12"], align="right"
         )
 
     # ==========================================================
@@ -838,7 +855,9 @@ def create_etf_dashboard():
     status_txt = "LIVE · Yahoo Finance (Xetra)" if any_live else "ZÁLOŽNÉ DÁTA · API nedostupné"
     draw.text((14, 459), status_txt, font=fonts["reg_12"], fill=TEXT_COLOR)
 
-    return img
+    # Krok 2: ostrý prevod do 1-bit BMP bez bodkovaného šumu (ditheringu)
+    img_1bit = img_gray.point(lambda p: 255 if p >= THRESHOLD_1BIT else 0, mode='1')
+    return img_1bit
 
 
 def main():
