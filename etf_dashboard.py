@@ -555,8 +555,8 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
         draw.line([(sx, sy), (ex, ey)], fill=TEXT_COLOR, width=1)
 
 
-def draw_sparkline_clean(draw, x0, y0, x1, y1, series):
-    """Vykreslí čistý 6M sparkline graf bez textov (s jemnou prerušovanou čiarou priemeru)."""
+def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath):
+    """Vykreslí čistý 6M sparkline graf bez textov s prerušovanou čiarou historického maxima (ATH)."""
     draw.rectangle([x0, y0, x1, y1], outline=TEXT_COLOR, width=1)
     pad_x = 6
     pad_y = 7
@@ -567,15 +567,14 @@ def draw_sparkline_clean(draw, x0, y0, x1, y1, series):
     plot_y1 = y1 - pad_y
 
     min_v = min(series)
-    max_v = max(series)
+    max_v = max(max(series), ath)
     span = max_v - min_v
     if span <= 0:
         span = 1.0
 
-    # Jemná prerušovaná čiara 6M priemeru
-    avg_v = sum(series) / len(series)
-    avg_y = plot_y1 - int(((avg_v - min_v) / span) * (plot_y1 - plot_y0))
-    draw_dashed_hline(draw, x0 + 2, x1 - 2, avg_y, dash=2, gap=4)
+    # Prerušovaná vodorovná čiara historického maxima (ATH)
+    ath_y = plot_y1 - int(((ath - min_v) / span) * (plot_y1 - plot_y0))
+    draw_dashed_hline(draw, x0 + 2, x1 - 2, ath_y, dash=3, gap=3)
 
     # Krivka vývoja (2 px)
     pts = []
@@ -683,8 +682,8 @@ def create_etf_dashboard():
         marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
         draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 2. Vyšší čistý 6M Sparkline graf bez textov (x = 188..362, výška 78 px)
-        draw_sparkline_clean(draw, 188, ry + 11, 362, ry + 89, e["series"])
+        # 2. Vyšší čistý 6M Sparkline graf s prerušovanou čiarou ATH (x = 188..362, výška 78 px)
+        draw_sparkline_clean(draw, 188, ry + 11, 362, ry + 89, e["series"], e["ath"])
 
         # 3. Cena, Dnes a štítok "Na ATH" (x = 370..500)
         right_anchor = 500
