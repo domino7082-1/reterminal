@@ -2,7 +2,7 @@ name: Generate Dashboard BMP
 
 on:
   schedule:
-    # Spustiť každú hodinu (minúta 0)
+    # Spustiť každé 2 hodiny (minúta 17 a 49)
     - cron: '17,49 */2 * * *'
   workflow_dispatch: # Umožní spustiť to aj manuálne tlačidlom
 
@@ -26,23 +26,24 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y fonts-dejavu
-        # Tvoj skript hľadá fonty v /usr/share/fonts/truetype/dejavu/
-        # Toto zabezpečí, že tam budú, keďže na serveri nie sú Windows fonty (arial.ttf)
 
     - name: Install Python dependencies
       run: |
         pip install -r requirements.txt
 
-    - name: Run script
+    - name: Run main dashboard
       run: python main.py
+
+    - name: Run ETF dashboard
+      run: python etf_dashboard.py
 
     - name: Commit and Push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # Pridáme vygenerovaný obrázok a JSON so stavom (aby sa striedali zaujímavosti)
-        git add dashboard_output.bmp dashboard_state.json
-        
+
+        # Pridáme oba vygenerované obrázky a JSON so stavom
+        git add dashboard_output.bmp etf_output.bmp dashboard_state.json
+
         # Skontrolujeme, či sú nejaké zmeny, ak nie, končíme
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update dashboard [skip ci]" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update dashboards [skip ci]" && git push)
