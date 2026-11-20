@@ -2,8 +2,8 @@ name: Generate Dashboard BMP
 
 on:
   schedule:
-    # Spustiť každé 2 hodiny (minúta 17 a 49)
-    - cron: '17,49 */2 * * *'
+    # Spustiť každú hodinu (minúta 5)
+    - cron: '5 * * * *'
   workflow_dispatch: # Umožní spustiť to aj manuálne tlačidlom
 
 permissions:
