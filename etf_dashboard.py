@@ -555,8 +555,8 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
         draw.line([(sx, sy), (ex, ey)], fill=TEXT_COLOR, width=1)
 
 
-def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath):
-    """Vykreslí čistý 6M sparkline graf bez textov s prerušovanou čiarou historického maxima (ATH)."""
+def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
+    """Vykreslí čistý 6M sparkline graf s prerušovanou čiarou ATH a štítkom 6M vpravo hore vedľa grafu."""
     draw.rectangle([x0, y0, x1, y1], outline=TEXT_COLOR, width=1)
     pad_x = 6
     pad_y = 7
@@ -590,6 +590,15 @@ def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath):
     # Bodka na poslednej cene
     lx, ly = pts[-1]
     draw.ellipse([lx - 3, ly - 3, lx + 3, ly + 3], fill=TEXT_COLOR)
+
+    # Štítok "6M" priradený zvonka vpravo hore vedľa grafu
+    tag_x0 = x1
+    tag_y0 = y0
+    tag_x1 = x1 + 24
+    tag_y1 = y0 + 16
+    draw.rectangle([tag_x0, tag_y0, tag_x1, tag_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=1)
+    w_6m = draw.textlength("6M", font=fonts["bold_11"])
+    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_6m) / 2.0, tag_y0 + 2), "6M", font=fonts["bold_11"], fill=TEXT_COLOR)
 
 
 # --- HLAVNÉ VYKRESLENIE DASHBOARDU ---
@@ -682,10 +691,10 @@ def create_etf_dashboard():
         marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
         draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 2. Vyšší čistý 6M Sparkline graf s prerušovanou čiarou ATH (x = 188..362, výška 78 px)
-        draw_sparkline_clean(draw, 188, ry + 11, 362, ry + 89, e["series"], e["ath"])
+        # 2. Čistý 6M Sparkline graf s prerušovanou čiarou ATH a štítkom 6M vpravo hore (x = 188..356, štítok 356..380)
+        draw_sparkline_clean(draw, 188, ry + 11, 356, ry + 89, e["series"], e["ath"], fonts)
 
-        # 3. Cena, Dnes a štítok "Na ATH" (x = 370..500)
+        # 3. Cena, Dnes a štítok "Na ATH" (x = 372..500)
         right_anchor = 500
         price_str = fmt_eur(e["price"])
         draw_text_clean(draw, right_anchor, ry + 9, price_str, fonts["price"], align="right")
