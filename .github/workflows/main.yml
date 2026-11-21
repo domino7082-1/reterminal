@@ -1,9 +1,6 @@
 name: Generate Dashboard BMP
 
 on:
-  schedule:
-    # 3x za hodinu mimo špičky v celej hodine (:07, :27, :47)
-    - cron: '7,27,47 * * * *'
   workflow_dispatch:
 
 # Zabráni kolízii pri git push, ak by GitHub spustil 2 behy tesne po sebe
