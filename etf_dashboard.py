@@ -11,7 +11,7 @@ WIDTH = 800
 HEIGHT = 480
 RENDER_MODE = 'L'
 THRESHOLD_ON_WHITE = 155  # Plnšie čierne ťahy (znamenká +, − a číslice) na bielom pozadí
-THRESHOLD_ON_BLACK = 110  # Plnšie biele ťahy v čiernych hlavičkách a inverzných štítkoch
+THRESHOLD_ON_BLACK = 110  # Plnšie biele ťahy v čiernych hlavičkách a ticker štítkoch
 BACKGROUND_COLOR = 255    # Biela
 TEXT_COLOR = 0            # Čierna
 MINUS_SIGN = "\u2212"     # Skutočné matematické mínus (−), rovnaká šírka aj hrúbka ako +
@@ -379,7 +379,7 @@ def get_return_over_days(points, latest_price, days_back):
 
 
 def fetch_etf_data(cfg):
-    """Stiahne živú cenu, 1M/3M/6M/1R výkonnosť, 6M krivku, 52T rozpätie a ATH."""
+    """Stiahne živú cenu, 1M/3M/6M/1R výkonnosť, 1R krivku, 52T rozpätie a ATH."""
     symbol = cfg["yahoo"]
     live = False
 
@@ -393,10 +393,10 @@ def fetch_etf_data(cfg):
     perf_3m = cfg["fallback_perf"]["3m"]
     perf_6m = cfg["fallback_perf"]["6m"]
     perf_1y = cfg["fallback_perf"]["1y"]
-    series_6m = []
+    series_1y = []
 
     try:
-        # 1. Denné dáta za 2 roky (presné 1M, 3M, 6M, 1R, 52T min/max aj 6M sparkline)
+        # 1. Denné dáta za 2 roky (presné 1M, 3M, 6M, 1R, 52T min/max aj 1R sparkline)
         chart_2y = fetch_yahoo_chart(symbol, "2y", "1d")
         if chart_2y:
             meta = chart_2y.get("meta", {})
@@ -428,10 +428,10 @@ def fetch_etf_data(cfg):
 
             if points:
                 latest_ts = points[-1][0]
-                cutoff_6m = latest_ts - 183 * 86400
                 cutoff_1y = latest_ts - 365 * 86400
 
-                series_6m = [p[1] for p in points if p[0] >= cutoff_6m]
+                # Ročná krivka (posledných 365 dní)
+                series_1y = [p[1] for p in points if p[0] >= cutoff_1y]
 
                 r1m = get_return_over_days(points, price, 30)
                 r3m = get_return_over_days(points, price, 91)
@@ -502,10 +502,10 @@ def fetch_etf_data(cfg):
     low_52w = min(low_52w, price)
     high_52w = max(high_52w, price)
 
-    if len(series_6m) < 5:
-        series_6m = [
-            ath * 0.92, ath * 0.95, ath * 0.93, ath * 0.97,
-            ath, ath * 0.96, ath * 0.93, price,
+    if len(series_1y) < 5:
+        series_1y = [
+            low_52w, ath * 0.85, ath * 0.90, ath * 0.88, ath * 0.94,
+            ath * 0.97, ath, ath * 0.96, ath * 0.93, price,
         ]
 
     drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
@@ -534,7 +534,7 @@ def fetch_etf_data(cfg):
         "high_52w": high_52w,
         "from_low_pct": from_low_pct,
         "pos_52w": pos_52w,
-        "series": series_6m,
+        "series": series_1y,
         "live": live,
     }
 
@@ -573,7 +573,7 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
 
 
 def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
-    """Vykreslí čistý 6M sparkline graf s prerušovanou čiarou ATH a štítkom 6M vpravo hore."""
+    """Vykreslí čistý 1R sparkline graf s prerušovanou čiarou ATH a štítkom 1R vpravo hore."""
     draw.rectangle([x0, y0, x1, y1], outline=TEXT_COLOR, width=1)
     pad_x = 6
     pad_y = 7
@@ -593,7 +593,7 @@ def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
     ath_y = plot_y1 - int(((ath - min_v) / span) * (plot_y1 - plot_y0))
     draw_dashed_hline(draw, x0 + 2, x1 - 2, ath_y, dash=3, gap=3)
 
-    # Krivka vývoja (2 px)
+    # Krivka ročného vývoja (2 px)
     pts = []
     n = len(series)
     for i, val in enumerate(series):
@@ -608,14 +608,14 @@ def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
     lx, ly = pts[-1]
     draw.ellipse([lx - 3, ly - 3, lx + 3, ly + 3], fill=TEXT_COLOR)
 
-    # Štítok "6M" zvonka vpravo hore vedľa grafu (13 px Bold)
+    # Štítok "1R" zvonka vpravo hore vedľa grafu (13 px Bold)
     tag_x0 = x1
     tag_y0 = y0
     tag_x1 = x1 + 28
     tag_y1 = y0 + 19
     draw.rectangle([tag_x0, tag_y0, tag_x1, tag_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=1)
-    w_6m = draw.textlength("6M", font=fonts["bold_13"])
-    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_6m) / 2.0, tag_y0 + 2), "6M", font=fonts["bold_13"], fill=TEXT_COLOR)
+    w_1r = draw.textlength("1R", font=fonts["bold_13"])
+    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_1r) / 2.0, tag_y0 + 2), "1R", font=fonts["bold_13"], fill=TEXT_COLOR)
 
 
 # --- HLAVNÉ VYKRESLENIE DASHBOARDU ---
@@ -710,10 +710,10 @@ def create_etf_dashboard():
         marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
         draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 2. Čistý 6M Sparkline graf s čiarou ATH a štítkom 6M (x = 176..310, štítok 310..338)
+        # 2. Čistý 1R Sparkline graf s čiarou ATH a štítkom 1R (x = 176..310, štítok 310..338)
         draw_sparkline_clean(draw, 176, ry + 11, 310, ry + 89, e["series"], e["ath"], fonts)
 
-        # 3. Cena (22B), Dnes (14B) a štítok "Na ATH" (14B) (x = 336..470)
+        # 3. Cena (22B), Dnes (14B) a jednotný orámovaný štítok "Na ATH" (14B) (x = 336..470)
         right_anchor = 470
         draw_text_aligned(draw, right_anchor, ry + 8, fmt_eur(e["price"]), fonts["price"], align="right")
 
@@ -721,29 +721,21 @@ def create_etf_dashboard():
         draw_text_aligned(draw, right_anchor, ry + 37, day_str, fonts["bold_14"], align="right")
 
         box_x0, box_y0, box_x1, box_y1 = 336, ry + 61, right_anchor, ry + 89
-        is_deep = e["needed_gain_pct"] >= 15.0
         if e["needed_gain_pct"] < 0.05:
             na_ath_lbl = "NA MAXIME"
         else:
             na_ath_lbl = f"Na ATH {fmt_pct(e['needed_gain_pct'], show_plus=True, decimals=1)}"
 
-        if is_deep:
-            def make_deep_drawer(lbl):
-                def _draw(sd, sw, sh):
-                    draw_text_aligned(sd, sw / 2.0, 6, lbl, fonts["bold_14"], fill=BACKGROUND_COLOR, align="center")
-                return _draw
-            inverted_tasks.append((box_x0, box_y0, box_x1 + 1, box_y1 + 1, make_deep_drawer(na_ath_lbl)))
-        else:
-            draw.rectangle([box_x0, box_y0, box_x1, box_y1], outline=TEXT_COLOR, width=2)
-            draw_text_aligned(
-                draw,
-                (box_x0 + box_x1) / 2.0,
-                box_y0 + 6,
-                na_ath_lbl,
-                fonts["bold_14"],
-                fill=TEXT_COLOR,
-                align="center",
-            )
+        draw.rectangle([box_x0, box_y0, box_x1, box_y1], outline=TEXT_COLOR, width=2)
+        draw_text_aligned(
+            draw,
+            (box_x0 + box_x1) / 2.0,
+            box_y0 + 6,
+            na_ath_lbl,
+            fonts["bold_14"],
+            fill=TEXT_COLOR,
+            align="center",
+        )
 
         if idx < len(etfs) - 1:
             draw.line([(10, ry + row_h), (470, ry + row_h)], fill=TEXT_COLOR, width=1)
