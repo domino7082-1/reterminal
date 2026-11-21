@@ -9,10 +9,12 @@ from PIL import Image, ImageDraw, ImageFont
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
 HEIGHT = 480
-RENDER_MODE = 'L'       # Kreslíme v odtieňoch sivej pre hladšie kontúry písma
-THRESHOLD_1BIT = 128    # Symetrický prah prevodu do ostrého 1-bit BMP (bez ditheringu)
-BACKGROUND_COLOR = 255  # Biela
-TEXT_COLOR = 0          # Čierna
+RENDER_MODE = 'L'
+THRESHOLD_ON_WHITE = 155  # Plnšie čierne ťahy (znamenká +, − a číslice) na bielom pozadí
+THRESHOLD_ON_BLACK = 110  # Plnšie biele ťahy v čiernych hlavičkách a inverzných štítkoch
+BACKGROUND_COLOR = 255    # Biela
+TEXT_COLOR = 0            # Čierna
+MINUS_SIGN = "\u2212"     # Skutočné matematické mínus (−), rovnaká šírka aj hrúbka ako +
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE = os.path.join(BASE_DIR, "etf_output.bmp")
@@ -107,7 +109,7 @@ FIXED_HOLIDAYS_SK = {
 
 
 def get_fonts():
-    """Uprednostní DejaVu Sans (čitateľnejší na E-Ink), záloha lokálny Arial."""
+    """Uprednostní DejaVu Sans Bold pre maximálnu čitateľnosť z diaľky na 1-bit E-Ink."""
     fonts = {}
     font_candidates = [
         (
@@ -141,22 +143,22 @@ def get_fonts():
 
         fonts["header"] = ImageFont.truetype(font_bold, 18)
         fonts["header_mid_15"] = ImageFont.truetype(font_bold, 15)
+        fonts["header_mid_14"] = ImageFont.truetype(font_bold, 14)
         fonts["header_mid_13"] = ImageFont.truetype(font_bold, 13)
-        fonts["header_mid_12"] = ImageFont.truetype(font_bold, 12)
-        fonts["header_date"] = ImageFont.truetype(font_reg, 14)
-        fonts["price"] = ImageFont.truetype(font_bold, 21)
-        fonts["ticker"] = ImageFont.truetype(font_bold, 15)
-        fonts["sec_title"] = ImageFont.truetype(font_bold, 13)
+        fonts["header_date"] = ImageFont.truetype(font_bold, 14)
+        fonts["price"] = ImageFont.truetype(font_bold, 22)
+        fonts["ticker"] = ImageFont.truetype(font_bold, 16)
+        fonts["sec_title"] = ImageFont.truetype(font_bold, 14)
+        fonts["bold_14"] = ImageFont.truetype(font_bold, 14)
         fonts["bold_13"] = ImageFont.truetype(font_bold, 13)
         fonts["bold_12"] = ImageFont.truetype(font_bold, 12)
         fonts["reg_13"] = ImageFont.truetype(font_reg, 13)
-        fonts["reg_12"] = ImageFont.truetype(font_reg, 12)
     except IOError:
         default = ImageFont.load_default()
         keys = [
-            "header", "header_mid_15", "header_mid_13", "header_mid_12",
-            "header_date", "price", "ticker", "sec_title", "bold_13",
-            "bold_12", "reg_13", "reg_12",
+            "header", "header_mid_15", "header_mid_14", "header_mid_13",
+            "header_date", "price", "ticker", "sec_title", "bold_14",
+            "bold_13", "bold_12", "reg_13",
         ]
         fonts = {k: default for k in keys}
     return fonts
@@ -285,57 +287,56 @@ def get_header_nameday_or_holiday(now):
     return ""
 
 
-# --- FORMÁTOVANIE A TEXT S ČISTÝM ODSTUPOM ZNAMIENKA MÍNUS ---
+# --- FORMÁTOVANIE ČÍSEL S ČITATEĽNÝM ZNAMIENKOM MÍNUS (−) ---
 
 def fmt_eur(val, with_symbol=True):
     s = f"{val:.2f}".replace(".", ",") if abs(val) >= 100 else f"{val:.3f}".replace(".", ",")
     return f"{s} €" if with_symbol else s
 
 
-def fmt_pct(val, show_plus=True, decimals=1):
+def fmt_pct(val, show_plus=True, decimals=1, with_percent=True):
+    """Naformátuje percento so skutočným matematickým mínus (−), ktoré má rovnakú šírku ako +."""
     if val is None:
         return "—"
-    sign = "+" if (show_plus and val > 0) else ""
-    return f"{sign}{val:.{decimals}f}".replace(".", ",") + "%"
+    if val < 0:
+        sign = MINUS_SIGN
+        num_val = abs(val)
+    elif show_plus and val > 0:
+        sign = "+"
+        num_val = val
+    else:
+        sign = ""
+        num_val = abs(val)
+    num_str = f"{num_val:.{decimals}f}".replace(".", ",")
+    suffix = "%" if with_percent else ""
+    return f"{sign}{num_str}{suffix}"
 
 
-def measure_text_clean(draw, text, font, minus_gap=1):
-    """Zmeria šírku textu s rovnakým odstupom znamienka mínus ako pri kreslení."""
-    if "-" not in text:
-        return draw.textlength(text, font=font)
-    parts = text.split("-")
-    w_minus = draw.textlength("-", font=font)
-    total = 0.0
-    for idx, part in enumerate(parts):
-        if idx > 0:
-            total += w_minus + minus_gap
-        total += draw.textlength(part, font=font)
-    return total
-
-
-def draw_text_clean(draw, x, y, text, font, fill=TEXT_COLOR, align="left", minus_gap=1):
-    """Vykreslí text s jemným odstupom za znamienkom mínus pre ostrý E-Ink výstup."""
-    total_w = measure_text_clean(draw, text, font, minus_gap=minus_gap)
+def draw_text_aligned(draw, x, y, text, font, fill=TEXT_COLOR, align="left"):
+    w = draw.textlength(text, font=font)
     if align == "right":
-        cur_x = x - total_w
+        cur_x = x - w
     elif align == "center":
-        cur_x = x - total_w / 2.0
+        cur_x = x - w / 2.0
     else:
         cur_x = x
+    draw.text((cur_x, y), text, font=font, fill=fill)
 
-    if "-" not in text:
-        draw.text((cur_x, y), text, font=font, fill=fill)
+
+def paste_inverted_block(img_1bit, x0, y0, x1, y1, draw_fn):
+    """Vykreslí čierny blok s bielym textom s vlastným prahom, aby biele písmo ostalo plné."""
+    w = int(x1 - x0)
+    h = int(y1 - y0)
+    if w <= 0 or h <= 0:
         return
-
-    w_minus = draw.textlength("-", font=font)
-    parts = text.split("-")
-    for idx, part in enumerate(parts):
-        if idx > 0:
-            draw.text((cur_x, y), "-", font=font, fill=fill)
-            cur_x += w_minus + minus_gap
-        if part:
-            draw.text((cur_x, y), part, font=font, fill=fill)
-            cur_x += draw.textlength(part, font=font)
+    sub_gray = Image.new(RENDER_MODE, (w, h), TEXT_COLOR)
+    sub_draw = ImageDraw.Draw(sub_gray)
+    draw_fn(sub_draw, w, h)
+    sub_1bit = sub_gray.point(
+        lambda p: BACKGROUND_COLOR if p >= THRESHOLD_ON_BLACK else TEXT_COLOR,
+        mode='1',
+    )
+    img_1bit.paste(sub_1bit, (int(x0), int(y0)))
 
 
 # --- SŤAHOVANIE ETF DÁT Z YAHOO FINANCE ---
@@ -572,7 +573,7 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
 
 
 def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
-    """Vykreslí čistý 6M sparkline graf s prerušovanou čiarou ATH a štítkom 6M vpravo hore vedľa grafu."""
+    """Vykreslí čistý 6M sparkline graf s prerušovanou čiarou ATH a štítkom 6M vpravo hore."""
     draw.rectangle([x0, y0, x1, y1], outline=TEXT_COLOR, width=1)
     pad_x = 6
     pad_y = 7
@@ -607,20 +608,20 @@ def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
     lx, ly = pts[-1]
     draw.ellipse([lx - 3, ly - 3, lx + 3, ly + 3], fill=TEXT_COLOR)
 
-    # Štítok "6M" priradený zvonka vpravo hore vedľa grafu
+    # Štítok "6M" zvonka vpravo hore vedľa grafu (13 px Bold)
     tag_x0 = x1
     tag_y0 = y0
-    tag_x1 = x1 + 26
-    tag_y1 = y0 + 18
+    tag_x1 = x1 + 28
+    tag_y1 = y0 + 19
     draw.rectangle([tag_x0, tag_y0, tag_x1, tag_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=1)
-    w_6m = draw.textlength("6M", font=fonts["bold_12"])
-    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_6m) / 2.0, tag_y0 + 2), "6M", font=fonts["bold_12"], fill=TEXT_COLOR)
+    w_6m = draw.textlength("6M", font=fonts["bold_13"])
+    draw.text((tag_x0 + (tag_x1 - tag_x0 - w_6m) / 2.0, tag_y0 + 2), "6M", font=fonts["bold_13"], fill=TEXT_COLOR)
 
 
 # --- HLAVNÉ VYKRESLENIE DASHBOARDU ---
 
 def create_etf_dashboard():
-    # Krok 2: vykreslíme v odtieňoch sivej ('L') pre čisté kontúry písma
+    # Krok 1: Všetky čierne prvky na bielom pozadí kreslíme do odtieňov sivej ('L')
     img_gray = Image.new(RENDER_MODE, (WIDTH, HEIGHT), BACKGROUND_COLOR)
     draw = ImageDraw.Draw(img_gray)
     fonts = get_fonts()
@@ -630,52 +631,54 @@ def create_etf_dashboard():
     any_live = any(e["live"] for e in etfs)
     header_mid_text = get_header_nameday_or_holiday(now)
 
+    header_h = 46
+    inverted_tasks = []  # Čierne bloky s bielym textom (vykreslia sa s vlastným prahom)
+
     # ==========================================================
     # A. HLAVIČKA (y = 0..46): Názov | Meniny/Sviatok | Dátum
     # ==========================================================
-    header_h = 46
-    draw.rectangle([(0, 0), (WIDTH, header_h)], fill=TEXT_COLOR)
+    def draw_header(hd, hw, hh):
+        title_left = "ETF PORTFÓLIO · XETRA"
+        hd.text((12, 13), title_left, font=fonts["header"], fill=BACKGROUND_COLOR)
+        left_end_x = 12 + hd.textlength(title_left, font=fonts["header"])
 
-    title_left = "ETF PORTFÓLIO · XETRA"
-    draw.text((14, 13), title_left, font=fonts["header"], fill=BACKGROUND_COLOR)
-    left_end_x = 14 + draw.textlength(title_left, font=fonts["header"])
+        days_short = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
+        date_right = f"{days_short[now.weekday()]} {now.strftime('%d.%m.%Y  %H:%M')}"
+        w_date = hd.textlength(date_right, font=fonts["header_date"])
+        right_start_x = hw - w_date - 12
+        hd.text((right_start_x, 15), date_right, font=fonts["header_date"], fill=BACKGROUND_COLOR)
 
-    days_short = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
-    date_right = f"{days_short[now.weekday()]} {now.strftime('%d.%m.%Y  %H:%M')}"
-    w_date = draw.textlength(date_right, font=fonts["header_date"])
-    right_start_x = WIDTH - w_date - 14
-    draw.text((right_start_x, 15), date_right, font=fonts["header_date"], fill=BACKGROUND_COLOR)
+        if header_mid_text:
+            avail_w = (right_start_x - 14) - (left_end_x + 14)
+            mid_center_x = (left_end_x + right_start_x) / 2.0
 
-    # Stred hlavičky: aktuálne meniny alebo sviatok (dynamické škálovanie bez prekrytia)
-    if header_mid_text:
-        avail_w = (right_start_x - 16) - (left_end_x + 16)
-        mid_center_x = (left_end_x + right_start_x) / 2.0
+            mid_candidates = [
+                (fonts["header_mid_15"], 14),
+                (fonts["header_mid_14"], 15),
+                (fonts["header_mid_13"], 15),
+            ]
+            chosen_font, chosen_y = mid_candidates[-1]
+            for fnt, fy in mid_candidates:
+                if hd.textlength(header_mid_text, font=fnt) <= avail_w:
+                    chosen_font, chosen_y = fnt, fy
+                    break
 
-        mid_candidates = [
-            (fonts["header_mid_15"], 14),
-            (fonts["header_mid_13"], 15),
-            (fonts["header_mid_12"], 16),
-        ]
-        chosen_font, chosen_y = mid_candidates[-1]
-        for fnt, fy in mid_candidates:
-            if draw.textlength(header_mid_text, font=fnt) <= avail_w:
-                chosen_font, chosen_y = fnt, fy
-                break
+            display_mid = header_mid_text
+            while hd.textlength(display_mid, font=chosen_font) > avail_w and len(display_mid) > 6:
+                display_mid = display_mid[:-2].rstrip() + "…"
 
-        display_mid = header_mid_text
-        while draw.textlength(display_mid, font=chosen_font) > avail_w and len(display_mid) > 6:
-            display_mid = display_mid[:-2].rstrip() + "…"
+            w_mid = hd.textlength(display_mid, font=chosen_font)
+            hd.text(
+                (mid_center_x - w_mid / 2.0, chosen_y),
+                display_mid,
+                font=chosen_font,
+                fill=BACKGROUND_COLOR,
+            )
 
-        w_mid = draw.textlength(display_mid, font=chosen_font)
-        draw.text(
-            (mid_center_x - w_mid / 2.0, chosen_y),
-            display_mid,
-            font=chosen_font,
-            fill=BACKGROUND_COLOR,
-        )
+    inverted_tasks.append((0, 0, WIDTH, header_h, draw_header))
 
     # ==========================================================
-    # B. ĽAVÝ HLAVNÝ STĹPEC: 4 ETF FONDY (x = 0..488, y = 48..452)
+    # B. ĽAVÝ HLAVNÝ STĹPEC: 4 ETF FONDY (x = 0..474, y = 48..452)
     # ==========================================================
     row_h = 101
     start_y = 48
@@ -683,44 +686,41 @@ def create_etf_dashboard():
     for idx, e in enumerate(etfs):
         ry = start_y + idx * row_h
 
-        # 1. Ticker badge + región + názov + ATH + 52T ukazovateľ (x = 12..166)
-        badge_w = 58
-        draw.rectangle([12, ry + 10, 12 + badge_w, ry + 32], fill=TEXT_COLOR)
-        tw = draw.textlength(e["ticker"], font=fonts["ticker"])
-        draw.text(
-            (12 + (badge_w - tw) / 2.0, ry + 12),
-            e["ticker"],
-            font=fonts["ticker"],
-            fill=BACKGROUND_COLOR,
-        )
-        draw.text((76, ry + 14), e["region"], font=fonts["bold_12"], fill=TEXT_COLOR)
-        draw.text((12, ry + 37), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
+        # 1. Ticker badge + región + názov + ATH + 52T ukazovateľ (x = 10..172)
+        def make_ticker_drawer(ticker_text):
+            def _draw(sd, sw, sh):
+                tw = sd.textlength(ticker_text, font=fonts["ticker"])
+                sd.text(((sw - tw) / 2.0, 3), ticker_text, font=fonts["ticker"], fill=BACKGROUND_COLOR)
+            return _draw
+
+        inverted_tasks.append((10, ry + 9, 70, ry + 33, make_ticker_drawer(e["ticker"])))
+
+        draw.text((76, ry + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
+        draw.text((10, ry + 37), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
 
         ath_txt = f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})"
-        draw.text((12, ry + 56), ath_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
+        draw.text((10, ry + 56), ath_txt, font=fonts["bold_13"], fill=TEXT_COLOR)
 
         # 52-týždňový rozsah (vizuálna pozícia v pásme)
-        draw.text((12, ry + 76), "52T:", font=fonts["reg_12"], fill=TEXT_COLOR)
-        bar_x0, bar_x1, bar_y = 44, 164, ry + 83
+        draw.text((10, ry + 76), "52T:", font=fonts["bold_12"], fill=TEXT_COLOR)
+        bar_x0, bar_x1, bar_y = 45, 168, ry + 83
         draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=TEXT_COLOR, width=2)
         draw.line([(bar_x0, bar_y - 4), (bar_x0, bar_y + 4)], fill=TEXT_COLOR, width=1)
         draw.line([(bar_x1, bar_y - 4), (bar_x1, bar_y + 4)], fill=TEXT_COLOR, width=1)
         marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
         draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 2. Čistý 6M Sparkline graf s prerušovanou čiarou ATH a štítkom 6M (x = 172..330, štítok 330..356)
-        draw_sparkline_clean(draw, 172, ry + 11, 330, ry + 89, e["series"], e["ath"], fonts)
+        # 2. Čistý 6M Sparkline graf s čiarou ATH a štítkom 6M (x = 176..310, štítok 310..338)
+        draw_sparkline_clean(draw, 176, ry + 11, 310, ry + 89, e["series"], e["ath"], fonts)
 
-        # 3. Cena, Dnes a štítok "Na ATH" (x = 362..486)
-        right_anchor = 486
-        price_str = fmt_eur(e["price"])
-        draw_text_clean(draw, right_anchor, ry + 9, price_str, fonts["price"], align="right")
+        # 3. Cena (22B), Dnes (14B) a štítok "Na ATH" (14B) (x = 336..470)
+        right_anchor = 470
+        draw_text_aligned(draw, right_anchor, ry + 8, fmt_eur(e["price"]), fonts["price"], align="right")
 
         day_str = f"Dnes: {fmt_pct(e['day_pct'], decimals=2)}"
-        draw_text_clean(draw, right_anchor, ry + 38, day_str, fonts["bold_13"], align="right")
+        draw_text_aligned(draw, right_anchor, ry + 37, day_str, fonts["bold_14"], align="right")
 
-        # Štítok "Na ATH" (koľko % rastu treba na návrat na historické maximum)
-        box_x0, box_y0, box_x1, box_y1 = 362, ry + 62, right_anchor, ry + 88
+        box_x0, box_y0, box_x1, box_y1 = 336, ry + 61, right_anchor, ry + 89
         is_deep = e["needed_gain_pct"] >= 15.0
         if e["needed_gain_pct"] < 0.05:
             na_ath_lbl = "NA MAXIME"
@@ -728,59 +728,60 @@ def create_etf_dashboard():
             na_ath_lbl = f"Na ATH {fmt_pct(e['needed_gain_pct'], show_plus=True, decimals=1)}"
 
         if is_deep:
-            draw.rectangle([box_x0, box_y0, box_x1, box_y1], fill=TEXT_COLOR)
-            txt_fill = BACKGROUND_COLOR
+            def make_deep_drawer(lbl):
+                def _draw(sd, sw, sh):
+                    draw_text_aligned(sd, sw / 2.0, 6, lbl, fonts["bold_14"], fill=BACKGROUND_COLOR, align="center")
+                return _draw
+            inverted_tasks.append((box_x0, box_y0, box_x1 + 1, box_y1 + 1, make_deep_drawer(na_ath_lbl)))
         else:
-            draw.rectangle([box_x0, box_y0, box_x1, box_y1], outline=TEXT_COLOR, width=1)
-            txt_fill = TEXT_COLOR
-
-        draw_text_clean(
-            draw,
-            (box_x0 + box_x1) / 2.0,
-            box_y0 + 6,
-            na_ath_lbl,
-            fonts["bold_12"],
-            fill=txt_fill,
-            align="center",
-        )
+            draw.rectangle([box_x0, box_y0, box_x1, box_y1], outline=TEXT_COLOR, width=2)
+            draw_text_aligned(
+                draw,
+                (box_x0 + box_x1) / 2.0,
+                box_y0 + 6,
+                na_ath_lbl,
+                fonts["bold_14"],
+                fill=TEXT_COLOR,
+                align="center",
+            )
 
         if idx < len(etfs) - 1:
-            draw.line([(12, ry + row_h), (486, ry + row_h)], fill=TEXT_COLOR, width=1)
+            draw.line([(10, ry + row_h), (470, ry + row_h)], fill=TEXT_COLOR, width=1)
 
     # ==========================================================
     # C. VERTIKÁLNA ODDEĽOVACIA ČIARA
     # ==========================================================
-    draw.line([(496, header_h + 8), (496, HEIGHT - 32)], fill=TEXT_COLOR, width=3)
+    draw.line([(478, header_h + 8), (478, HEIGHT - 32)], fill=TEXT_COLOR, width=3)
 
     # ==========================================================
-    # D. PRAVÝ ŠTATISTICKÝ PANEL (x = 506..788) — ZVÄČŠENÉ PÍSMO (12–13 px)
+    # D. PRAVÝ ŠTATISTICKÝ PANEL (x = 488..790) — PÍSMO 13–14 PX BOLD
     # ==========================================================
-    rx = 506
-    rx_end = 788
+    rx = 488
+    rx_end = 790
 
     # --- Sekcia 1: POKLES OD ATH (s priemerom v hlavičke) ---
     avg_dd = sum(e["drawdown_pct"] for e in etfs) / len(etfs)
     draw.text((rx, 52), "POKLES OD ATH", font=fonts["sec_title"], fill=TEXT_COLOR)
     avg_txt = f"Ø {fmt_pct(avg_dd, show_plus=False, decimals=1)}"
-    draw_text_clean(draw, rx_end, 53, avg_txt, fonts["bold_12"], align="right")
-    draw.line([(rx, 70), (rx_end, 70)], fill=TEXT_COLOR, width=1)
+    draw_text_aligned(draw, rx_end, 53, avg_txt, fonts["bold_13"], align="right")
+    draw.line([(rx, 71), (rx_end, 71)], fill=TEXT_COLOR, width=1)
 
     max_dd_abs = max([abs(e["drawdown_pct"]) for e in etfs] + [20.0])
     scale_max = max(25.0, math.ceil(max_dd_abs / 5.0) * 5.0)
-    bar_left = 554
-    bar_right = 728
+    bar_left = 538
+    bar_right = 720
     bar_max_w = bar_right - bar_left
 
     for ref_pct in (10.0, 20.0):
         if ref_pct <= scale_max:
             ref_x = bar_left + int((ref_pct / scale_max) * bar_max_w)
-            draw_dashed_vline(draw, ref_x, 73, 162, dash=2, gap=3)
-            draw_text_clean(draw, ref_x, 163, f"-{int(ref_pct)}%", fonts["reg_12"], align="center")
-    draw.text((bar_left - 4, 163), "0%", font=fonts["reg_12"], fill=TEXT_COLOR)
+            draw_dashed_vline(draw, ref_x, 74, 161, dash=2, gap=3)
+            draw_text_aligned(draw, ref_x, 163, f"{MINUS_SIGN}{int(ref_pct)}%", fonts["bold_12"], align="center")
+    draw.text((bar_left - 4, 163), "0%", font=fonts["bold_12"], fill=TEXT_COLOR)
 
     for idx, e in enumerate(etfs):
         by = 76 + idx * 22
-        draw.text((rx, by + 1), e["ticker"], font=fonts["bold_12"], fill=TEXT_COLOR)
+        draw.text((rx, by), e["ticker"], font=fonts["bold_13"], fill=TEXT_COLOR)
         dd_abs = abs(e["drawdown_pct"])
         bw = max(2, int((dd_abs / scale_max) * bar_max_w))
         draw_hatched_rect(
@@ -788,64 +789,65 @@ def create_etf_dashboard():
             bar_left,
             by + 1,
             bar_left + bw,
-            by + 15,
+            by + 16,
             step=4,
             fill_solid=(dd_abs >= 20.0),
         )
         val_txt = fmt_pct(e["drawdown_pct"], show_plus=False, decimals=1)
-        draw_text_clean(draw, rx_end, by + 1, val_txt, fonts["bold_12"], align="right")
+        draw_text_aligned(draw, rx_end, by, val_txt, fonts["bold_14"], align="right")
 
-    # --- Sekcia 2: VÝKONNOSŤ (1M · 3M · 6M · 1R) ---
+    # --- Sekcia 2: VÝKONNOSŤ (%) (1M · 3M · 6M · 1R v 14 px Bold) ---
     s2_y = 186
     draw.text((rx, s2_y), "VÝKONNOSŤ", font=fonts["sec_title"], fill=TEXT_COLOR)
-    draw.line([(rx, s2_y + 18), (rx_end, s2_y + 18)], fill=TEXT_COLOR, width=1)
+    draw_text_aligned(draw, rx_end, s2_y + 1, "(%)", fonts["bold_13"], align="right")
+    draw.line([(rx, s2_y + 19), (rx_end, s2_y + 19)], fill=TEXT_COLOR, width=1)
 
-    th_y = s2_y + 22
-    col_1m_r = 606
-    col_3m_r = 665
+    th_y = s2_y + 23
+    col_1m_r = 594
+    col_3m_r = 659
     col_6m_r = 724
     col_1y_r = rx_end
 
-    draw.text((rx, th_y), "Fond", font=fonts["bold_12"], fill=TEXT_COLOR)
+    draw.text((rx, th_y), "Fond", font=fonts["bold_13"], fill=TEXT_COLOR)
     for title, anchor in [("1M", col_1m_r), ("3M", col_3m_r), ("6M", col_6m_r), ("1R", col_1y_r)]:
-        draw_text_clean(draw, anchor, th_y, title, fonts["bold_12"], align="right")
-    draw.line([(rx, th_y + 17), (rx_end, th_y + 17)], fill=TEXT_COLOR, width=1)
+        draw_text_aligned(draw, anchor, th_y, title, fonts["bold_13"], align="right")
+    draw.line([(rx, th_y + 18), (rx_end, th_y + 18)], fill=TEXT_COLOR, width=1)
 
     for idx, e in enumerate(etfs):
-        ty = th_y + 21 + idx * 20
-        draw.text((rx, ty), e["ticker"], font=fonts["bold_12"], fill=TEXT_COLOR)
-        draw_text_clean(draw, col_1m_r, ty, fmt_pct(e["perf_1m"]), fonts["reg_12"], align="right")
-        draw_text_clean(draw, col_3m_r, ty, fmt_pct(e["perf_3m"]), fonts["reg_12"], align="right")
-        draw_text_clean(draw, col_6m_r, ty, fmt_pct(e["perf_6m"]), fonts["reg_12"], align="right")
-        draw_text_clean(draw, col_1y_r, ty, fmt_pct(e["perf_1y"]), fonts["bold_12"], align="right")
+        ty = th_y + 22 + idx * 20
+        draw.text((rx, ty + 1), e["ticker"], font=fonts["bold_13"], fill=TEXT_COLOR)
+        draw_text_aligned(draw, col_1m_r, ty, fmt_pct(e["perf_1m"], with_percent=False), fonts["bold_14"], align="right")
+        draw_text_aligned(draw, col_3m_r, ty, fmt_pct(e["perf_3m"], with_percent=False), fonts["bold_14"], align="right")
+        draw_text_aligned(draw, col_6m_r, ty, fmt_pct(e["perf_6m"], with_percent=False), fonts["bold_14"], align="right")
+        draw_text_aligned(draw, col_1y_r, ty, fmt_pct(e["perf_1y"], with_percent=False), fonts["bold_14"], align="right")
 
-    # --- Sekcia 3: ROČNÉ ROZPÄTIE (52T) ---
+    # --- Sekcia 3: ROČNÉ ROZPÄTIE (52T) (Min · Max · Od dna v 14 px Bold) ---
     s3_y = 320
     draw.text((rx, s3_y), "ROČNÉ ROZPÄTIE (52T)", font=fonts["sec_title"], fill=TEXT_COLOR)
-    draw_text_clean(draw, rx_end, s3_y + 1, "(EUR)", fonts["reg_12"], align="right")
-    draw.line([(rx, s3_y + 18), (rx_end, s3_y + 18)], fill=TEXT_COLOR, width=1)
+    draw_text_aligned(draw, rx_end, s3_y + 1, "(EUR)", fonts["bold_12"], align="right")
+    draw.line([(rx, s3_y + 19), (rx_end, s3_y + 19)], fill=TEXT_COLOR, width=1)
 
-    r3_h_y = s3_y + 22
-    col_min_r = 634
-    col_max_r = 712
+    r3_h_y = s3_y + 23
+    col_min_r = 618
+    col_max_r = 702
     col_dna_r = rx_end
 
-    draw.text((rx, r3_h_y), "Fond", font=fonts["bold_12"], fill=TEXT_COLOR)
+    draw.text((rx, r3_h_y), "Fond", font=fonts["bold_13"], fill=TEXT_COLOR)
     for title, anchor in [("Min", col_min_r), ("Max", col_max_r), ("Od dna", col_dna_r)]:
-        draw_text_clean(draw, anchor, r3_h_y, title, fonts["bold_12"], align="right")
-    draw.line([(rx, r3_h_y + 17), (rx_end, r3_h_y + 17)], fill=TEXT_COLOR, width=1)
+        draw_text_aligned(draw, anchor, r3_h_y, title, fonts["bold_13"], align="right")
+    draw.line([(rx, r3_h_y + 18), (rx_end, r3_h_y + 18)], fill=TEXT_COLOR, width=1)
 
     for idx, e in enumerate(etfs):
-        ty = r3_h_y + 21 + idx * 20
-        draw.text((rx, ty), e["ticker"], font=fonts["bold_12"], fill=TEXT_COLOR)
-        draw_text_clean(
-            draw, col_min_r, ty, fmt_eur(e["low_52w"], with_symbol=False), fonts["reg_12"], align="right"
+        ty = r3_h_y + 22 + idx * 20
+        draw.text((rx, ty + 1), e["ticker"], font=fonts["bold_13"], fill=TEXT_COLOR)
+        draw_text_aligned(
+            draw, col_min_r, ty, fmt_eur(e["low_52w"], with_symbol=False), fonts["bold_14"], align="right"
         )
-        draw_text_clean(
-            draw, col_max_r, ty, fmt_eur(e["high_52w"], with_symbol=False), fonts["reg_12"], align="right"
+        draw_text_aligned(
+            draw, col_max_r, ty, fmt_eur(e["high_52w"], with_symbol=False), fonts["bold_14"], align="right"
         )
-        draw_text_clean(
-            draw, col_dna_r, ty, fmt_pct(e["from_low_pct"], show_plus=True), fonts["bold_12"], align="right"
+        draw_text_aligned(
+            draw, col_dna_r, ty, fmt_pct(e["from_low_pct"], show_plus=True), fonts["bold_14"], align="right"
         )
 
     # ==========================================================
@@ -853,10 +855,18 @@ def create_etf_dashboard():
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
     status_txt = "LIVE · Yahoo Finance (Xetra)" if any_live else "ZÁLOŽNÉ DÁTA · API nedostupné"
-    draw.text((14, 459), status_txt, font=fonts["reg_12"], fill=TEXT_COLOR)
+    draw.text((12, 459), status_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
 
-    # Krok 2: ostrý prevod do 1-bit BMP bez bodkovaného šumu (ditheringu)
-    img_1bit = img_gray.point(lambda p: 255 if p >= THRESHOLD_1BIT else 0, mode='1')
+    # Krok 2: Ostrý 1-bit prevod s optimalizovaným prahom pre biele pozadie
+    img_1bit = img_gray.point(
+        lambda p: BACKGROUND_COLOR if p >= THRESHOLD_ON_WHITE else TEXT_COLOR,
+        mode='1',
+    )
+
+    # Krok 3: Vloženie čiernych blokov s vlastným prahom pre plný biely text
+    for x0, y0, x1, y1, fn in inverted_tasks:
+        paste_inverted_block(img_1bit, x0, y0, x1, y1, fn)
+
     return img_1bit
 
 
