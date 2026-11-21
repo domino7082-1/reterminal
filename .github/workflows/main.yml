@@ -1,9 +1,16 @@
+
 name: Generate Dashboard BMP
+run-name: Generate Dashboard BMP (${{ inputs.source || 'ručne' }})
 
 on:
   workflow_dispatch:
+    inputs:
+      source:
+        description: 'Zdroj spustenia'
+        required: false
+        default: 'ručne'
 
-# Zabráni kolízii pri git push, ak by GitHub spustil 2 behy tesne po sebe
+# Zabráni kolízii pri git push, ak by sa 2 behy spustili tesne po sebe
 concurrency:
   group: etf-dashboard-update
   cancel-in-progress: true
