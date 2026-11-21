@@ -51,7 +51,7 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
         # Pridáme oba vygenerované obrázky a JSON so stavom
-        git add dashboard_output.bmp etf_output.bmp dashboard_state.json
+        git add etf_output.bmp
 
         # Skontrolujeme, či sú nejaké zmeny; ak nie, končíme
         if git diff --staged --quiet; then
