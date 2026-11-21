@@ -1,4 +1,5 @@
 import html
+import json
 import re
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -14,7 +15,12 @@ OUTPUT_FILE = "world_news_output.bmp"
 TZ_LOCAL = ZoneInfo("Europe/Bratislava")
 NEWSPAPER_TITLE = "SVETOVÝ DENNÍK"
 
-# Pomer správ v rozložení 1 + 4 (spolu 5 správ: napr. 3× Svet + 2× Tech)
+# Súradnice pre počasie (Šamorín)
+WEATHER_CITY = "Šamorín"
+WEATHER_LAT = 48.0279
+WEATHER_LON = 17.3106
+
+# Pomer správ v rozložení 1 + 4 (spolu 5 správ: 3× Svet + 2× Tech)
 TECH_SLOTS = 2
 
 # Svetové časy v hlavičke (Názov, IANA časové pásmo)
@@ -36,6 +42,38 @@ FEEDS = [
 ]
 
 DAYS_SK = ["PONDELOK", "UTOROK", "STREDA", "ŠTVRTOK", "PIATOK", "SOBOTA", "NEDEĽA"]
+
+# Slovenský preklad WMO kódov počasia (Open-Meteo)
+WMO_SK = {
+    0: "Jasno",
+    1: "Skoro jasno",
+    2: "Polooblačno",
+    3: "Zamračené",
+    45: "Hmla",
+    48: "Hmla",
+    51: "Mrholenie",
+    53: "Mrholenie",
+    55: "Mrholenie",
+    56: "Mrznúce mrholenie",
+    57: "Mrznúce mrholenie",
+    61: "Slabý dážď",
+    63: "Dážď",
+    65: "Silný dážď",
+    66: "Mrznúci dážď",
+    67: "Mrznúci dážď",
+    71: "Slabé sneženie",
+    73: "Sneženie",
+    75: "Silné sneženie",
+    77: "Snehové zrná",
+    80: "Prehánky",
+    81: "Prehánky",
+    82: "Silné prehánky",
+    85: "Snehové prehánky",
+    86: "Snehové prehánky",
+    95: "Búrka",
+    96: "Búrka s krúpami",
+    99: "Búrka s krúpami",
+}
 
 # Automatické priraďovanie štítkov podľa kľúčových slov v titulku a perexe
 TAG_RULES = [
@@ -65,7 +103,6 @@ def clean_text(raw):
         return ""
     text = re.sub(r"<[^>]+>", " ", raw)
     text = html.unescape(text)
-    # Odstránenie typických RSS dodatkov
     text = re.sub(r"\s*(Čítajte viac|Viac sa dočítate|Celý článok).*$", "", text, flags=re.IGNORECASE)
     return re.sub(r"\s+", " ", text).strip()
 
@@ -87,6 +124,33 @@ def parse_date(date_str):
         return dt.astimezone(TZ_LOCAL)
     except Exception:
         return datetime.now(TZ_LOCAL)
+
+
+def fetch_weather():
+    url = (
+        f"https://api.open-meteo.com/v1/forecast"
+        f"?latitude={WEATHER_LAT}&longitude={WEATHER_LON}"
+        f"&current=temperature_2m,weather_code"
+        f"&timezone=Europe%2FBratislava"
+    )
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; EInkWorldDaily/1.0)"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        current = data.get("current", {})
+        temp = current.get("temperature_2m")
+        code = current.get("weather_code")
+        if temp is None:
+            return f"{WEATHER_CITY}: -- °C"
+        temp_int = int(round(temp))
+        desc = WMO_SK.get(code, "")
+        return f"{WEATHER_CITY}: {temp_int} °C · {desc}" if desc else f"{WEATHER_CITY}: {temp_int} °C"
+    except Exception as e:
+        print(f"Chyba pri načítaní počasia: {e}")
+        return f"{WEATHER_CITY}: -- °C"
 
 
 def detect_tag(title, summary, group):
@@ -155,7 +219,6 @@ def fetch_articles(feeds, per_feed_limit=8):
                 continue
             seen.add(key)
 
-            # Ak je perex identický s titulkom, vynecháme ho
             if summary and normalize_key(summary) == key:
                 summary = ""
 
@@ -176,11 +239,9 @@ def fetch_articles(feeds, per_feed_limit=8):
 
 
 def pick_diverse(pool, count, used_keys):
-    """Vyberie najnovšie správy s preferenciou pestrých zdrojov a dostupného perexu."""
     selected = []
     used_sources = set()
 
-    # 1. priechod: rôzne zdroje a články s perexom
     for art in pool:
         if len(selected) >= count:
             break
@@ -191,7 +252,6 @@ def pick_diverse(pool, count, used_keys):
         used_keys.add(k)
         used_sources.add(art["source"])
 
-    # 2. priechod: doplnenie do cieľového počtu bez obmedzenia zdroja
     for art in pool:
         if len(selected) >= count:
             break
@@ -212,19 +272,16 @@ def select_five_articles(articles):
     tech_pool = [a for a in articles if a["group"] == "tech"]
     used_keys = set()
 
-    # 1. Hlavná správa (preferujeme čerstvú svetovú správu s perexom)
     lead_candidates = pick_diverse(world_pool, 1, used_keys)
     if not lead_candidates:
         lead_candidates = pick_diverse(tech_pool, 1, used_keys)
     lead = lead_candidates[0]
 
-    # 2. Mriežka 2×2 (4 správy: mix Svet + Tech)
     tech_picks = pick_diverse(tech_pool, TECH_SLOTS, used_keys)
     world_needed = 4 - len(tech_picks)
     world_picks = pick_diverse(world_pool, world_needed, used_keys)
 
     grid = world_picks + tech_picks
-    # Ak by niečo chýbalo (výpadok niektorých feedov), doplníme zo zvyšku
     if len(grid) < 4:
         grid.extend(pick_diverse(articles, 4 - len(grid), used_keys))
 
@@ -282,7 +339,7 @@ def wrap_text(draw, text, font, max_width, max_lines):
     return lines[:max_lines]
 
 
-def render_dashboard(selected_articles):
+def render_dashboard(selected_articles, weather_str):
     # 1-bit plátno: 1 = biela, 0 = čierna
     img = Image.new("1", (WIDTH, HEIGHT), 1)
     draw = ImageDraw.Draw(img)
@@ -313,6 +370,7 @@ def render_dashboard(selected_articles):
     f_grid_title = load_font(sans_bold, 15)
     f_grid_body = load_font(sans_reg, 13)
     f_footer = load_font(sans_reg, 11)
+    f_footer_bold = load_font(sans_bold, 11)
 
     now = datetime.now(TZ_LOCAL)
     margin_x = 16
@@ -413,23 +471,18 @@ def render_dashboard(selected_articles):
                 draw.text((cx, ty), line, font=f_grid_body, fill=0)
                 ty += 16
 
-    # --- 5. PÄTIČKA ---
+    # --- 5. PÄTIČKA (ZDROJE + POČASIE ŠAMORÍN) ---
     draw.line((margin_x, 456, right_x, 456), fill=0, width=1)
     sources_used = " · ".join(dict.fromkeys(f[0] for f in FEEDS))
     draw.text((margin_x, 468), f"Zdroje: {sources_used}", font=f_footer, fill=0, anchor="lm")
-    draw.text(
-        (right_x, 468),
-        f"{len(selected_articles)} správ (Svet + Tech) · 1-bit E-Ink",
-        font=f_footer,
-        fill=0,
-        anchor="rm",
-    )
+    draw.text((right_x, 468), weather_str, font=f_footer_bold, fill=0, anchor="rm")
 
     img.save(OUTPUT_FILE)
-    print(f"Vygenerované: {OUTPUT_FILE} ({len(selected_articles)} správ)")
+    print(f"Vygenerované: {OUTPUT_FILE} ({len(selected_articles)} správ | {weather_str})")
 
 
 if __name__ == "__main__":
     all_articles = fetch_articles(FEEDS)
     top_five = select_five_articles(all_articles)
-    render_dashboard(top_five)
+    weather = fetch_weather()
+    render_dashboard(top_five, weather)
