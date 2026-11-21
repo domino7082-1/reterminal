@@ -45,13 +45,16 @@ jobs:
     - name: Run ETF dashboard
       run: python etf_dashboard.py
 
+    - name: Run World News dashboard
+      run: python world_news_dashboard.py
+
     - name: Commit and Push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
         # Pridáme oba vygenerované obrázky a JSON so stavom
-        git add etf_output.bmp
+        git add etf_output.bmp world_news_output.bmp
 
         # Skontrolujeme, či sú nejaké zmeny; ak nie, končíme
         if git diff --staged --quiet; then
