@@ -2,9 +2,14 @@ name: Generate Dashboard BMP
 
 on:
   schedule:
-    # Spustiť každú hodinu (minúta 5)
-    - cron: '5 * * * *'
-  workflow_dispatch: # Umožní spustiť to aj manuálne tlačidlom
+    # 3x za hodinu mimo špičky v celej hodine (:07, :27, :47)
+    - cron: '7,27,47 * * * *'
+  workflow_dispatch:
+
+# Zabráni kolízii pri git push, ak by GitHub spustil 2 behy tesne po sebe
+concurrency:
+  group: etf-dashboard-update
+  cancel-in-progress: true
 
 permissions:
   contents: write
