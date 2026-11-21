@@ -6,6 +6,11 @@ import time
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
 HEIGHT = 480
@@ -165,12 +170,27 @@ def get_fonts():
 
 
 def get_now_bratislava():
+    if ZoneInfo is not None:
+        try:
+            return datetime.datetime.now(ZoneInfo("Europe/Bratislava"))
+        except Exception:
+            pass
     try:
         os.environ["TZ"] = "Europe/Bratislava"
         time.tzset()
     except AttributeError:
         pass
     return datetime.datetime.now()
+
+
+def ts_to_bratislava(ts):
+    """Prevedie Unix timestamp (z Yahoo Finance) na lokálny bratislavský čas."""
+    if ZoneInfo is not None:
+        try:
+            return datetime.datetime.fromtimestamp(ts, tz=ZoneInfo("Europe/Bratislava"))
+        except Exception:
+            pass
+    return datetime.datetime.fromtimestamp(ts)
 
 
 def remove_html_tags(text):
@@ -379,9 +399,10 @@ def get_return_over_days(points, latest_price, days_back):
 
 
 def fetch_etf_data(cfg):
-    """Stiahne živú cenu, 1M/3M/6M/1R výkonnosť, 1R krivku, 52T rozpätie a ATH."""
+    """Stiahne živú cenu, čas posledného kurzu, 1M/3M/6M/1R výkonnosť, 1R krivku, 52T rozpätie a ATH."""
     symbol = cfg["yahoo"]
     live = False
+    market_ts = None
 
     price = cfg["fallback_price"]
     day_pct = cfg["fallback_day_pct"]
@@ -419,6 +440,12 @@ def fetch_etf_data(cfg):
             elif points:
                 price = points[-1][1]
                 live = True
+
+            reg_time = meta.get("regularMarketTime")
+            if reg_time:
+                market_ts = int(reg_time)
+            elif points:
+                market_ts = points[-1][0]
 
             prev_close = meta.get("regularMarketPreviousClose")
             if prev_close is None and len(points) >= 2:
@@ -491,7 +518,7 @@ def fetch_etf_data(cfg):
             if best_val > 0:
                 ath = max(best_val, price, high_52w)
                 if best_ts:
-                    dt = datetime.datetime.fromtimestamp(best_ts)
+                    dt = ts_to_bratislava(best_ts)
                     ath_date_str = dt.strftime("%m/%y")
     except Exception as e:
         print(f"Chyba sťahovania {symbol}: {e} (používam záložné dáta)")
@@ -536,6 +563,7 @@ def fetch_etf_data(cfg):
         "pos_52w": pos_52w,
         "series": series_1y,
         "live": live,
+        "market_ts": market_ts,
     }
 
 
@@ -629,6 +657,8 @@ def create_etf_dashboard():
 
     etfs = [fetch_etf_data(cfg) for cfg in ETF_CONFIG]
     any_live = any(e["live"] for e in etfs)
+    market_times = [e["market_ts"] for e in etfs if e.get("market_ts")]
+    latest_market_dt = ts_to_bratislava(max(market_times)) if market_times else now
     header_mid_text = get_header_nameday_or_holiday(now)
 
     header_h = 46
@@ -843,10 +873,14 @@ def create_etf_dashboard():
         )
 
     # ==========================================================
-    # E. PÄTIČKA (y = 452..480) — pravá strana zámerne prázdna
+    # E. PÄTIČKA (y = 452..480) — zdroj + čas posledných dát z Xetry
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
-    status_txt = "LIVE · Yahoo Finance (Xetra)" if any_live else "ZÁLOŽNÉ DÁTA · API nedostupné"
+    if any_live:
+        data_time_str = latest_market_dt.strftime("%d.%m.%Y %H:%M")
+        status_txt = f"LIVE · Yahoo Finance (Xetra) · Dáta: {data_time_str}"
+    else:
+        status_txt = f"ZÁLOŽNÉ DÁTA · API nedostupné · {now.strftime('%d.%m.%Y %H:%M')}"
     draw.text((12, 459), status_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
 
     # Krok 2: Ostrý 1-bit prevod s optimalizovaným prahom pre biele pozadie
