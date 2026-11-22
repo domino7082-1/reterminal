@@ -1,4 +1,3 @@
-
 import html
 import json
 import re
@@ -17,6 +16,9 @@ OUTPUT_FILE = "world_news_output.bmp"
 TZ_LOCAL = ZoneInfo("Europe/Bratislava")
 NEWSPAPER_TITLE = "SVETOVÝ DENNÍK"
 
+# Počet správ na displeji: 1 hlavná + 3 ďalšie = 4
+TOTAL_ARTICLES = 4
+
 # Zobrazovať prísne len správy vydané v aktuálny deň
 ONLY_TODAY = True
 
@@ -33,29 +35,22 @@ WORLD_CLOCKS = [
     ("TOKIO", "Asia/Tokyo"),
 ]
 
-# 5 pevných pozícií: (Hlavná kategória, Náhradná kategória)
-# Pozícia 0 = hlavná správa hore, pozície 1..4 = mriežka 2×2
-SLOTS = [
-    {
-        "primary": ("SVET", "svet"),
-        "fallback": ("DOMOV", "domov"),
-    },
-    {
-        "primary": ("EKONOMIKA A TRHY", "ekonomika"),
-        "fallback": ("ENERGIE A BÝVANIE", "energie_byvanie"),
-    },
-    {
-        "primary": ("AI A TECH", "ai_tech"),
-        "fallback": ("GADGETY A IT", "gadgety_it"),
-    },
-    {
-        "primary": ("VEDA A VESMÍR", "veda_vesmir"),
-        "fallback": ("ZDRAVIE A PRÍRODA", "zdravie_priroda"),
-    },
-    {
-        "primary": ("ŠPORT", "sport"),
-        "fallback": ("AUTO A MOBILITA", "auto"),
-    },
+# 5 hlavných kategórií (mixujú sa do 4 pozícií)
+MAIN_CATEGORIES = [
+    ("SVET", "svet"),
+    ("EKONOMIKA A TRHY", "ekonomika"),
+    ("AI A TECH", "ai_tech"),
+    ("VEDA A VESMÍR", "veda_vesmir"),
+    ("ŠPORT", "sport"),
+]
+
+# 5 záložných kategórií (použijú sa len vtedy, ak hlavné nestačia na 4 správy)
+FALLBACK_CATEGORIES = [
+    ("DOMOV", "domov"),
+    ("ENERGIE A BÝVANIE", "energie_byvanie"),
+    ("GADGETY A IT", "gadgety_it"),
+    ("ZDRAVIE A PRÍRODA", "zdravie_priroda"),
+    ("AUTO A MOBILITA", "auto"),
 ]
 
 # RSS zdroje: (Krátky názov zdroja, Názov vydavateľa do pätičky, Kategórie zdroja, URL)
@@ -96,7 +91,7 @@ FEEDS = [
     ("Pravda Auto", "Pravda", ("auto",), "https://auto.pravda.sk/rss/xml/"),
 ]
 
-# Kľúčové slová pre jemné triedenie podkategórií (podporujú celé slová cez regex aj korene slov)
+# Kľúčové slová pre jemné triedenie podkategórií
 KEYWORDS = {
     "energie_byvanie": [
         "energi", "elektrin", "plyn", "tepl", "bývan", "nehnuteľn", "hypoték",
@@ -136,6 +131,12 @@ KEYWORDS = {
 }
 
 DAYS_SK = ["PONDELOK", "UTOROK", "STREDA", "ŠTVRTOK", "PIATOK", "SOBOTA", "NEDEĽA"]
+
+# Bežné slovenské skratky, po ktorých bodka neukončuje vetu
+ABBREV_RE = re.compile(
+    r"(?:\b(?:napr|tzv|mil|mld|tis|hod|min|sek|dr|ing|mgr|prof|mudr|judr|sv|st|č|r|str|pozn|resp|atď|t\.?\s*j)|^\d+|\s\d+)\.$",
+    re.IGNORECASE,
+)
 
 # Slovenský preklad WMO kódov počasia (Open-Meteo)
 WMO_SK = {
@@ -182,13 +183,51 @@ def load_font(candidates, size):
         return ImageFont.load_default()
 
 
-def clean_text(raw):
+def split_sentences(text):
+    """Rozdelí slovenský text na celé vety bez lámania na radových číslovkách a skratkách."""
+    if not text:
+        return []
+    parts = re.split(r"(?<=[.!?])\s+", text.strip())
+    sentences = []
+    for part in parts:
+        if not part:
+            continue
+        if sentences and ABBREV_RE.search(sentences[-1]):
+            sentences[-1] = f"{sentences[-1]} {part}"
+        else:
+            sentences.append(part)
+    return sentences
+
+
+def clean_text(raw, is_summary=False):
     if not raw:
         return ""
     text = re.sub(r"<[^>]+>", " ", raw)
     text = html.unescape(text)
-    text = re.sub(r"\s*(Čítajte viac|Viac sa dočítate|Celý článok).*$", "", text, flags=re.IGNORECASE)
-    return re.sub(r"\s+", " ", text).strip()
+    # Odstránenie typických RSS a WordPress dodatkov
+    text = re.sub(
+        r"\s*(Čítajte viac|Viac sa dočítate|Celý článok|Príspevok .*? sa (prvýkrát|najprv) objavil|The post .*? appeared first).*$",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"\s+", " ", text).strip()
+
+    if is_summary and text:
+        # Ak samotný RSS feed usekol perex znakmi [...], […] alebo ...
+        had_feed_ellipsis = bool(re.search(r"(\[\s*(?:\.\.\.|…)\s*\]|\.\.\.|…)\s*$", text))
+        if had_feed_ellipsis:
+            stripped = re.sub(r"\s*(\[\s*(?:\.\.\.|…)\s*\]|\.\.\.|…)\s*$", "", text).strip()
+            sentences = split_sentences(stripped)
+            complete = [s for s in sentences if s and s[-1] in ".!?"]
+            if complete:
+                text = " ".join(complete)
+            else:
+                text = stripped.rstrip(",;:–—- ")
+                if text and text[-1] not in ".!?":
+                    text += "."
+
+    return text
 
 
 def parse_date(date_str):
@@ -285,14 +324,14 @@ def fetch_single_feed(feed_cfg, today, per_feed_limit=15):
 
         if is_atom:
             ns = "{http://www.w3.org/2005/Atom}"
-            title = clean_text(item.findtext(f"{ns}title"))
-            summary = clean_text(
-                item.findtext(f"{ns}summary") or item.findtext(f"{ns}content")
-            )
+            title = clean_text(item.findtext(f"{ns}title"), is_summary=False)
+            raw_summary = item.findtext(f"{ns}summary") or item.findtext(f"{ns}content")
+            summary = clean_text(raw_summary, is_summary=True)
             pub_raw = item.findtext(f"{ns}published") or item.findtext(f"{ns}updated")
         else:
-            title = clean_text(item.findtext("title"))
-            summary = clean_text(item.findtext("description"))
+            title = clean_text(item.findtext("title"), is_summary=False)
+            raw_summary = item.findtext("description")
+            summary = clean_text(raw_summary, is_summary=True)
             pub_raw = item.findtext("pubDate") or item.findtext(dc_date_tag)
 
         if not title or len(title) < 12:
@@ -308,6 +347,9 @@ def fetch_single_feed(feed_cfg, today, per_feed_limit=15):
         if summary and normalize_key(summary) == key:
             summary = ""
 
+        # Poznačenie, či mal RSS perex už od zdroja neúplné tri bodky
+        raw_cut = bool(raw_summary and re.search(r"(\[\s*(?:\.\.\.|…)\s*\]|\.\.\.|…)\s*$", re.sub(r"<[^>]+>", "", html.unescape(raw_summary)).strip()))
+
         results.append(
             {
                 "key": key,
@@ -316,6 +358,7 @@ def fetch_single_feed(feed_cfg, today, per_feed_limit=15):
                 "groups": set(groups),
                 "title": title,
                 "summary": summary,
+                "raw_cut": raw_cut,
                 "dt": dt,
             }
         )
@@ -336,7 +379,6 @@ def fetch_articles(feeds, per_feed_limit=15):
         for fut in as_completed(futures):
             all_raw.extend(fut.result())
 
-    # Zoradenie od najnovšieho a odstránenie duplicít (zlúčením skupín pri rovnakom článku)
     all_raw.sort(key=lambda x: x["dt"], reverse=True)
     by_key = {}
     ordered = []
@@ -349,8 +391,9 @@ def fetch_articles(feeds, per_feed_limit=15):
         else:
             existing = by_key[k]
             existing["groups"].update(art["groups"])
-            if not existing["summary"] and art["summary"]:
+            if (not existing["summary"] or existing["raw_cut"]) and art["summary"] and not art["raw_cut"]:
                 existing["summary"] = art["summary"]
+                existing["raw_cut"] = False
 
     return ordered
 
@@ -399,7 +442,6 @@ def pick_best_for_category(articles, cat_key, used_keys):
     if not candidates:
         return None
 
-    # Pri Gadgety a IT uprednostníme články priamo o gadgetoch/IT pred všeobecným techom
     if cat_key == "gadgety_it":
         gadget_matches = [
             a for a in candidates
@@ -408,92 +450,184 @@ def pick_best_for_category(articles, cat_key, used_keys):
         if gadget_matches:
             candidates = gadget_matches
 
-    # Uprednostníme najnovší článok s perexom; ak žiaden nemá perex, berieme najnovší
-    with_summary = [a for a in candidates if a["summary"]]
-    chosen = with_summary[0] if with_summary else candidates[0]
+    # Uprednostníme najčerstvejší článok s kompletným perexom bez RSS useknutia
+    clean_complete = [a for a in candidates if a["summary"] and not a["raw_cut"]]
+    if clean_complete:
+        chosen = clean_complete[0]
+    else:
+        with_summary = [a for a in candidates if a["summary"]]
+        chosen = with_summary[0] if with_summary else candidates[0]
+
     used_keys.add(chosen["key"])
     return chosen
 
 
-def select_slot_articles(articles):
+def select_mixed_articles(articles):
+    """
+    Vyberie 4 správy (1 hlavná + 3 ďalšie):
+    - Najprv mixuje medzi všetkými 5 hlavnými kategóriami (každú hodinu sa poradie rotuje,
+      takže všetkých 5 dostáva rovnaký priestor).
+    - Ak hlavné kategórie neposkytnú 4 dnešné správy, doplní zvyšok zo 5 záložných kategórií.
+    - Najnovšia hlavná správa sa zobrazí navrchu ako HLAVNÁ SPRÁVA.
+    """
+    now = datetime.now(TZ_LOCAL)
+    rotation_seed = now.timetuple().tm_yday * 24 + now.hour
+
+    def rotated(items):
+        offset = rotation_seed % len(items)
+        return items[offset:] + items[:offset]
+
     used_keys = set()
-    slot_results = []
+    selected = []
 
-    for idx, slot in enumerate(SLOTS, start=1):
-        p_label, p_key = slot["primary"]
-        f_label, f_key = slot["fallback"]
-
-        art = pick_best_for_category(articles, p_key, used_keys)
+    # 1. Kolo: mix z 5 hlavných kategórií
+    for label, key in rotated(MAIN_CATEGORIES):
+        if len(selected) >= TOTAL_ARTICLES:
+            break
+        art = pick_best_for_category(articles, key, used_keys)
         if art is not None:
-            entry = dict(art, display_tag=p_label, is_fallback=False)
-            slot_results.append(entry)
-            print(f"Slot {idx} [{p_label}]: {art['source']} ({art['dt'].strftime('%d.%m. %H:%M')}) - {art['title'][:60]}")
-            continue
+            selected.append(dict(art, display_tag=label, is_fallback=False))
 
-        art = pick_best_for_category(articles, f_key, used_keys)
-        if art is not None:
-            entry = dict(art, display_tag=f_label, is_fallback=True)
-            slot_results.append(entry)
-            print(f"Slot {idx} [ZÁLOHA: {f_label}]: {art['source']} ({art['dt'].strftime('%d.%m. %H:%M')}) - {art['title'][:60]}")
-            continue
+    # 2. Kolo: doplnenie zo 5 záložných kategórií iba ak chýbajú hlavné
+    if len(selected) < TOTAL_ARTICLES:
+        for label, key in rotated(FALLBACK_CATEGORIES):
+            if len(selected) >= TOTAL_ARTICLES:
+                break
+            art = pick_best_for_category(articles, key, used_keys)
+            if art is not None:
+                selected.append(dict(art, display_tag=label, is_fallback=True))
 
-        slot_results.append({"display_tag": p_label, "empty": True})
-        print(f"Slot {idx} [{p_label} / {f_label}]: dnes zatiaľ bez nových správ")
+    # Hlavné kategórie vždy pred záložnými, v rámci nich od najnovšej
+    selected.sort(key=lambda a: (a["is_fallback"], -a["dt"].timestamp()))
 
-    return slot_results
+    for idx, art in enumerate(selected, start=1):
+        role = "ZÁLOHA" if art["is_fallback"] else "HLAVNÁ KAT."
+        pos = "HLAVNÁ SPRÁVA" if idx == 1 else f"SPRÁVA {idx}"
+        print(
+            f"{pos} [{role}: {art['display_tag']}]: "
+            f"{art['source']} ({art['dt'].strftime('%d.%m. %H:%M')}) - {art['title']}"
+        )
+
+    return selected
 
 
-def wrap_text(draw, text, font, max_width, max_lines):
+def wrap_text_full(draw, text, font, max_width):
+    """Zalomí celý text podľa šírky v pixeloch bez skracovania a bez troch bodiek."""
     words = text.split()
     if not words:
         return []
 
     lines = []
     current = ""
-    truncated = False
-
-    for i, word in enumerate(words):
+    for word in words:
         candidate = f"{current} {word}".strip()
         if draw.textlength(candidate, font=font) <= max_width:
             current = candidate
         else:
             if current:
                 lines.append(current)
-                if len(lines) == max_lines:
-                    truncated = True
-                    current = ""
-                    break
                 current = word
             else:
-                trimmed = word
-                while trimmed and draw.textlength(trimmed + "…", font=font) > max_width:
-                    trimmed = trimmed[:-1]
-                lines.append(trimmed + "…")
-                if len(lines) == max_lines:
-                    truncated = i < len(words) - 1
-                    current = ""
-                    break
-                current = ""
-
-    if current and len(lines) < max_lines:
-        if draw.textlength(current, font=font) <= max_width:
-            lines.append(current)
-        else:
-            trimmed = current
-            while trimmed and draw.textlength(trimmed + "…", font=font) > max_width:
-                trimmed = trimmed[:-1]
-            lines.append(trimmed + "…")
-
-    if truncated and lines and not lines[-1].endswith("…"):
-        last = lines[-1].rstrip(".,;:!?-–— ")
-        while last and draw.textlength(last + "…", font=font) > max_width:
-            last = last[:-1].rstrip(".,;:!?-–— ")
-        lines[-1] = (last + "…") if last else "…"
-
-    return lines[:max_lines]
+                # Extrémne dlhé jedno slovo (napr. URL) rozdelí bez straty znakov
+                chunk = ""
+                for ch in word:
+                    if draw.textlength(chunk + ch, font=font) <= max_width:
+                        chunk += ch
+                    else:
+                        if chunk:
+                            lines.append(chunk)
+                        chunk = ch
+                current = chunk
+    if current:
+        lines.append(current)
+    return lines
 
 
-def render_dashboard(slot_articles, weather_str):
+def compute_blocks(draw, articles, preset, content_w):
+    blocks = []
+    for idx, art in enumerate(articles):
+        is_lead = idx == 0
+        f_title = preset["lead_title"] if is_lead else preset["item_title"]
+        f_body = preset["lead_body"] if is_lead else preset["item_body"]
+        lh_title = preset["lead_lh_t"] if is_lead else preset["item_lh_t"]
+        lh_body = preset["lead_lh_b"] if is_lead else preset["item_lh_b"]
+        badge_h = preset["lead_badge_h"] if is_lead else preset["item_badge_h"]
+        gap_after_badge = preset["gap_badge"]
+        gap_after_title = preset["gap_title"]
+
+        t_lines = wrap_text_full(draw, art["title"], f_title, content_w)
+        s_lines = wrap_text_full(draw, art["summary"], f_body, content_w) if art["summary"] else []
+
+        h = badge_h + gap_after_badge + len(t_lines) * lh_title
+        if s_lines:
+            h += gap_after_title + len(s_lines) * lh_body
+
+        blocks.append(
+            {
+                "art": art,
+                "is_lead": is_lead,
+                "t_lines": t_lines,
+                "s_lines": s_lines,
+                "f_title": f_title,
+                "f_body": f_body,
+                "lh_title": lh_title,
+                "lh_body": lh_body,
+                "badge_h": badge_h,
+                "gap_after_badge": gap_after_badge,
+                "gap_after_title": gap_after_title,
+                "height": h,
+            }
+        )
+    return blocks
+
+
+def fit_articles_to_canvas(draw, articles, presets, content_w, avail_h):
+    """
+    Nájde najčitateľnejšiu sadu písiem, pri ktorej sa zmestia všetky články celé.
+    Ak by niektorý RSS feed mal extrémne dlhý odsek, skráti ho len po celých vetách (nikdy na '...').
+    """
+    min_div_space = 10
+
+    for p_idx, preset in enumerate(presets):
+        blocks = compute_blocks(draw, articles, preset, content_w)
+        total_h = sum(b["height"] for b in blocks) + min_div_space * max(0, len(blocks) - 1)
+        if total_h <= avail_h:
+            return blocks, preset, p_idx + 1
+
+    # Záložný režim pri extrémne dlhých perexoch: použijeme najkompaktnejšie písmo
+    # a z najdlhšieho perexu uberáme po celých vetách, kým sa nezmestí bez '...'
+    preset = presets[-1]
+    trimmed = [dict(a) for a in articles]
+
+    while True:
+        blocks = compute_blocks(draw, trimmed, preset, content_w)
+        total_h = sum(b["height"] for b in blocks) + min_div_space * max(0, len(blocks) - 1)
+        if total_h <= avail_h:
+            return blocks, preset, len(presets)
+
+        # Nájdeme článok s najdlhším perexom, ktorý má viac než 1 vetu
+        candidates = [
+            (i, split_sentences(a["summary"]))
+            for i, a in enumerate(trimmed)
+            if a["summary"]
+        ]
+        multi = [(i, sents) for i, sents in candidates if len(sents) > 1]
+        if multi:
+            target_i, sents = max(multi, key=lambda x: len(trimmed[x[0]]["summary"]))
+            trimmed[target_i]["summary"] = " ".join(sents[:-1]).strip()
+            continue
+
+        # Posledná poistka: ak ostali už len 1-vetové extrémne dlhé perexy, skryjeme najdlhší perex
+        any_sum = [i for i, a in enumerate(trimmed) if a["summary"]]
+        if any_sum:
+            target_i = max(any_sum, key=lambda i: len(trimmed[i]["summary"]))
+            trimmed[target_i]["summary"] = ""
+            continue
+
+        return blocks, preset, len(presets)
+
+
+def render_dashboard(selected_articles, weather_str):
     # 1-bit plátno: 1 = biela, 0 = čierna
     img = Image.new("1", (WIDTH, HEIGHT), 1)
     draw = ImageDraw.Draw(img)
@@ -515,16 +649,66 @@ def render_dashboard(slot_articles, weather_str):
     f_masthead = load_font(serif_bold, 25)
     f_hdr_meta = load_font(sans_bold, 12)
     f_clock = load_font(sans_bold, 12)
-    f_badge = load_font(sans_bold, 11)
-    f_badge_sm = load_font(sans_bold, 10)
-    f_meta = load_font(sans_bold, 12)
-    f_meta_sm = load_font(sans_bold, 11)
-    f_lead_title = load_font(sans_bold, 20)
-    f_lead_body = load_font(sans_reg, 14)
-    f_grid_title = load_font(sans_bold, 15)
-    f_grid_body = load_font(sans_reg, 13)
     f_footer = load_font(sans_reg, 11)
     f_footer_bold = load_font(sans_bold, 11)
+
+    # Sady písiem od najčitateľnejšej po kompaktnejšiu (aby sa vždy zmestili celé správy)
+    presets = [
+        {
+            "badge_lead": load_font(sans_bold, 11),
+            "badge_item": load_font(sans_bold, 10),
+            "meta_lead": load_font(sans_bold, 12),
+            "meta_item": load_font(sans_bold, 11),
+            "lead_title": load_font(sans_bold, 19),
+            "lead_body": load_font(sans_reg, 14),
+            "item_title": load_font(sans_bold, 15),
+            "item_body": load_font(sans_reg, 13),
+            "lead_badge_h": 18,
+            "item_badge_h": 16,
+            "lead_lh_t": 22,
+            "lead_lh_b": 17,
+            "item_lh_t": 18,
+            "item_lh_b": 16,
+            "gap_badge": 4,
+            "gap_title": 4,
+        },
+        {
+            "badge_lead": load_font(sans_bold, 11),
+            "badge_item": load_font(sans_bold, 10),
+            "meta_lead": load_font(sans_bold, 11),
+            "meta_item": load_font(sans_bold, 11),
+            "lead_title": load_font(sans_bold, 18),
+            "lead_body": load_font(sans_reg, 13),
+            "item_title": load_font(sans_bold, 14),
+            "item_body": load_font(sans_reg, 12),
+            "lead_badge_h": 17,
+            "item_badge_h": 15,
+            "lead_lh_t": 20,
+            "lead_lh_b": 16,
+            "item_lh_t": 17,
+            "item_lh_b": 15,
+            "gap_badge": 3,
+            "gap_title": 3,
+        },
+        {
+            "badge_lead": load_font(sans_bold, 10),
+            "badge_item": load_font(sans_bold, 10),
+            "meta_lead": load_font(sans_bold, 11),
+            "meta_item": load_font(sans_bold, 10),
+            "lead_title": load_font(sans_bold, 16),
+            "lead_body": load_font(sans_reg, 12),
+            "item_title": load_font(sans_bold, 13),
+            "item_body": load_font(sans_reg, 11),
+            "lead_badge_h": 16,
+            "item_badge_h": 15,
+            "lead_lh_t": 19,
+            "lead_lh_b": 14,
+            "item_lh_t": 16,
+            "item_lh_b": 13,
+            "gap_badge": 3,
+            "gap_title": 2,
+        },
+    ]
 
     now = datetime.now(TZ_LOCAL)
     margin_x = 16
@@ -554,96 +738,97 @@ def render_dashboard(slot_articles, weather_str):
     draw.line((margin_x, 70, right_x, 70), fill=0, width=1)
     draw.line((margin_x, 73, right_x, 73), fill=0, width=2)
 
-    # --- 3. HLAVNÁ SPRÁVA (SLOT 1: SVET / DOMOV) ---
-    lead = slot_articles[0]
-    badge_txt = f" {lead['display_tag']} "
-    badge_w = int(draw.textlength(badge_txt, font=f_badge)) + 8
-    draw.rectangle((margin_x, 80, margin_x + badge_w, 98), fill=0)
-    draw.text((margin_x + 4, 89), badge_txt, font=f_badge, fill=1, anchor="lm")
-    draw.text((right_x, 89), "HLAVNÁ SPRÁVA", font=f_meta_sm, fill=0, anchor="rm")
+    # --- PÄTIČKA (VYDAVATELIA + POČASIE ŠAMORÍN) ---
+    def draw_footer():
+        draw.line((margin_x, 456, right_x, 456), fill=0, width=1)
+        publishers = " · ".join(dict.fromkeys(f[1] for f in FEEDS))
+        draw.text((margin_x, 468), f"Zdroje: {publishers}", font=f_footer, fill=0, anchor="lm")
+        draw.text((right_x, 468), weather_str, font=f_footer_bold, fill=0, anchor="rm")
 
-    if lead.get("empty"):
-        draw.text(
-            (margin_x, 126),
-            "Dnes zatiaľ neboli vydané nové správy v kategórii Svet ani Domov.",
-            font=f_lead_body,
-            fill=0,
+    if not selected_articles:
+        msg = (
+            "Dnes zatiaľ neboli vydané nové správy."
+            if ONLY_TODAY
+            else "Nepodarilo sa načítať správy z RSS zdrojov."
         )
+        draw.text((WIDTH // 2, HEIGHT // 2), msg, font=presets[0]["lead_title"], fill=0, anchor="mm")
+        draw_footer()
+        img.save(OUTPUT_FILE)
+        print(f"Vygenerované: {OUTPUT_FILE} (0 správ | {weather_str})")
+        return
+
+    # --- 3. VYKRESLENIE 1 HLAVNEJ + 3 ĎALŠÍCH SPRÁV NA CELÚ ŠÍRKU ---
+    top_y = 80
+    bottom_y = 450
+    avail_h = bottom_y - top_y
+
+    blocks, preset, used_preset_num = fit_articles_to_canvas(
+        draw, selected_articles, presets, content_w, avail_h
+    )
+
+    total_blocks_h = sum(b["height"] for b in blocks)
+    n_gaps = max(0, len(blocks) - 1)
+    extra_h = max(0, avail_h - total_blocks_h)
+
+    # Rovnomerné rozdelenie voľného priestoru medzi oddeľovače a okraje
+    if n_gaps > 0:
+        div_space = min(24, max(10, extra_h // (n_gaps + 1)))
+        remaining = max(0, extra_h - div_space * n_gaps)
+        y = top_y + min(10, remaining // 2)
     else:
-        lead_meta = f"{lead['dt'].strftime('%H:%M')} · {lead['source'].upper()}"
-        draw.text((margin_x + badge_w + 10, 89), lead_meta, font=f_meta, fill=0, anchor="lm")
+        div_space = 0
+        y = top_y
 
-        y = 103
-        lead_lines = wrap_text(draw, lead["title"], f_lead_title, content_w, max_lines=2)
-        for line in lead_lines:
-            draw.text((margin_x, y), line, font=f_lead_title, fill=0)
-            y += 23
+    for idx, b in enumerate(blocks):
+        art = b["art"]
+        is_lead = b["is_lead"]
+        f_badge = preset["badge_lead"] if is_lead else preset["badge_item"]
+        f_meta = preset["meta_lead"] if is_lead else preset["meta_item"]
+        badge_h = b["badge_h"]
 
-        if lead["summary"]:
-            y += 5
-            max_sum_lines = 3 if len(lead_lines) == 1 else 2
-            for line in wrap_text(draw, lead["summary"], f_lead_body, content_w, max_lines=max_sum_lines):
-                draw.text((margin_x, y), line, font=f_lead_body, fill=0)
-                y += 18
+        # Štítok kategórie (inverzný čierny obdĺžnik)
+        badge_txt = f" {art['display_tag']} "
+        badge_w = int(draw.textlength(badge_txt, font=f_badge)) + 8
+        draw.rectangle((margin_x, y, margin_x + badge_w, y + badge_h), fill=0)
+        draw.text((margin_x + 4, y + badge_h // 2), badge_txt, font=f_badge, fill=1, anchor="lm")
 
-    draw.line((margin_x, 195, right_x, 195), fill=0, width=2)
+        meta_str = f"{art['dt'].strftime('%H:%M')} · {art['source'].upper()}"
+        draw.text((margin_x + badge_w + 10, y + badge_h // 2), meta_str, font=f_meta, fill=0, anchor="lm")
 
-    # --- 4. MRIEŽKA 2×2 (SLOTY 2 – 5) ---
-    draw.line((WIDTH // 2, 202, WIDTH // 2, 450), fill=0, width=1)
-    draw.line((margin_x, 327, right_x, 327), fill=0, width=1)
+        if is_lead:
+            draw.text((right_x, y + badge_h // 2), "HLAVNÁ SPRÁVA", font=preset["meta_item"], fill=0, anchor="rm")
 
-    cell_w = 372
-    cells = [
-        (margin_x, 203),          # Horná ľavá: Ekonomika / Energie a bývanie
-        (WIDTH // 2 + 12, 203),   # Horná pravá: AI a Tech / Gadgety a IT
-        (margin_x, 335),          # Dolná ľavá: Veda a vesmír / Zdravie a príroda
-        (WIDTH // 2 + 12, 335),   # Dolná pravá: Šport / Auto a mobilita
-    ]
+        cy = y + badge_h + b["gap_after_badge"]
+        for line in b["t_lines"]:
+            draw.text((margin_x, cy), line, font=b["f_title"], fill=0)
+            cy += b["lh_title"]
 
-    for art, (cx, cy) in zip(slot_articles[1:5], cells):
-        b_txt = f" {art['display_tag']} "
-        b_w = int(draw.textlength(b_txt, font=f_badge_sm)) + 6
-        draw.rectangle((cx, cy, cx + b_w, cy + 16), fill=0)
-        draw.text((cx + 3, cy + 8), b_txt, font=f_badge_sm, fill=1, anchor="lm")
+        if b["s_lines"]:
+            cy += b["gap_after_title"]
+            for line in b["s_lines"]:
+                draw.text((margin_x, cy), line, font=b["f_body"], fill=0)
+                cy += b["lh_body"]
 
-        if art.get("empty"):
-            draw.text(
-                (cx, cy + 32),
-                "Dnes zatiaľ bez nových správ v tejto kategórii.",
-                font=f_grid_body,
-                fill=0,
-            )
-            continue
+        # Oddeľovač pod článkom (hrubší pod hlavnou správou, tenší medzi ďalšími)
+        if idx < len(blocks) - 1:
+            div_y = cy + div_space // 2
+            line_w = 2 if is_lead else 1
+            draw.line((margin_x, div_y, right_x, div_y), fill=0, width=line_w)
+            y = cy + div_space
+        else:
+            y = cy
 
-        meta = f"{art['dt'].strftime('%H:%M')} · {art['source'].upper()}"
-        draw.text((cx + b_w + 8, cy + 8), meta, font=f_meta_sm, fill=0, anchor="lm")
-
-        ty = cy + 21
-        t_lines = wrap_text(draw, art["title"], f_grid_title, cell_w, max_lines=2)
-        for line in t_lines:
-            draw.text((cx, ty), line, font=f_grid_title, fill=0)
-            ty += 18
-
-        if art["summary"]:
-            ty += 4
-            s_max = 4 if len(t_lines) == 1 else 3
-            for line in wrap_text(draw, art["summary"], f_grid_body, cell_w, max_lines=s_max):
-                draw.text((cx, ty), line, font=f_grid_body, fill=0)
-                ty += 16
-
-    # --- 5. PÄTIČKA (VYDAVATELIA + POČASIE ŠAMORÍN) ---
-    draw.line((margin_x, 456, right_x, 456), fill=0, width=1)
-    publishers = " · ".join(dict.fromkeys(f[1] for f in FEEDS))
-    draw.text((margin_x, 468), f"Zdroje: {publishers}", font=f_footer, fill=0, anchor="lm")
-    draw.text((right_x, 468), weather_str, font=f_footer_bold, fill=0, anchor="rm")
+    draw_footer()
 
     img.save(OUTPUT_FILE)
-    filled = sum(1 for a in slot_articles if not a.get("empty"))
-    print(f"Vygenerované: {OUTPUT_FILE} ({filled}/5 obsadených pozícií | {weather_str})")
+    print(
+        f"Vygenerované: {OUTPUT_FILE} ({len(blocks)}/{TOTAL_ARTICLES} správ | "
+        f"Písmo: sada {used_preset_num} | {weather_str})"
+    )
 
 
 if __name__ == "__main__":
     all_articles = fetch_articles(FEEDS)
-    slots_selected = select_slot_articles(all_articles)
+    selected = select_mixed_articles(all_articles)
     weather = fetch_weather()
-    render_dashboard(slots_selected, weather)
+    render_dashboard(selected, weather)
