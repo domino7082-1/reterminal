@@ -1,4 +1,3 @@
-
 name: Generate Dashboard BMP
 run-name: Generate Dashboard BMP (${{ inputs.source || 'ručne' }})
 
@@ -46,6 +45,9 @@ jobs:
       run: python etf_dashboard.py
 
     - name: Run World News dashboard
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       run: python world_news_dashboard.py
 
     - name: Commit and Push changes
@@ -53,8 +55,11 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-        # Pridáme oba vygenerované obrázky a JSON so stavom
+        # Pridáme oba vygenerované obrázky a cache so zhrnutiami (ak existuje)
         git add etf_output.bmp world_news_output.bmp
+        if [ -f summary_cache.json ]; then
+          git add summary_cache.json
+        fi
 
         # Skontrolujeme, či sú nejaké zmeny; ak nie, končíme
         if git diff --staged --quiet; then
@@ -73,4 +78,3 @@ jobs:
           git commit -m "$COMMIT_MSG"
           git push
         fi
-
