@@ -3,6 +3,7 @@ import html
 import json
 import os
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -11,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from PIL import Image, ImageDraw, ImageFont
@@ -36,9 +38,23 @@ WEATHER_LON = 17.3106
 # AI konfigurácia (kľúče sa načítajú bezpečne z GitHub Secrets)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
-GEMINI_MODELS = ["gemini-2.5-flash-lite", "gemini-2.5-flash"]
-GROQ_MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-HTTP_UA = "Mozilla/5.0 (compatible; EInkSvetovyDennik/2.0; +https://github.com)"
+GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"]
+GROQ_FALLBACK_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+
+BROWSER_UA = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+)
+APP_UA = "EInkSvetovyDennik/2.1 github.com/domino7082-1"
+
+# Interný stav behu (zabraňuje opakovanému skúšaniu nefunkčných modelov a 429 na doménach)
+_DEAD_GEMINI_MODELS = set()
+_DEAD_GROQ_MODELS = set()
+_DISCOVERED_GEMINI_MODELS = None
+_DISCOVERED_GROQ_MODELS = None
+_DOMAIN_LOCKS = {}
+_DOMAIN_LAST_HIT = {}
+_DOMAIN_META_LOCK = threading.Lock()
 
 # Svetové časy v hlavičke (Názov, IANA časové pásmo)
 WORLD_CLOCKS = [
@@ -83,14 +99,12 @@ FEEDS = [
     ("Denník E", ("ekonomika",), "https://e.dennikn.sk/feed/"),
     ("Aktuality", ("ekonomika",), "https://www.aktuality.sk/rss/ekonomika/"),
     ("TASR", ("ekonomika",), "https://www.teraz.sk/rss/ekonomika.rss"),
-    ("Pravda", ("ekonomika",), "https://ekonomika.pravda.sk/rss/xml/"),
     # TECH / AI / GADGETY
     ("Živé.sk", ("tech",), "https://zive.aktuality.sk/rss/najnovsie/"),
     ("SME Tech", ("tech",), "https://tech.sme.sk/rss"),
     ("TouchIT", ("tech",), "https://touchit.sk/feed/"),
     # VEDA A VESMÍR
     ("Denník N", ("veda",), "https://dennikn.sk/veda/feed/"),
-    ("Pravda Veda", ("veda",), "https://veda.pravda.sk/rss/xml/"),
     # ZDRAVIE A PRÍRODA
     ("SME Primár", ("zdravie",), "https://primar.sme.sk/rss"),
     ("Pravda Zdravie", ("zdravie",), "https://zdravie.pravda.sk/rss/xml/"),
@@ -562,8 +576,35 @@ def parse_date(date_str):
         return None
 
 
-def http_get_text(url, timeout=10, extra_headers=None):
-    headers = {"User-Agent": HTTP_UA, "Accept-Language": "sk,cs;q=0.9,en;q=0.5"}
+def _root_domain(url):
+    host = (urlparse(url).hostname or "").lower()
+    parts = host.split(".")
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+
+def _throttle_domain(url, min_interval=0.8):
+    """Zabraňuje chybám 429 (najmä na sme.sk) pri paralelnom sťahovaní viacerých rubrík."""
+    dom = _root_domain(url)
+    with _DOMAIN_META_LOCK:
+        lock = _DOMAIN_LOCKS.setdefault(dom, threading.Lock())
+    with lock:
+        now_t = time.monotonic()
+        last = _DOMAIN_LAST_HIT.get(dom, 0.0)
+        wait = min_interval - (now_t - last)
+        if wait > 0:
+            time.sleep(wait)
+        _DOMAIN_LAST_HIT[dom] = time.monotonic()
+
+
+def http_get_text(url, timeout=10, extra_headers=None, throttle=False):
+    if throttle:
+        _throttle_domain(url)
+    headers = {
+        "User-Agent": BROWSER_UA,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "sk,cs;q=0.9,en;q=0.5",
+        "Accept-Encoding": "gzip",
+    }
     if extra_headers:
         headers.update(extra_headers)
     req = urllib.request.Request(url, headers=headers)
@@ -624,7 +665,7 @@ def fetch_article_body(url):
     if not url:
         return "", False
     try:
-        page_html = http_get_text(url, timeout=10)
+        page_html = http_get_text(url, timeout=10, throttle=True)
     except Exception as e:
         print(f"Nepodarilo sa stiahnuť článok ({url}): {e}")
         return "", False
@@ -635,7 +676,6 @@ def fetch_article_body(url):
     except Exception:
         return "", False
 
-    # Odstránenie duplicitných odsekov a orezanie na rozumnú dĺžku pre AI
     seen_p = set()
     clean_p = []
     total_chars = 0
@@ -650,7 +690,6 @@ def fetch_article_body(url):
             break
 
     body_text = "\n".join(clean_p)
-    # Detekcia paywallu: varovný text na stránke a zároveň málo voľného textu
     has_paywall_hint = bool(PAYWALL_RE.search(page_html))
     is_paywalled = has_paywall_hint and len(body_text) < 1200
     return body_text, is_paywalled
@@ -664,7 +703,6 @@ def load_summary_cache(today):
             data = json.load(f)
         if not isinstance(data, dict):
             return {}
-        # Uchovávame len záznamy z posledných 2 dní, aby súbor nerástol
         cutoff = (today - timedelta(days=2)).isoformat()
         return {
             k: v for k, v in data.items()
@@ -698,13 +736,11 @@ AI_SYSTEM_PROMPT = (
 def _clean_ai_output(text):
     if not text:
         return ""
-    # Odstránenie prípadných interných <think> blokov a markdownu
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"\*{1,2}|`", "", text)
     text = re.sub(r"\s+", " ", text).strip().strip('"„“\'')
     if text.upper().startswith("PAYWALL"):
         return "PAYWALL"
-    # Odstránenie prípadných troch bodiek na konci
     if re.search(r"(\.\.\.|…)\s*$", text):
         stripped = re.sub(r"\s*(\.\.\.|…)\s*$", "", text).strip()
         sents = split_sentences(stripped)
@@ -713,6 +749,49 @@ def _clean_ai_output(text):
     if text and text[-1] not in ".!?":
         text += "."
     return text
+
+
+def _discover_gemini_models():
+    """Dynamicky zistí dostupné Gemini Flash modely, ak by sa názvy v budúcnosti zmenili."""
+    global _DISCOVERED_GEMINI_MODELS
+    if _DISCOVERED_GEMINI_MODELS is not None:
+        return _DISCOVERED_GEMINI_MODELS
+
+    found = []
+    try:
+        req = urllib.request.Request(
+            "https://generativelanguage.googleapis.com/v1beta/models",
+            headers={"x-goog-api-key": GEMINI_API_KEY, "User-Agent": APP_UA},
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        exclude = ("tts", "image", "audio", "embedding", "robotics", "computer-use", "live", "veo")
+        for m in data.get("models") or []:
+            methods = m.get("supportedGenerationMethods") or []
+            if "generateContent" not in methods:
+                continue
+            mid = (m.get("name") or "").replace("models/", "")
+            low = mid.lower()
+            if "gemini" not in low or any(x in low for x in exclude):
+                continue
+            found.append(mid)
+
+        def rank_gemini(mid):
+            low = mid.lower()
+            is_lite = 0 if "flash-lite" in low else (1 if "flash" in low else 2)
+            ver_match = re.search(r"gemini-(\d+(?:\.\d+)?)", low)
+            ver = float(ver_match.group(1)) if ver_match else 0.0
+            is_preview = 1 if ("preview" in low or "exp" in low) else 0
+            return (is_lite, -ver, is_preview)
+
+        found.sort(key=rank_gemini)
+        if found:
+            print(f"Auto-objavené Gemini modely: {', '.join(found[:4])}")
+    except Exception as e:
+        print(f"Chyba pri zisťovaní Gemini modelov: {e}")
+
+    _DISCOVERED_GEMINI_MODELS = found[:4]
+    return _DISCOVERED_GEMINI_MODELS
 
 
 def _call_gemini(user_prompt):
@@ -729,51 +808,120 @@ def _call_gemini(user_prompt):
     }
     body_bytes = json.dumps(payload_base).encode("utf-8")
 
-    for model in GEMINI_MODELS:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-        req = urllib.request.Request(
-            url,
-            data=body_bytes,
-            method="POST",
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": GEMINI_API_KEY,
-                "User-Agent": HTTP_UA,
-            },
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            candidates = data.get("candidates") or []
-            if not candidates:
-                continue
-            parts = candidates[0].get("content", {}).get("parts") or []
-            # Preskočíme prípadné "thought" časti pri reasoning modeloch
-            answer_parts = [
-                p.get("text", "") for p in parts
-                if p.get("text") and not p.get("thought")
-            ]
-            out = _clean_ai_output(" ".join(answer_parts))
-            if out:
-                return out, f"Gemini/{model}"
-        except urllib.error.HTTPError as e:
-            err_body = ""
+    models_to_try = [m for m in GEMINI_MODELS if m not in _DEAD_GEMINI_MODELS]
+    if not models_to_try:
+        models_to_try = [m for m in _discover_gemini_models() if m not in _DEAD_GEMINI_MODELS]
+
+    for phase in (1, 2):
+        for model in models_to_try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+            req = urllib.request.Request(
+                url,
+                data=body_bytes,
+                method="POST",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": GEMINI_API_KEY,
+                    "User-Agent": APP_UA,
+                },
+            )
             try:
-                err_body = e.read().decode("utf-8", errors="replace")[:200]
-            except Exception:
-                pass
-            print(f"Chyba Gemini [{model}] HTTP {e.code}: {err_body}")
-        except Exception as e:
-            print(f"Chyba Gemini [{model}]: {e}")
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                candidates = data.get("candidates") or []
+                if not candidates:
+                    continue
+                parts = candidates[0].get("content", {}).get("parts") or []
+                answer_parts = [
+                    p.get("text", "") for p in parts
+                    if p.get("text") and not p.get("thought")
+                ]
+                out = _clean_ai_output(" ".join(answer_parts))
+                if out:
+                    return out, f"Gemini/{model}"
+            except urllib.error.HTTPError as e:
+                err_body = ""
+                try:
+                    err_body = e.read().decode("utf-8", errors="replace")[:220]
+                except Exception:
+                    pass
+                print(f"Chyba Gemini [{model}] HTTP {e.code}: {err_body}")
+                if e.code == 404:
+                    _DEAD_GEMINI_MODELS.add(model)
+            except Exception as e:
+                print(f"Chyba Gemini [{model}]: {e}")
+
+        # Ak všetky predvolené modely vrátili 404, skúsime automaticky objavené
+        if phase == 1 and all(m in _DEAD_GEMINI_MODELS for m in GEMINI_MODELS):
+            models_to_try = [
+                m for m in _discover_gemini_models()
+                if m not in _DEAD_GEMINI_MODELS and m not in GEMINI_MODELS
+            ]
+            if not models_to_try:
+                break
+        else:
+            break
 
     return None, None
+
+
+def _discover_groq_models():
+    """Dynamicky načíta aktuálne dostupné textové chat modely z Groq API."""
+    global _DISCOVERED_GROQ_MODELS
+    if _DISCOVERED_GROQ_MODELS is not None:
+        return _DISCOVERED_GROQ_MODELS
+
+    found = []
+    try:
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/models",
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "User-Agent": APP_UA},
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        exclude = (
+            "whisper", "tts", "audio", "guard", "safeguard", "moderation",
+            "playai", "orpheus", "allam", "compound", "embed", "vision",
+        )
+        for m in data.get("data") or []:
+            mid = m.get("id") or ""
+            low = mid.lower()
+            if not mid or any(x in low for x in exclude):
+                continue
+            if m.get("active") is False:
+                continue
+            found.append(mid)
+
+        def rank_groq(mid):
+            low = mid.lower()
+            if "gpt-oss-120b" in low:
+                return (0, mid)
+            if "qwen" in low:
+                return (1, mid)
+            if "llama" in low and ("70b" in low or "maverick" in low or "scout" in low):
+                return (2, mid)
+            if "gpt-oss-20b" in low:
+                return (3, mid)
+            if "llama" in low:
+                return (4, mid)
+            return (5, mid)
+
+        found.sort(key=rank_groq)
+        if found:
+            print(f"Auto-objavené Groq modely: {', '.join(found[:4])}")
+    except Exception as e:
+        print(f"Chyba pri zisťovaní Groq modelov: {e}")
+
+    _DISCOVERED_GROQ_MODELS = found[:4] if found else list(GROQ_FALLBACK_MODELS)
+    return _DISCOVERED_GROQ_MODELS
 
 
 def _call_groq(user_prompt):
     if not GROQ_API_KEY:
         return None, None
 
-    for model in GROQ_MODELS:
+    models_to_try = [m for m in _discover_groq_models() if m not in _DEAD_GROQ_MODELS]
+    for model in models_to_try:
         payload = {
             "model": model,
             "messages": [
@@ -781,7 +929,7 @@ def _call_groq(user_prompt):
                 {"role": "user", "content": user_prompt},
             ],
             "temperature": 0.2,
-            "max_tokens": 350,
+            "max_tokens": 400,
         }
         req = urllib.request.Request(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -790,7 +938,7 @@ def _call_groq(user_prompt):
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {GROQ_API_KEY}",
-                "User-Agent": HTTP_UA,
+                "User-Agent": APP_UA,
             },
         )
         try:
@@ -806,10 +954,12 @@ def _call_groq(user_prompt):
         except urllib.error.HTTPError as e:
             err_body = ""
             try:
-                err_body = e.read().decode("utf-8", errors="replace")[:200]
+                err_body = e.read().decode("utf-8", errors="replace")[:220]
             except Exception:
                 pass
             print(f"Chyba Groq [{model}] HTTP {e.code}: {err_body}")
+            if e.code == 404:
+                _DEAD_GROQ_MODELS.add(model)
         except Exception as e:
             print(f"Chyba Groq [{model}]: {e}")
 
@@ -830,7 +980,6 @@ def summarize_article_with_ai(art, cache, today_iso):
         if status == "paywall":
             return "paywall", "", "cache:paywall"
 
-    # Ak nie sú nastavené žiadne API kľúče, použijeme vyčistený RSS perex
     if not GEMINI_API_KEY and not GROQ_API_KEY:
         return "fallback", art["summary"], "RSS"
 
@@ -839,7 +988,6 @@ def summarize_article_with_ai(art, cache, today_iso):
         if is_paywalled:
             cache[cache_key] = {"status": "paywall", "date": today_iso}
             return "paywall", "", "paywall-html"
-        # Ak sa nepodarilo stiahnuť telo (napr. JS stránka), ale RSS je vecné a úplné
         return "fallback", art["summary"], "RSS"
 
     user_prompt = (
@@ -878,7 +1026,7 @@ def _fetch_weather_open_meteo():
         f"&current=temperature_2m,weather_code"
         f"&timezone=Europe%2FBratislava"
     )
-    data = json.loads(http_get_text(url, timeout=10))
+    data = json.loads(http_get_text(url, timeout=10, extra_headers={"User-Agent": APP_UA}))
     current = data.get("current", {})
     temp = current.get("temperature_2m")
     code = current.get("weather_code")
@@ -893,13 +1041,7 @@ def _fetch_weather_met_no():
         f"https://api.met.no/weatherapi/locationforecast/2.0/compact"
         f"?lat={WEATHER_LAT}&lon={WEATHER_LON}"
     )
-    data = json.loads(
-        http_get_text(
-            url,
-            timeout=10,
-            extra_headers={"User-Agent": "EInkSvetovyDennik/2.0 github.com/domino7082-1"},
-        )
-    )
+    data = json.loads(http_get_text(url, timeout=10, extra_headers={"User-Agent": APP_UA}))
     ts = data["properties"]["timeseries"][0]["data"]
     temp = ts["instant"]["details"]["air_temperature"]
     sym = (
@@ -915,7 +1057,7 @@ def _fetch_weather_met_no():
 def _fetch_weather_wttr():
     """Záloha 2: wttr.in JSON API."""
     url = f"https://wttr.in/{WEATHER_LAT},{WEATHER_LON}?format=j1"
-    data = json.loads(http_get_text(url, timeout=10))
+    data = json.loads(http_get_text(url, timeout=10, extra_headers={"User-Agent": APP_UA}))
     cur = data["current_condition"][0]
     temp = cur.get("temp_C")
     if temp is None:
@@ -984,9 +1126,7 @@ def is_teaser_rss(art):
 
 
 def score_article(art, now):
-    """
-    Ohodnotí pridanú hodnotu a informačnú bohatosť článku.
-    """
+    """Ohodnotí pridanú hodnotu a informačnú bohatosť článku."""
     title = art["title"]
     summary = art["summary"]
     s_len = len(summary)
@@ -1046,7 +1186,7 @@ def fetch_single_feed(feed_cfg, today, now, per_feed_limit=20):
     results = []
 
     try:
-        xml_data = http_get_text(url, timeout=10).encode("utf-8")
+        xml_data = http_get_text(url, timeout=10, throttle=True).encode("utf-8")
         root = ET.fromstring(xml_data)
     except Exception as e:
         print(f"Chyba pri načítaní {source} ({url}): {e}")
@@ -1118,7 +1258,7 @@ def fetch_articles(feeds, per_feed_limit=20):
     today = now.date()
     all_raw = []
 
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=6) as executor:
         futures = [
             executor.submit(fetch_single_feed, cfg, today, now, per_feed_limit)
             for cfg in feeds
@@ -1215,16 +1355,13 @@ def pick_complete_article_for_category(articles, cat_key, used_keys, min_score, 
     for cand in candidates[:3]:
         status, summary_text, provider = summarize_article_with_ai(cand, cache, today_iso)
         if status == "ok":
-            entry = dict(cand, summary=summary_text, ai_provider=provider)
-            return entry
+            return dict(cand, summary=summary_text, ai_provider=provider)
         if status == "fallback" and not is_teaser_rss(cand) and rss_backup is None:
             rss_backup = dict(cand, summary=summary_text, ai_provider=provider)
 
-    # Ak žiadny z top 3 nemal odomknutý plný text, použijeme zálohu s úplným RSS perexom
     if rss_backup is not None:
         return rss_backup
 
-    # Posledná poistka len pri záchrannom kole (min_score is None)
     if min_score is None:
         for cand in candidates[:3]:
             if cand["summary"] and not TEASER_RE.search(f"{cand['title']} {cand['summary']}"):
@@ -1256,7 +1393,6 @@ def select_three_articles(articles, cache):
     selected = []
 
     def fill_from_categories(cat_list, is_fallback, min_score):
-        # Zoradíme kategórie podľa kvality najlepšieho dostupného článku + hodinovej rotácie
         ranked_cats = []
         for order_idx, (label, key) in enumerate(rotated(cat_list)):
             if key in used_cats:
@@ -1580,4 +1716,3 @@ if __name__ == "__main__":
     save_summary_cache(summary_cache)
     weather = fetch_weather()
     render_dashboard(selected, weather)
-
