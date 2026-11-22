@@ -15,12 +15,15 @@ OUTPUT_FILE = "world_news_output.bmp"
 TZ_LOCAL = ZoneInfo("Europe/Bratislava")
 NEWSPAPER_TITLE = "SVETOVÝ DENNÍK"
 
+# Zobrazovať prísne len správy vydané v aktuálny deň
+ONLY_TODAY = True
+
 # Súradnice pre počasie (Šamorín)
 WEATHER_CITY = "Šamorín"
 WEATHER_LAT = 48.0279
 WEATHER_LON = 17.3106
 
-# Pomer správ v rozložení 1 + 4 (spolu 5 správ: 3× Svet + 2× Tech)
+# Pomer správ v rozložení 1 + 4 (spolu 5 správ: cieľ 3× Svet + 2× Tech)
 TECH_SLOTS = 2
 
 # Svetové časy v hlavičke (Názov, IANA časové pásmo)
@@ -109,21 +112,22 @@ def clean_text(raw):
 
 def parse_date(date_str):
     if not date_str:
-        return datetime.now(TZ_LOCAL)
+        return None
+    raw = date_str.strip()
     try:
-        dt = parsedate_to_datetime(date_str)
+        dt = parsedate_to_datetime(raw)
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=TZ_LOCAL)
         return dt.astimezone(TZ_LOCAL)
     except Exception:
         pass
     try:
-        dt = datetime.fromisoformat(date_str.strip().replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=TZ_LOCAL)
         return dt.astimezone(TZ_LOCAL)
     except Exception:
-        return datetime.now(TZ_LOCAL)
+        return None
 
 
 def fetch_weather():
@@ -171,9 +175,11 @@ def normalize_key(title):
     return cleaned[:48]
 
 
-def fetch_articles(feeds, per_feed_limit=8):
+def fetch_articles(feeds, per_feed_limit=15):
     articles = []
     seen = set()
+    today = datetime.now(TZ_LOCAL).date()
+    dc_date_tag = "{http://purl.org/dc/elements/1.1/}date"
 
     for source, group, url in feeds:
         try:
@@ -205,13 +211,19 @@ def fetch_articles(feeds, per_feed_limit=8):
                 summary = clean_text(
                     item.findtext(f"{ns}summary") or item.findtext(f"{ns}content")
                 )
-                pub_raw = item.findtext(f"{ns}updated") or item.findtext(f"{ns}published")
+                pub_raw = item.findtext(f"{ns}published") or item.findtext(f"{ns}updated")
             else:
                 title = clean_text(item.findtext("title"))
                 summary = clean_text(item.findtext("description"))
-                pub_raw = item.findtext("pubDate")
+                pub_raw = item.findtext("pubDate") or item.findtext(dc_date_tag)
 
             if not title or len(title) < 12:
+                continue
+
+            dt = parse_date(pub_raw)
+            if dt is None:
+                continue
+            if ONLY_TODAY and dt.date() != today:
                 continue
 
             key = normalize_key(title)
@@ -229,7 +241,7 @@ def fetch_articles(feeds, per_feed_limit=8):
                     "tag": detect_tag(title, summary, group),
                     "title": title,
                     "summary": summary,
-                    "dt": parse_date(pub_raw),
+                    "dt": dt,
                 }
             )
             count += 1
@@ -400,15 +412,23 @@ def render_dashboard(selected_articles, weather_str):
     draw.line((margin_x, 70, right_x, 70), fill=0, width=1)
     draw.line((margin_x, 73, right_x, 73), fill=0, width=2)
 
+    # --- 5. PÄTIČKA (vykreslí sa vždy, aj skoro ráno pri 0 správach) ---
+    def draw_footer():
+        draw.line((margin_x, 456, right_x, 456), fill=0, width=1)
+        sources_used = " · ".join(dict.fromkeys(f[0] for f in FEEDS))
+        draw.text((margin_x, 468), f"Zdroje: {sources_used}", font=f_footer, fill=0, anchor="lm")
+        draw.text((right_x, 468), weather_str, font=f_footer_bold, fill=0, anchor="rm")
+
     if not selected_articles:
-        draw.text(
-            (WIDTH // 2, HEIGHT // 2),
-            "Nepodarilo sa načítať správy z RSS zdrojov.",
-            font=f_lead_title,
-            fill=0,
-            anchor="mm",
+        msg = (
+            "Zatiaľ neboli vydané dnešné správy."
+            if ONLY_TODAY
+            else "Nepodarilo sa načítať správy z RSS zdrojov."
         )
+        draw.text((WIDTH // 2, HEIGHT // 2), msg, font=f_lead_title, fill=0, anchor="mm")
+        draw_footer()
         img.save(OUTPUT_FILE)
+        print(f"Vygenerované: {OUTPUT_FILE} (0 dnešných správ | {weather_str})")
         return
 
     # --- 3. HLAVNÁ SPRÁVA (1) CEZ CELÚ ŠÍRKU ---
@@ -471,14 +491,12 @@ def render_dashboard(selected_articles, weather_str):
                 draw.text((cx, ty), line, font=f_grid_body, fill=0)
                 ty += 16
 
-    # --- 5. PÄTIČKA (ZDROJE + POČASIE ŠAMORÍN) ---
-    draw.line((margin_x, 456, right_x, 456), fill=0, width=1)
-    sources_used = " · ".join(dict.fromkeys(f[0] for f in FEEDS))
-    draw.text((margin_x, 468), f"Zdroje: {sources_used}", font=f_footer, fill=0, anchor="lm")
-    draw.text((right_x, 468), weather_str, font=f_footer_bold, fill=0, anchor="rm")
+    draw_footer()
 
     img.save(OUTPUT_FILE)
+    dates_log = ", ".join(f"{a['source']} ({a['dt'].strftime('%d.%m. %H:%M')})" for a in selected_articles)
     print(f"Vygenerované: {OUTPUT_FILE} ({len(selected_articles)} správ | {weather_str})")
+    print(f"Vybrané články: {dates_log}")
 
 
 if __name__ == "__main__":
