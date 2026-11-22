@@ -1,6 +1,7 @@
 import html
 import json
 import re
+import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -16,7 +17,7 @@ OUTPUT_FILE = "world_news_output.bmp"
 TZ_LOCAL = ZoneInfo("Europe/Bratislava")
 NEWSPAPER_TITLE = "SVETOVÝ DENNÍK"
 
-# Rozloženie: 1 hlavná správa (celá šírka) + 2 doplnkové (ľavý a pravý stĺpec)
+# Rozloženie: 3 rovnocenné správy pod sebou na celú šírku (písmo 17 / 14 px)
 TOTAL_ARTICLES = 3
 
 # Zobrazovať prísne len správy vydané v aktuálny deň
@@ -35,7 +36,7 @@ WORLD_CLOCKS = [
     ("TOKIO", "Asia/Tokyo"),
 ]
 
-# 5 hlavných kategórií
+# 5 hlavných kategórií (mixujú sa do 3 rovnocenných pozícií)
 MAIN_CATEGORIES = [
     ("SVET", "svet"),
     ("EKONOMIKA A TRHY", "ekonomika"),
@@ -52,20 +53,6 @@ FALLBACK_CATEGORIES = [
     ("ZDRAVIE A PRÍRODA", "zdravie_priroda"),
     ("AUTO A MOBILITA", "auto"),
 ]
-
-# Priorita kategórií pre výber HLAVNEJ SPRÁVY (kategórie s najvyššou pridanou hodnotou)
-LEAD_PRIORITY_BONUS = {
-    "svet": 22,
-    "ekonomika": 18,
-    "ai_tech": 14,
-    "veda_vesmir": 14,
-    "domov": 12,
-    "energie_byvanie": 8,
-    "zdravie_priroda": 6,
-    "gadgety_it": 4,
-    "auto": 2,
-    "sport": -25,  # Šport patrí prednostne do spodných stĺpcov, nie ako hlavná správa
-}
 
 # RSS zdroje: (Krátky názov zdroja, Kategórie zdroja, URL)
 FEEDS = [
@@ -164,7 +151,7 @@ CLICKBAIT_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Perexy, ktoré začínajú ako vytrhnutá druhá veta bez kontextu (časté v agentúrnych správach)
+# Perexy, ktoré začínajú ako vytrhnutá druhá veta bez kontextu
 DANGLING_START_RE = re.compile(
     r"^(?:zároveň|tiež|taktiež|dodal|dodala|uviedol\s+to|uviedla\s+to|"
     r"informoval[ao]?\s+o\s+tom|podľa\s+(?:neho|nej|nich)|píše\s+o\s+tom)\b",
@@ -217,6 +204,85 @@ WMO_SK = {
     95: "Búrka",
     96: "Búrka s krúpami",
     99: "Búrka s krúpami",
+}
+
+# Slovenský preklad symbolov pre zálohu 1 (Yr.no / MET Norway)
+METNO_SK = {
+    "clearsky": "Jasno",
+    "fair": "Skoro jasno",
+    "partlycloudy": "Polooblačno",
+    "cloudy": "Zamračené",
+    "fog": "Hmla",
+    "lightrain": "Slabý dážď",
+    "rain": "Dážď",
+    "heavyrain": "Silný dážď",
+    "lightrainshowers": "Prehánky",
+    "rainshowers": "Prehánky",
+    "heavyrainshowers": "Silné prehánky",
+    "lightsleet": "Dážď so snehom",
+    "sleet": "Dážď so snehom",
+    "heavysleet": "Dážď so snehom",
+    "lightsleetshowers": "Prehánky so snehom",
+    "sleetshowers": "Prehánky so snehom",
+    "heavysleetshowers": "Prehánky so snehom",
+    "lightsnow": "Slabé sneženie",
+    "snow": "Sneženie",
+    "heavysnow": "Silné sneženie",
+    "lightsnowshowers": "Snehové prehánky",
+    "snowshowers": "Snehové prehánky",
+    "heavysnowshowers": "Snehové prehánky",
+}
+
+# Slovenský preklad WWO kódov pre zálohu 2 (wttr.in)
+WTTR_SK = {
+    113: "Jasno",
+    116: "Polooblačno",
+    119: "Zamračené",
+    122: "Zamračené",
+    143: "Hmla",
+    176: "Prehánky",
+    179: "Snehové prehánky",
+    182: "Dážď so snehom",
+    185: "Mrznúce mrholenie",
+    200: "Búrka",
+    227: "Sneženie",
+    230: "Silné sneženie",
+    248: "Hmla",
+    260: "Hmla",
+    263: "Mrholenie",
+    266: "Mrholenie",
+    281: "Mrznúce mrholenie",
+    284: "Mrznúce mrholenie",
+    293: "Slabý dážď",
+    296: "Slabý dážď",
+    299: "Dážď",
+    302: "Dážď",
+    305: "Silný dážď",
+    308: "Silný dážď",
+    311: "Mrznúci dážď",
+    314: "Mrznúci dážď",
+    317: "Dážď so snehom",
+    320: "Dážď so snehom",
+    323: "Slabé sneženie",
+    326: "Slabé sneženie",
+    329: "Sneženie",
+    332: "Sneženie",
+    335: "Silné sneženie",
+    338: "Silné sneženie",
+    350: "Snehové zrná",
+    353: "Prehánky",
+    356: "Silné prehánky",
+    359: "Silný dážď",
+    362: "Dážď so snehom",
+    365: "Dážď so snehom",
+    368: "Snehové prehánky",
+    371: "Snehové prehánky",
+    374: "Krúpy",
+    377: "Krúpy",
+    386: "Búrka",
+    389: "Búrka",
+    392: "Búrka so snehom",
+    395: "Búrka so snehom",
 }
 
 # Pevné slovenské sviatky a významné dni
@@ -401,7 +467,6 @@ def clean_text(raw, is_summary=False):
         return ""
     text = re.sub(r"<[^>]+>", " ", raw)
     text = html.unescape(text)
-    # Odstránenie typických RSS / WordPress / TouchIT dodatkov
     text = re.sub(
         r"\s*(?:"
         r"Čítajte viac|Viac sa dočítate|Celý článok|"
@@ -456,31 +521,98 @@ def parse_date(date_str):
         return None
 
 
-def fetch_weather():
+def _fetch_weather_open_meteo():
     url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={WEATHER_LAT}&longitude={WEATHER_LON}"
         f"&current=temperature_2m,weather_code"
         f"&timezone=Europe%2FBratislava"
     )
-    try:
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; EInkWorldDaily/1.0)"},
-        )
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        current = data.get("current", {})
-        temp = current.get("temperature_2m")
-        code = current.get("weather_code")
-        if temp is None:
-            return f"{WEATHER_CITY}: -- °C"
-        temp_int = int(round(temp))
-        desc = WMO_SK.get(code, "")
-        return f"{WEATHER_CITY}: {temp_int} °C · {desc}" if desc else f"{WEATHER_CITY}: {temp_int} °C"
-    except Exception as e:
-        print(f"Chyba pri načítaní počasia: {e}")
-        return f"{WEATHER_CITY}: -- °C"
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "EInkSvetovyDennik/1.0 (https://github.com/domino7082-1)"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    current = data.get("current", {})
+    temp = current.get("temperature_2m")
+    code = current.get("weather_code")
+    if temp is None:
+        raise ValueError("Open-Meteo nevrátil teplotu")
+    return int(round(float(temp))), WMO_SK.get(code, "")
+
+
+def _fetch_weather_met_no():
+    """Záloha 1: Nórsky meteorologický inštitút (Yr.no / MET Norway)."""
+    url = (
+        f"https://api.met.no/weatherapi/locationforecast/2.0/compact"
+        f"?lat={WEATHER_LAT}&lon={WEATHER_LON}"
+    )
+    # MET Norway vyžaduje unikátny User-Agent s identifikáciou aplikácie
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "EInkSvetovyDennik/1.0 github.com/domino7082-1"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    ts = data["properties"]["timeseries"][0]["data"]
+    temp = ts["instant"]["details"]["air_temperature"]
+    sym = (
+        ts.get("next_1_hours", {}).get("summary", {}).get("symbol_code")
+        or ts.get("next_6_hours", {}).get("summary", {}).get("symbol_code")
+        or ""
+    )
+    base_sym = sym.split("_")[0]
+    if "thunder" in base_sym:
+        desc = "Búrka"
+    else:
+        desc = METNO_SK.get(base_sym, "")
+    return int(round(float(temp))), desc
+
+
+def _fetch_weather_wttr():
+    """Záloha 2: wttr.in JSON API."""
+    url = f"https://wttr.in/{WEATHER_LAT},{WEATHER_LON}?format=j1"
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "EInkSvetovyDennik/1.0"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    cur = data["current_condition"][0]
+    temp = cur.get("temp_C")
+    if temp is None:
+        raise ValueError("wttr.in nevrátil teplotu")
+    code = int(cur.get("weatherCode", -1))
+    return int(round(float(temp))), WTTR_SK.get(code, "")
+
+
+def fetch_weather():
+    """Získa počasie pre Šamorín s automatickou zálohou cez 3 nezávislé zdroje."""
+    providers = [
+        ("Open-Meteo", _fetch_weather_open_meteo),
+        ("MET Norway (Yr.no)", _fetch_weather_met_no),
+        ("wttr.in", _fetch_weather_wttr),
+    ]
+
+    for name, fn in providers:
+        attempts = 2 if name == "Open-Meteo" else 1
+        for attempt in range(1, attempts + 1):
+            try:
+                temp_int, desc = fn()
+                result = (
+                    f"{WEATHER_CITY}: {temp_int} °C · {desc}"
+                    if desc
+                    else f"{WEATHER_CITY}: {temp_int} °C"
+                )
+                print(f"Počasie načítané cez {name}: {result}")
+                return result
+            except Exception as e:
+                print(f"Chyba počasia [{name}, pokus {attempt}]: {e}")
+                if attempt < attempts:
+                    time.sleep(1)
+
+    return f"{WEATHER_CITY}: -- °C"
 
 
 def normalize_key(title):
@@ -524,9 +656,9 @@ def score_article(art, now):
     elif s_len <= 420:
         score += 32 + min(14, (s_len - 130) / 18.0)
     else:
-        score += 36  # Bohatý perex (prípadne sa oreže po celých vetách)
+        score += 36
 
-    # 2. Viac vetné vysvetlenie (kontext + dopad)
+    # 2. Viacvetné vysvetlenie (kontext + dopad)
     if n_sent >= 2:
         score += 18
     elif n_sent == 1 and s_len < 120:
@@ -536,21 +668,21 @@ def score_article(art, now):
     if summary and not art["raw_cut"]:
         score += 12
 
-    # 4. Penalizácia vytrhnutých agentúrnych viet bez kontextu ("Zároveň upozornil...")
+    # 4. Penalizácia vytrhnutých agentúrnych viet bez kontextu
     if summary and DANGLING_START_RE.search(summary):
         score -= 28
 
-    # 5. Penalizácia clickbaitu a otázok typu "Zistite..."
+    # 5. Penalizácia clickbaitu
     if CLICKBAIT_RE.search(f"{title} {summary}"):
         score -= 26
     if title.endswith("?") and s_len < 140:
         score -= 10
 
-    # 6. Bonus za konkrétne fakty, čísla a analytické kľúčové slová
+    # 6. Bonus za konkrétne fakty, čísla a vecné témy
     factual_hits = len(FACTUAL_SIGNALS_RE.findall(f"{title} {summary}"))
     score += min(18, factual_hits * 4)
 
-    # 7. Mierny bonus za čerstvosť (aby kvalita vždy prevážila nad prázdnou novinkou)
+    # 7. Mierny bonus za čerstvosť
     age_hours = max(0.0, (now - art["dt"]).total_seconds() / 3600.0)
     score += max(0.0, 10.0 - age_hours * 0.7)
 
@@ -644,7 +776,6 @@ def fetch_articles(feeds, per_feed_limit=20):
         for fut in as_completed(futures):
             all_raw.extend(fut.result())
 
-    # Deduplikácia so zachovaním verzie s vyšším informačným skóre
     all_raw.sort(key=lambda x: (x["score"], x["dt"].timestamp()), reverse=True)
     by_key = {}
     ordered = []
@@ -655,8 +786,7 @@ def fetch_articles(feeds, per_feed_limit=20):
             by_key[k] = art
             ordered.append(art)
         else:
-            existing = by_key[k]
-            existing["groups"].update(art["groups"])
+            by_key[k]["groups"].update(art["groups"])
 
     return ordered
 
@@ -716,19 +846,16 @@ def pick_best_for_category(articles, cat_key, used_keys, min_score=None):
     candidates.sort(key=lambda a: (a["score"], a["dt"].timestamp()), reverse=True)
     if min_score is not None:
         quality = [a for a in candidates if a["score"] >= min_score]
-        if not quality:
-            return None
-        return quality[0]
+        return quality[0] if quality else None
 
     return candidates[0]
 
 
 def select_three_articles(articles):
     """
-    Vyberie 3 správy s najvyššou pridanou hodnotou:
-    1. HLAVNÁ SPRÁVA: najsilnejší vecný článok z kľúčových kategórií (Svet, Ekonomika, AI/Tech, Veda).
-    2. + 3. DOPLNKOVÉ SPRÁVY: 2 kvalitné správy zo zvyšných hlavných kategórií (mixovaných podľa hodiny);
-       záložné kategórie zaskočia iba vtedy, ak hlavné kategórie nemajú dostatok kvalitných správ.
+    Vyberie 3 rovnocenné správy s najvyššou pridanou hodnotou:
+    - Mixuje medzi všetkými 5 hlavnými kategóriami (s jemnou hodinovou rotáciou).
+    - 5 záložných kategórií použije len vtedy, ak hlavné kategórie nemajú 3 kvalitné správy.
     """
     if not articles:
         return []
@@ -742,104 +869,49 @@ def select_three_articles(articles):
 
     used_keys = set()
     used_cats = set()
+    selected = []
 
-    # --- 1. Výber HLAVNEJ SPRÁVY s najvyššou pridanou hodnotou ---
-    lead_candidates = []
-    for label, key in MAIN_CATEGORIES:
-        art = pick_best_for_category(articles, key, used_keys, min_score=15)
-        if art is not None:
-            lead_score = art["score"] + LEAD_PRIORITY_BONUS.get(key, 0)
-            lead_candidates.append((lead_score, label, key, False, art))
-
-    if not lead_candidates:
-        for label, key in FALLBACK_CATEGORIES:
-            art = pick_best_for_category(articles, key, used_keys, min_score=10)
-            if art is not None:
-                lead_score = art["score"] + LEAD_PRIORITY_BONUS.get(key, 0)
-                lead_candidates.append((lead_score, label, key, True, art))
-
-    # Posledná poistka (napr. veľmi skoro ráno) bez prahu min_score
-    if not lead_candidates:
-        for is_fb, cat_list in ((False, MAIN_CATEGORIES), (True, FALLBACK_CATEGORIES)):
-            for label, key in cat_list:
-                art = pick_best_for_category(articles, key, used_keys, min_score=None)
-                if art is not None:
-                    lead_score = art["score"] + LEAD_PRIORITY_BONUS.get(key, 0)
-                    lead_candidates.append((lead_score, label, key, is_fb, art))
-            if lead_candidates:
-                break
-
-    if not lead_candidates:
-        return []
-
-    lead_candidates.sort(key=lambda x: (x[0], x[4]["dt"].timestamp()), reverse=True)
-    _, lead_label, lead_key, lead_fb, lead_art = lead_candidates[0]
-    lead_entry = dict(lead_art, display_tag=lead_label, is_fallback=lead_fb)
-    used_keys.add(lead_art["key"])
-    used_cats.add(lead_key)
-
-    # --- 2. Výber 2 DOPLNKOVÝCH SPRÁV (mix zo zvyšných hlavných, potom záložné) ---
-    extras = []
-    remaining_main = [(l, k) for l, k in rotated(MAIN_CATEGORIES) if k not in used_cats]
-    remaining_fb = [(l, k) for l, k in rotated(FALLBACK_CATEGORIES) if k not in used_cats]
-
-    # Najprv hľadáme kvalitné články (min_score=15) z hlavných kategórií
-    main_pool = []
-    for order_idx, (label, key) in enumerate(remaining_main):
-        art = pick_best_for_category(articles, key, used_keys, min_score=15)
-        if art is not None:
-            # Kombinácia kvality a jemného mixovania kategórií podľa hodiny
-            mix_score = art["score"] - order_idx * 3.0
-            main_pool.append((mix_score, label, key, art))
-
-    main_pool.sort(key=lambda x: x[0], reverse=True)
-    for _, label, key, art in main_pool:
-        if len(extras) >= TOTAL_ARTICLES - 1:
-            break
-        if art["key"] in used_keys:
-            continue
-        extras.append(dict(art, display_tag=label, is_fallback=False))
-        used_keys.add(art["key"])
-        used_cats.add(key)
-
-    # Ak hlavné kategórie nedali 2 kvalitné správy, doplníme kvalitné zo záložných
-    if len(extras) < TOTAL_ARTICLES - 1:
-        fb_pool = []
-        for order_idx, (label, key) in enumerate(remaining_fb):
-            art = pick_best_for_category(articles, key, used_keys, min_score=10)
-            if art is not None:
-                mix_score = art["score"] - order_idx * 3.0
-                fb_pool.append((mix_score, label, key, art))
-        fb_pool.sort(key=lambda x: x[0], reverse=True)
-        for _, label, key, art in fb_pool:
-            if len(extras) >= TOTAL_ARTICLES - 1:
-                break
-            if art["key"] in used_keys:
+    def fill_from_categories(cat_list, is_fallback, min_score):
+        pool = []
+        for order_idx, (label, key) in enumerate(rotated(cat_list)):
+            if key in used_cats:
                 continue
-            extras.append(dict(art, display_tag=label, is_fallback=True))
+            art = pick_best_for_category(articles, key, used_keys, min_score=min_score)
+            if art is not None:
+                # Kvalita má hlavnú váhu, hodinová rotácia zabezpečuje striedanie kategórií
+                rank = art["score"] - order_idx * 3.5
+                pool.append((rank, label, key, art))
+
+        pool.sort(key=lambda x: (x[0], x[3]["dt"].timestamp()), reverse=True)
+        for _, label, key, art in pool:
+            if len(selected) >= TOTAL_ARTICLES:
+                break
+            if art["key"] in used_keys or key in used_cats:
+                continue
+            selected.append(dict(art, display_tag=label, is_fallback=is_fallback))
             used_keys.add(art["key"])
             used_cats.add(key)
 
-    # Záchranný priechod bez prahu skóre (iba skoro ráno pri malom počte dnešných správ)
-    if len(extras) < TOTAL_ARTICLES - 1:
-        for is_fb, cat_list in ((False, remaining_main), (True, remaining_fb)):
-            for label, key in cat_list:
-                if len(extras) >= TOTAL_ARTICLES - 1:
-                    break
-                if key in used_cats:
-                    continue
-                art = pick_best_for_category(articles, key, used_keys, min_score=None)
-                if art is not None:
-                    extras.append(dict(art, display_tag=label, is_fallback=is_fb))
-                    used_keys.add(art["key"])
-                    used_cats.add(key)
+    # 1. Kolo: kvalitné články z 5 hlavných kategórií
+    fill_from_categories(MAIN_CATEGORIES, is_fallback=False, min_score=15)
 
-    selected = [lead_entry] + extras
+    # 2. Kolo: kvalitné články zo 5 záložných kategórií (iba ak chýbajú hlavné)
+    if len(selected) < TOTAL_ARTICLES:
+        fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=10)
+
+    # 3. Záchranné kolo (skoro ráno pri malom počte dnešných článkov)
+    if len(selected) < TOTAL_ARTICLES:
+        fill_from_categories(MAIN_CATEGORIES, is_fallback=False, min_score=None)
+    if len(selected) < TOTAL_ARTICLES:
+        fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=None)
+
+    # Hlavné kategórie pred záložnými, v rámci nich od najvyššej pridanej hodnoty
+    selected.sort(key=lambda a: (a["is_fallback"], -a["score"], -a["dt"].timestamp()))
+
     for idx, art in enumerate(selected, start=1):
         role = "ZÁLOHA" if art["is_fallback"] else "HLAVNÁ KAT."
-        pos = "HLAVNÁ SPRÁVA" if idx == 1 else ("ĽAVÝ STĹPEC" if idx == 2 else "PRAVÝ STĹPEC")
         print(
-            f"{pos} [{role}: {art['display_tag']} | skóre {art['score']}]: "
+            f"SPRÁVA {idx} [{role}: {art['display_tag']} | skóre {art['score']}]: "
             f"{art['source']} ({art['dt'].strftime('%d.%m. %H:%M')}) - {art['title']}"
         )
 
@@ -877,79 +949,61 @@ def wrap_text_full(draw, text, font, max_width):
     return lines
 
 
-def build_block(draw, art, preset, max_width, is_lead):
-    f_title = preset["lead_title"] if is_lead else preset["col_title"]
-    f_body = preset["lead_body"] if is_lead else preset["col_body"]
-    lh_title = preset["lead_lh_t"] if is_lead else preset["col_lh_t"]
-    lh_body = preset["lead_lh_b"] if is_lead else preset["col_lh_b"]
-    badge_h = preset["lead_badge_h"] if is_lead else preset["col_badge_h"]
-    gap_badge = preset["gap_badge"]
-    gap_title = preset["gap_title"]
+def compute_equal_blocks(draw, articles, preset, content_w):
+    blocks = []
+    for art in articles:
+        t_lines = wrap_text_full(draw, art["title"], preset["title"], content_w)
+        s_lines = wrap_text_full(draw, art["summary"], preset["body"], content_w) if art["summary"] else []
 
-    t_lines = wrap_text_full(draw, art["title"], f_title, max_width)
-    s_lines = wrap_text_full(draw, art["summary"], f_body, max_width) if art["summary"] else []
+        h = preset["badge_h"] + preset["gap_badge"] + len(t_lines) * preset["lh_t"]
+        if s_lines:
+            h += preset["gap_title"] + len(s_lines) * preset["lh_b"]
 
-    h = badge_h + gap_badge + len(t_lines) * lh_title
-    if s_lines:
-        h += gap_title + len(s_lines) * lh_body
-
-    return {
-        "art": art,
-        "is_lead": is_lead,
-        "t_lines": t_lines,
-        "s_lines": s_lines,
-        "f_title": f_title,
-        "f_body": f_body,
-        "lh_title": lh_title,
-        "lh_body": lh_body,
-        "badge_h": badge_h,
-        "gap_badge": gap_badge,
-        "gap_title": gap_title,
-        "height": h,
-    }
+        blocks.append(
+            {
+                "art": art,
+                "t_lines": t_lines,
+                "s_lines": s_lines,
+                "height": h,
+            }
+        )
+    return blocks
 
 
-def fit_1_plus_2_layout(draw, articles, presets, full_w, col_w, avail_h):
+def fit_three_equal_articles(draw, articles, presets, content_w, avail_h):
     """
-    Nájde najčitateľnejšiu sadu písiem, pri ktorej sa zmestí 1 hlavná správa (celá šírka)
-    + 2 stĺpcové správy pod ňou CELÉ bez '...'.
+    Primárne vykreslí všetky 3 správy písmom 17 / 14 px.
+    Ak sú všetky 3 extrémne dlhé, plynulo zmenší na záložnú sadu a prípadne skráti
+    najdlhší perex po celých vetách (nikdy na '...').
     """
-    min_div_gap = 18
-
-    def measure(arts, preset):
-        lead_blk = build_block(draw, arts[0], preset, full_w, is_lead=True)
-        col_blks = [build_block(draw, a, preset, col_w, is_lead=False) for a in arts[1:3]]
-        bottom_h = max((b["height"] for b in col_blks), default=0)
-        total_h = lead_blk["height"] + (min_div_gap + bottom_h if col_blks else 0)
-        return lead_blk, col_blks, total_h
+    min_div_space = 16
 
     for p_idx, preset in enumerate(presets):
-        lead_blk, col_blks, total_h = measure(articles, preset)
+        blocks = compute_equal_blocks(draw, articles, preset, content_w)
+        total_h = sum(b["height"] for b in blocks) + min_div_space * max(0, len(blocks) - 1)
         if total_h <= avail_h:
-            return lead_blk, col_blks, preset, p_idx + 1
+            return blocks, preset, p_idx + 1
 
-    # Ak by bol niektorý RSS perex extrémne dlhý, uberáme po celých vetách (nikdy na '...')
     preset = presets[-1]
     trimmed = [dict(a) for a in articles]
 
     while True:
-        lead_blk, col_blks, total_h = measure(trimmed, preset)
+        blocks = compute_equal_blocks(draw, trimmed, preset, content_w)
+        total_h = sum(b["height"] for b in blocks) + min_div_space * max(0, len(blocks) - 1)
         if total_h <= avail_h:
-            return lead_blk, col_blks, preset, len(presets)
+            return blocks, preset, len(presets)
 
-        # Vyberieme najdlhší viacvetný perex z blokov, ktoré najviac tlačia na výšku
-        candidates = []
-        for idx, art in enumerate(trimmed):
-            sents = split_sentences(art["summary"])
-            if len(sents) > 1:
-                candidates.append((idx, sents))
-
-        if candidates:
-            target_i, sents = max(candidates, key=lambda x: len(trimmed[x[0]]["summary"]))
+        multi = [
+            (i, split_sentences(a["summary"]))
+            for i, a in enumerate(trimmed)
+            if len(split_sentences(a["summary"])) > 1
+        ]
+        if multi:
+            target_i, sents = max(multi, key=lambda x: len(trimmed[x[0]]["summary"]))
             trimmed[target_i]["summary"] = " ".join(sents[:-1]).strip()
             continue
 
-        return lead_blk, col_blks, preset, len(presets)
+        return blocks, preset, len(presets)
 
 
 def render_dashboard(selected_articles, weather_str):
@@ -976,61 +1030,43 @@ def render_dashboard(selected_articles, weather_str):
     f_clock = load_font(sans_bold, 12)
     f_footer = load_font(sans_bold, 11)
 
-    # Sady písiem od najčitateľnejšej po kompaktnejšiu (pre 3 správy je dosť miesta na veľké písmo)
+    # Primárne písmo presne 17 / 14 px, s kompaktnými zálohami pri extrémne dlhých textoch
     presets = [
         {
-            "badge_lead": load_font(sans_bold, 11),
-            "badge_col": load_font(sans_bold, 11),
-            "meta_lead": load_font(sans_bold, 12),
-            "meta_col": load_font(sans_bold, 11),
-            "lead_title": load_font(sans_bold, 21),
-            "lead_body": load_font(sans_reg, 15),
-            "col_title": load_font(sans_bold, 16),
-            "col_body": load_font(sans_reg, 14),
-            "lead_badge_h": 19,
-            "col_badge_h": 17,
-            "lead_lh_t": 25,
-            "lead_lh_b": 19,
-            "col_lh_t": 20,
-            "col_lh_b": 18,
-            "gap_badge": 6,
-            "gap_title": 6,
-        },
-        {
-            "badge_lead": load_font(sans_bold, 11),
-            "badge_col": load_font(sans_bold, 10),
-            "meta_lead": load_font(sans_bold, 12),
-            "meta_col": load_font(sans_bold, 11),
-            "lead_title": load_font(sans_bold, 19),
-            "lead_body": load_font(sans_reg, 14),
-            "col_title": load_font(sans_bold, 15),
-            "col_body": load_font(sans_reg, 13),
-            "lead_badge_h": 18,
-            "col_badge_h": 16,
-            "lead_lh_t": 23,
-            "lead_lh_b": 17,
-            "col_lh_t": 18,
-            "col_lh_b": 16,
+            "name": "17/14",
+            "badge": load_font(sans_bold, 11),
+            "meta": load_font(sans_bold, 11),
+            "title": load_font(sans_bold, 17),
+            "body": load_font(sans_reg, 14),
+            "badge_h": 18,
+            "lh_t": 21,
+            "lh_b": 18,
             "gap_badge": 5,
-            "gap_title": 5,
+            "gap_title": 4,
         },
         {
-            "badge_lead": load_font(sans_bold, 10),
-            "badge_col": load_font(sans_bold, 10),
-            "meta_lead": load_font(sans_bold, 11),
-            "meta_col": load_font(sans_bold, 10),
-            "lead_title": load_font(sans_bold, 17),
-            "lead_body": load_font(sans_reg, 13),
-            "col_title": load_font(sans_bold, 14),
-            "col_body": load_font(sans_reg, 12),
-            "lead_badge_h": 16,
-            "col_badge_h": 15,
-            "lead_lh_t": 20,
-            "lead_lh_b": 16,
-            "col_lh_t": 17,
-            "col_lh_b": 15,
+            "name": "16/13",
+            "badge": load_font(sans_bold, 10),
+            "meta": load_font(sans_bold, 11),
+            "title": load_font(sans_bold, 16),
+            "body": load_font(sans_reg, 13),
+            "badge_h": 17,
+            "lh_t": 19,
+            "lh_b": 16,
             "gap_badge": 4,
-            "gap_title": 4,
+            "gap_title": 3,
+        },
+        {
+            "name": "15/12",
+            "badge": load_font(sans_bold, 10),
+            "meta": load_font(sans_bold, 10),
+            "title": load_font(sans_bold, 15),
+            "body": load_font(sans_reg, 12),
+            "badge_h": 16,
+            "lh_t": 18,
+            "lh_b": 15,
+            "gap_badge": 3,
+            "gap_title": 3,
         },
     ]
 
@@ -1038,8 +1074,6 @@ def render_dashboard(selected_articles, weather_str):
     margin_x = 16
     right_x = WIDTH - margin_x
     content_w = right_x - margin_x
-    col_gap = 24
-    col_w = (content_w - col_gap) // 2
 
     # --- 1. HLAVIČKA (MASTHEAD) ---
     draw.line((margin_x, 8, right_x, 8), fill=0, width=3)
@@ -1064,7 +1098,7 @@ def render_dashboard(selected_articles, weather_str):
     draw.line((margin_x, 70, right_x, 70), fill=0, width=1)
     draw.line((margin_x, 73, right_x, 73), fill=0, width=2)
 
-    # --- 5. PÄTIČKA (MENINY / SVIATOK + POČASIE ŠAMORÍN) ---
+    # --- 4. PÄTIČKA (MENINY / SVIATOK + POČASIE ŠAMORÍN) ---
     day_info = get_day_footer_text(now.date())
 
     def draw_footer():
@@ -1079,84 +1113,70 @@ def render_dashboard(selected_articles, weather_str):
             if ONLY_TODAY
             else "Nepodarilo sa načítať správy z RSS zdrojov."
         )
-        draw.text((WIDTH // 2, HEIGHT // 2), msg, font=presets[0]["lead_title"], fill=0, anchor="mm")
+        draw.text((WIDTH // 2, HEIGHT // 2), msg, font=presets[0]["title"], fill=0, anchor="mm")
         draw_footer()
         img.save(OUTPUT_FILE)
         print(f"Vygenerované: {OUTPUT_FILE} (0 správ | {day_info} | {weather_str})")
         return
 
-    # --- 3. + 4. VÝPOČET A VYKRESLENIE (1 HLAVNÁ + 2 STĹPCE POD ŇOU) ---
+    # --- 3. VYKRESLENIE 3 ROVNOCENNÝCH SPRÁV POD SEBOU ---
     top_y = 82
     bottom_y = 450
     avail_h = bottom_y - top_y
 
-    lead_blk, col_blks, preset, used_preset_num = fit_1_plus_2_layout(
-        draw, selected_articles, presets, content_w, col_w, avail_h
+    blocks, preset, _ = fit_three_equal_articles(
+        draw, selected_articles, presets, content_w, avail_h
     )
 
-    def draw_article_block(blk, x, y, show_lead_label=False):
-        art = blk["art"]
-        is_lead = blk["is_lead"]
-        f_badge = preset["badge_lead"] if is_lead else preset["badge_col"]
-        f_meta = preset["meta_lead"] if is_lead else preset["meta_col"]
-        badge_h = blk["badge_h"]
+    total_blocks_h = sum(b["height"] for b in blocks)
+    n_gaps = max(0, len(blocks) - 1)
+    extra_h = max(0, avail_h - total_blocks_h)
 
+    if n_gaps > 0:
+        div_space = min(30, max(16, extra_h // (n_gaps + 1)))
+        remaining = max(0, extra_h - div_space * n_gaps)
+        y = top_y + min(12, remaining // 2)
+    else:
+        div_space = 0
+        y = top_y
+
+    badge_h = preset["badge_h"]
+    for idx, b in enumerate(blocks):
+        art = b["art"]
+
+        # Štítok kategórie (rovnaký pre všetky 3 správy)
         badge_txt = f" {art['display_tag']} "
-        badge_w = int(draw.textlength(badge_txt, font=f_badge)) + 8
-        draw.rectangle((x, y, x + badge_w, y + badge_h), fill=0)
-        draw.text((x + 4, y + badge_h // 2), badge_txt, font=f_badge, fill=1, anchor="lm")
+        badge_w = int(draw.textlength(badge_txt, font=preset["badge"])) + 8
+        draw.rectangle((margin_x, y, margin_x + badge_w, y + badge_h), fill=0)
+        draw.text((margin_x + 4, y + badge_h // 2), badge_txt, font=preset["badge"], fill=1, anchor="lm")
 
         meta_str = f"{art['dt'].strftime('%H:%M')} · {art['source'].upper()}"
-        draw.text((x + badge_w + 10, y + badge_h // 2), meta_str, font=f_meta, fill=0, anchor="lm")
+        draw.text((margin_x + badge_w + 10, y + badge_h // 2), meta_str, font=preset["meta"], fill=0, anchor="lm")
 
-        if show_lead_label:
-            draw.text((right_x, y + badge_h // 2), "HLAVNÁ SPRÁVA", font=preset["meta_col"], fill=0, anchor="rm")
+        cy = y + badge_h + preset["gap_badge"]
+        for line in b["t_lines"]:
+            draw.text((margin_x, cy), line, font=preset["title"], fill=0)
+            cy += preset["lh_t"]
 
-        cy = y + badge_h + blk["gap_badge"]
-        for line in blk["t_lines"]:
-            draw.text((x, cy), line, font=blk["f_title"], fill=0)
-            cy += blk["lh_title"]
+        if b["s_lines"]:
+            cy += preset["gap_title"]
+            for line in b["s_lines"]:
+                draw.text((margin_x, cy), line, font=preset["body"], fill=0)
+                cy += preset["lh_b"]
 
-        if blk["s_lines"]:
-            cy += blk["gap_title"]
-            for line in blk["s_lines"]:
-                draw.text((x, cy), line, font=blk["f_body"], fill=0)
-                cy += blk["lh_body"]
-
-        return cy
-
-    # Vyvážené zvislé rozloženie medzi hlavnou správou a spodnými stĺpcami
-    bottom_h = max((b["height"] for b in col_blks), default=0)
-    extra_h = max(0, avail_h - lead_blk["height"] - bottom_h)
-
-    if col_blks:
-        div_gap = min(28, max(18, extra_h // 2))
-        lead_y = top_y + min(8, max(0, (extra_h - div_gap) // 4))
-    else:
-        div_gap = 0
-        lead_y = top_y
-
-    # Vykreslenie HLAVNEJ SPRÁVY cez celú šírku
-    lead_end_y = draw_article_block(lead_blk, margin_x, lead_y, show_lead_label=True)
-
-    # Vykreslenie 2 DOPLNKOVÝCH SPRÁV pod ňou (ľavý a pravý stĺpec)
-    if col_blks:
-        div_y = lead_end_y + div_gap // 2
-        draw.line((margin_x, div_y, right_x, div_y), fill=0, width=2)
-
-        cols_top_y = lead_end_y + div_gap
-        draw.line((WIDTH // 2, div_y + 10, WIDTH // 2, bottom_y - 2), fill=0, width=1)
-
-        col_xs = [margin_x, WIDTH // 2 + col_gap // 2]
-        for blk, cx in zip(col_blks, col_xs):
-            draw_article_block(blk, cx, cols_top_y, show_lead_label=False)
+        if idx < len(blocks) - 1:
+            div_y = cy + div_space // 2
+            draw.line((margin_x, div_y, right_x, div_y), fill=0, width=1)
+            y = cy + div_space
+        else:
+            y = cy
 
     draw_footer()
 
     img.save(OUTPUT_FILE)
     print(
-        f"Vygenerované: {OUTPUT_FILE} ({1 + len(col_blks)}/{TOTAL_ARTICLES} správ | "
-        f"Písmo: sada {used_preset_num} | {day_info} | {weather_str})"
+        f"Vygenerované: {OUTPUT_FILE} ({len(blocks)}/{TOTAL_ARTICLES} správ | "
+        f"Písmo: {preset['name']} | {day_info} | {weather_str})"
     )
 
 
