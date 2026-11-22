@@ -1,12 +1,16 @@
+import gzip
 import html
 import json
+import os
 import re
 import time
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 from email.utils import parsedate_to_datetime
+from html.parser import HTMLParser
 from zoneinfo import ZoneInfo
 
 from PIL import Image, ImageDraw, ImageFont
@@ -14,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 # --- KONFIGURÁCIA ---
 WIDTH, HEIGHT = 800, 480
 OUTPUT_FILE = "world_news_output.bmp"
+CACHE_FILE = "summary_cache.json"
 TZ_LOCAL = ZoneInfo("Europe/Bratislava")
 NEWSPAPER_TITLE = "SVETOVÝ DENNÍK"
 
@@ -27,6 +32,13 @@ ONLY_TODAY = True
 WEATHER_CITY = "Šamorín"
 WEATHER_LAT = 48.0279
 WEATHER_LON = 17.3106
+
+# AI konfigurácia (kľúče sa načítajú bezpečne z GitHub Secrets)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+GEMINI_MODELS = ["gemini-2.5-flash-lite", "gemini-2.5-flash"]
+GROQ_MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+HTTP_UA = "Mozilla/5.0 (compatible; EInkSvetovyDennik/2.0; +https://github.com)"
 
 # Svetové časy v hlavičke (Názov, IANA časové pásmo)
 WORLD_CLOCKS = [
@@ -144,14 +156,21 @@ UNWANTED_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Slabé clickbaitové alebo prázdne formulácie (znižujú skóre relevancie)
+# Slabé clickbaitové alebo prázdne formulácie
 CLICKBAIT_RE = re.compile(
     r"(?:zistite[, ]|pozrite\s+si|neuveríte|šokujúc|toto\s+ste\s+nevedeli|"
     r"vyzerajú\s+tak\s+strašne|nikdy\s+nerobte|týchto\s+\d+\s+vecí|rebríček\s+naj)",
     re.IGNORECASE,
 )
 
-# Perexy, ktoré začínajú ako vytrhnutá druhá veta bez kontextu
+# Formulácie typické pre upútavky, ktoré zamlčujú pointu do tela článku
+TEASER_RE = re.compile(
+    r"(?:o\s+tom,\s*(?:prečo|ako|čo)|vysvetľuje,\s*(?:prečo|ako)|prezradil|"
+    r"urobili\s+presne\s+to,\s*čo\s+mali|týždeň\s+v(?:o)?\s+svetovej|rozhovor\s*:)",
+    re.IGNORECASE,
+)
+
+# Perexy začínajúce ako vytrhnutá druhá veta bez kontextu
 DANGLING_START_RE = re.compile(
     r"^(?:zároveň|tiež|taktiež|dodal|dodala|uviedol\s+to|uviedla\s+to|"
     r"informoval[ao]?\s+o\s+tom|podľa\s+(?:neho|nej|nich)|píše\s+o\s+tom)\b",
@@ -163,6 +182,26 @@ FACTUAL_SIGNALS_RE = re.compile(
     r"(?:\d+\s*(?:%|percent|mil\.|milión|mld\.|miliard|tisíc|eur|dolár|km|gw|mw)|"
     r"\b(?:výskum|štúdi|analýz|ekonomik|infláci|sadzb|banka|vlád|parlament|komisi|"
     r"dohod|zmluv|sankci|investíci|zákon|opatreni|technológi|objav|rekord|nárast|pokles)\w*)",
+    re.IGNORECASE,
+)
+
+# Znaky platobnej brány (paywallu) v texte článku
+PAYWALL_RE = re.compile(
+    r"(?:tento\s+článok\s+je\s+(?:zamknutý|dostupný\s+len\s+pre\s+predplatiteľov)|"
+    r"odomknite\s+si\s+(?:tento\s+článok|celý\s+článok|prístup)|"
+    r"pokračujte\s+v\s+čítaní\s+s\s+predplatným|"
+    r"pridajte\s+sa\s+k\s+predplatiteľom|staňte\s+sa\s+predplatiteľom|"
+    r"čítajte\s+bez\s+obmedzení\s+s\s+predplatným|"
+    r"obsah\s+je\s+prístupný\s+iba\s+predplatiteľom)",
+    re.IGNORECASE,
+)
+
+# Vata na stránkach, ktorá nepatrí do tela článku
+BOILERPLATE_P_RE = re.compile(
+    r"(?:súbory\s+cookie|cookies|ochrana\s+osobných\s+údajov|všetky\s+práva\s+vyhradené|"
+    r"prihláste\s+sa\s+na\s+odber|newsletter|zdieľať\s+článok|súvisiace\s+články|"
+    r"čítajte\s+aj:|prečítajte\s+si\s+aj|reklama|inzercia|copyright|©|"
+    r"viac\s+si\s+prečítate\s+v\s+našej|predplatné\s+sme|predplatné\s+denníka)",
     re.IGNORECASE,
 )
 
@@ -394,6 +433,8 @@ MENINY_BY_MONTH = {
 }
 
 
+# --- POMOCNÉ FUNKCIE: KALENDÁR, TEXT, HTTP ---
+
 def easter_sunday(year):
     a = year % 19
     b = year // 100
@@ -469,7 +510,7 @@ def clean_text(raw, is_summary=False):
     text = html.unescape(text)
     text = re.sub(
         r"\s*(?:"
-        r"Čítajte viac|Viac sa dočítate|Celý článok|"
+        r"Čítajte viac|Viac sa dočítate|Viac si prečítate|Celý článok|"
         r"Článok\s+.*?\s+je zobrazený ako prvý na|"
         r"Príspevok\s+.*?\s+sa (?:prvýkrát|najprv) objavil|"
         r"The post\s+.*?\s+appeared first"
@@ -521,6 +562,315 @@ def parse_date(date_str):
         return None
 
 
+def http_get_text(url, timeout=10, extra_headers=None):
+    headers = {"User-Agent": HTTP_UA, "Accept-Language": "sk,cs;q=0.9,en;q=0.5"}
+    if extra_headers:
+        headers.update(extra_headers)
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        raw = resp.read()
+        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+            raw = gzip.decompress(raw)
+        charset = resp.headers.get_content_charset() or "utf-8"
+        return raw.decode(charset, errors="replace")
+
+
+# --- SŤAHOVANIE PLNÉHO TEXTU ČLÁNKOV + CACHE + AI ZHRNUTIE ---
+
+class ArticleParagraphExtractor(HTMLParser):
+    """Jednoduchý extraktor odsekov z HTML stránky bez externých knižníc."""
+
+    SKIP_TAGS = {
+        "script", "style", "noscript", "nav", "header", "footer",
+        "aside", "form", "button", "figure", "figcaption", "iframe", "svg",
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.skip_depth = 0
+        self.in_p = False
+        self.buf = []
+        self.paragraphs = []
+
+    def handle_starttag(self, tag, attrs):
+        t = tag.lower()
+        if t in self.SKIP_TAGS:
+            self.skip_depth += 1
+        elif t == "p" and self.skip_depth == 0:
+            self.in_p = True
+            self.buf = []
+
+    def handle_endtag(self, tag):
+        t = tag.lower()
+        if t in self.SKIP_TAGS and self.skip_depth > 0:
+            self.skip_depth -= 1
+        elif t == "p" and self.in_p:
+            self.in_p = False
+            text = re.sub(r"\s+", " ", html.unescape("".join(self.buf))).strip()
+            if len(text) >= 40 and not BOILERPLATE_P_RE.search(text):
+                self.paragraphs.append(text)
+            self.buf = []
+
+    def handle_data(self, data):
+        if self.in_p and self.skip_depth == 0:
+            self.buf.append(data)
+
+
+def fetch_article_body(url):
+    """
+    Stiahne a vyčistí text článku z webu.
+    Vráti dvojicu (text, is_paywalled).
+    """
+    if not url:
+        return "", False
+    try:
+        page_html = http_get_text(url, timeout=10)
+    except Exception as e:
+        print(f"Nepodarilo sa stiahnuť článok ({url}): {e}")
+        return "", False
+
+    parser = ArticleParagraphExtractor()
+    try:
+        parser.feed(page_html)
+    except Exception:
+        return "", False
+
+    # Odstránenie duplicitných odsekov a orezanie na rozumnú dĺžku pre AI
+    seen_p = set()
+    clean_p = []
+    total_chars = 0
+    for p in parser.paragraphs:
+        norm = p[:80].lower()
+        if norm in seen_p:
+            continue
+        seen_p.add(norm)
+        clean_p.append(p)
+        total_chars += len(p)
+        if total_chars >= 4500:
+            break
+
+    body_text = "\n".join(clean_p)
+    # Detekcia paywallu: varovný text na stránke a zároveň málo voľného textu
+    has_paywall_hint = bool(PAYWALL_RE.search(page_html))
+    is_paywalled = has_paywall_hint and len(body_text) < 1200
+    return body_text, is_paywalled
+
+
+def load_summary_cache(today):
+    if not os.path.exists(CACHE_FILE):
+        return {}
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            return {}
+        # Uchovávame len záznamy z posledných 2 dní, aby súbor nerástol
+        cutoff = (today - timedelta(days=2)).isoformat()
+        return {
+            k: v for k, v in data.items()
+            if isinstance(v, dict) and v.get("date", "") >= cutoff
+        }
+    except Exception as e:
+        print(f"Chyba pri čítaní cache ({CACHE_FILE}): {e}")
+        return {}
+
+
+def save_summary_cache(cache):
+    try:
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
+    except Exception as e:
+        print(f"Chyba pri ukladaní cache ({CACHE_FILE}): {e}")
+
+
+AI_SYSTEM_PROMPT = (
+    "Si vecný slovenský spravodajský editor pre E-Ink noviny. "
+    "Tvojou úlohou je napísať ucelené, samostatne zrozumiteľné zhrnutie článku po slovensky. "
+    "Pravidlá:\n"
+    "1. Napíš presne 2 až 3 hutné, úplné vety v rozsahu približne 200 až 290 znakov (maximálne 320 znakov).\n"
+    "2. Vždy jasne uveď pointu: čo presne sa stalo, prečo sa to stalo a aký je výsledok, rozhodnutie alebo dopad.\n"
+    "3. Nikdy nepoužívaj upútavky ani prázdne frázy typu 'článok sa venuje', 'dozviete sa', 'viac si prečítate'.\n"
+    "4. Vychádzaj výhradne z poskytnutého textu, nič si nevymýšľaj. Žiadne odrážky, žiadny markdown, žiadne tri bodky na konci.\n"
+    "5. Ak je text zjavne neúplný alebo zamknutý (paywall) a neobsahuje skutočnú odpoveď ani rozuzlenie, odpovedz presne jediným slovom: PAYWALL"
+)
+
+
+def _clean_ai_output(text):
+    if not text:
+        return ""
+    # Odstránenie prípadných interných <think> blokov a markdownu
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"\*{1,2}|`", "", text)
+    text = re.sub(r"\s+", " ", text).strip().strip('"„“\'')
+    if text.upper().startswith("PAYWALL"):
+        return "PAYWALL"
+    # Odstránenie prípadných troch bodiek na konci
+    if re.search(r"(\.\.\.|…)\s*$", text):
+        stripped = re.sub(r"\s*(\.\.\.|…)\s*$", "", text).strip()
+        sents = split_sentences(stripped)
+        complete = [s for s in sents if s and s[-1] in ".!?"]
+        text = " ".join(complete) if complete else stripped.rstrip(",;:–—- ") + "."
+    if text and text[-1] not in ".!?":
+        text += "."
+    return text
+
+
+def _call_gemini(user_prompt):
+    if not GEMINI_API_KEY:
+        return None, None
+
+    payload_base = {
+        "system_instruction": {"parts": [{"text": AI_SYSTEM_PROMPT}]},
+        "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 1024,
+        },
+    }
+    body_bytes = json.dumps(payload_base).encode("utf-8")
+
+    for model in GEMINI_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        req = urllib.request.Request(
+            url,
+            data=body_bytes,
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY,
+                "User-Agent": HTTP_UA,
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            candidates = data.get("candidates") or []
+            if not candidates:
+                continue
+            parts = candidates[0].get("content", {}).get("parts") or []
+            # Preskočíme prípadné "thought" časti pri reasoning modeloch
+            answer_parts = [
+                p.get("text", "") for p in parts
+                if p.get("text") and not p.get("thought")
+            ]
+            out = _clean_ai_output(" ".join(answer_parts))
+            if out:
+                return out, f"Gemini/{model}"
+        except urllib.error.HTTPError as e:
+            err_body = ""
+            try:
+                err_body = e.read().decode("utf-8", errors="replace")[:200]
+            except Exception:
+                pass
+            print(f"Chyba Gemini [{model}] HTTP {e.code}: {err_body}")
+        except Exception as e:
+            print(f"Chyba Gemini [{model}]: {e}")
+
+    return None, None
+
+
+def _call_groq(user_prompt):
+    if not GROQ_API_KEY:
+        return None, None
+
+    for model in GROQ_MODELS:
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": AI_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": 0.2,
+            "max_tokens": 350,
+        }
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "User-Agent": HTTP_UA,
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            choices = data.get("choices") or []
+            if not choices:
+                continue
+            content = choices[0].get("message", {}).get("content", "")
+            out = _clean_ai_output(content)
+            if out:
+                return out, f"Groq/{model}"
+        except urllib.error.HTTPError as e:
+            err_body = ""
+            try:
+                err_body = e.read().decode("utf-8", errors="replace")[:200]
+            except Exception:
+                pass
+            print(f"Chyba Groq [{model}] HTTP {e.code}: {err_body}")
+        except Exception as e:
+            print(f"Chyba Groq [{model}]: {e}")
+
+    return None, None
+
+
+def summarize_article_with_ai(art, cache, today_iso):
+    """
+    Vytvorí alebo načíta z cache ucelené AI zhrnutie článku.
+    Vráti stav: ("ok", summary_text, provider) alebo ("paywall", "", "") alebo ("fallback", rss_summary, "RSS").
+    """
+    cache_key = art["url"] or art["key"]
+    cached = cache.get(cache_key)
+    if cached:
+        status = cached.get("status")
+        if status == "ok" and cached.get("summary"):
+            return "ok", cached["summary"], f"cache:{cached.get('provider', 'AI')}"
+        if status == "paywall":
+            return "paywall", "", "cache:paywall"
+
+    # Ak nie sú nastavené žiadne API kľúče, použijeme vyčistený RSS perex
+    if not GEMINI_API_KEY and not GROQ_API_KEY:
+        return "fallback", art["summary"], "RSS"
+
+    body_text, is_paywalled = fetch_article_body(art["url"])
+    if is_paywalled or len(body_text) < 320:
+        if is_paywalled:
+            cache[cache_key] = {"status": "paywall", "date": today_iso}
+            return "paywall", "", "paywall-html"
+        # Ak sa nepodarilo stiahnuť telo (napr. JS stránka), ale RSS je vecné a úplné
+        return "fallback", art["summary"], "RSS"
+
+    user_prompt = (
+        f"Titulok: {art['title']}\n"
+        f"Zdroj: {art['source']}\n"
+        f"RSS perex: {art['summary']}\n\n"
+        f"Text článku:\n{body_text}"
+    )
+
+    summary, provider = _call_gemini(user_prompt)
+    if not summary:
+        summary, provider = _call_groq(user_prompt)
+
+    if summary == "PAYWALL":
+        cache[cache_key] = {"status": "paywall", "date": today_iso}
+        return "paywall", "", "paywall-ai"
+
+    if summary and 70 <= len(summary) <= 520:
+        cache[cache_key] = {
+            "status": "ok",
+            "summary": summary,
+            "provider": provider,
+            "date": today_iso,
+        }
+        return "ok", summary, provider
+
+    return "fallback", art["summary"], "RSS"
+
+
+# --- POČASIE PRE ŠAMORÍN (3 NEZÁVISLÉ ZDROJE) ---
+
 def _fetch_weather_open_meteo():
     url = (
         f"https://api.open-meteo.com/v1/forecast"
@@ -528,12 +878,7 @@ def _fetch_weather_open_meteo():
         f"&current=temperature_2m,weather_code"
         f"&timezone=Europe%2FBratislava"
     )
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "EInkSvetovyDennik/1.0 (https://github.com/domino7082-1)"},
-    )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    data = json.loads(http_get_text(url, timeout=10))
     current = data.get("current", {})
     temp = current.get("temperature_2m")
     code = current.get("weather_code")
@@ -548,13 +893,13 @@ def _fetch_weather_met_no():
         f"https://api.met.no/weatherapi/locationforecast/2.0/compact"
         f"?lat={WEATHER_LAT}&lon={WEATHER_LON}"
     )
-    # MET Norway vyžaduje unikátny User-Agent s identifikáciou aplikácie
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "EInkSvetovyDennik/1.0 github.com/domino7082-1"},
+    data = json.loads(
+        http_get_text(
+            url,
+            timeout=10,
+            extra_headers={"User-Agent": "EInkSvetovyDennik/2.0 github.com/domino7082-1"},
+        )
     )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
     ts = data["properties"]["timeseries"][0]["data"]
     temp = ts["instant"]["details"]["air_temperature"]
     sym = (
@@ -563,22 +908,14 @@ def _fetch_weather_met_no():
         or ""
     )
     base_sym = sym.split("_")[0]
-    if "thunder" in base_sym:
-        desc = "Búrka"
-    else:
-        desc = METNO_SK.get(base_sym, "")
+    desc = "Búrka" if "thunder" in base_sym else METNO_SK.get(base_sym, "")
     return int(round(float(temp))), desc
 
 
 def _fetch_weather_wttr():
     """Záloha 2: wttr.in JSON API."""
     url = f"https://wttr.in/{WEATHER_LAT},{WEATHER_LON}?format=j1"
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "EInkSvetovyDennik/1.0"},
-    )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    data = json.loads(http_get_text(url, timeout=10))
     cur = data["current_condition"][0]
     temp = cur.get("temp_C")
     if temp is None:
@@ -615,6 +952,8 @@ def fetch_weather():
     return f"{WEATHER_CITY}: -- °C"
 
 
+# --- NAČÍTANIE, BODOVANIE A VÝBER SPRÁV ---
+
 def normalize_key(title):
     cleaned = re.sub(r"[^a-z0-9áčďéíĺľňóôŕšťúýž]+", "", title.lower())
     return cleaned[:48]
@@ -632,11 +971,21 @@ def has_keyword(text, category_key):
     return False
 
 
+def is_teaser_rss(art):
+    """Rozpozná RSS perex, ktorý bez plného článku nedáva zmysel alebo zamlčuje pointu."""
+    text = f"{art['title']} {art['summary']}"
+    if TEASER_RE.search(text):
+        return True
+    if not art["summary"] or len(art["summary"]) < 130:
+        return True
+    if DANGLING_START_RE.search(art["summary"]):
+        return True
+    return False
+
+
 def score_article(art, now):
     """
-    Ohodnotí pridanú hodnotu a informačnú bohatosť článku:
-    - Uprednostňuje vecné, viacvetné správy s konkrétnymi údajmi.
-    - Penalizuje krátke 1-vetové útržky, vytrhnuté vety a clickbait.
+    Ohodnotí pridanú hodnotu a informačnú bohatosť článku.
     """
     title = art["title"]
     summary = art["summary"]
@@ -648,35 +997,37 @@ def score_article(art, now):
 
     # 1. Informačná hustota a dĺžka perexu
     if s_len == 0:
-        score -= 60
+        score -= 50
     elif s_len < 85:
-        score -= 35
+        score -= 28
     elif s_len < 130:
-        score -= 10
+        score -= 8
     elif s_len <= 420:
-        score += 32 + min(14, (s_len - 130) / 18.0)
+        score += 30 + min(14, (s_len - 130) / 18.0)
     else:
-        score += 36
+        score += 34
 
-    # 2. Viacvetné vysvetlenie (kontext + dopad)
+    # 2. Viacvetné vysvetlenie
     if n_sent >= 2:
-        score += 18
+        score += 16
     elif n_sent == 1 and s_len < 120:
-        score -= 15
+        score -= 12
 
     # 3. Kompletnosť bez pôvodného RSS useknutia
     if summary and not art["raw_cut"]:
-        score += 12
+        score += 10
 
-    # 4. Penalizácia vytrhnutých agentúrnych viet bez kontextu
+    # 4. Penalizácia vytrhnutých viet bez kontextu a clickbaitu
     if summary and DANGLING_START_RE.search(summary):
-        score -= 28
-
-    # 5. Penalizácia clickbaitu
+        score -= 24
     if CLICKBAIT_RE.search(f"{title} {summary}"):
-        score -= 26
+        score -= 28
     if title.endswith("?") and s_len < 140:
         score -= 10
+
+    # 5. Mierna preferencia odomknutých zdrojov (väčšia šanca na plný text pre AI)
+    if art["source"] in ("Denník N", "Denník E"):
+        score -= 8
 
     # 6. Bonus za konkrétne fakty, čísla a vecné témy
     factual_hits = len(FACTUAL_SIGNALS_RE.findall(f"{title} {summary}"))
@@ -695,12 +1046,7 @@ def fetch_single_feed(feed_cfg, today, now, per_feed_limit=20):
     results = []
 
     try:
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; EInkWorldDaily/1.0)"},
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            xml_data = resp.read()
+        xml_data = http_get_text(url, timeout=10).encode("utf-8")
         root = ET.fromstring(xml_data)
     except Exception as e:
         print(f"Chyba pri načítaní {source} ({url}): {e}")
@@ -723,11 +1069,14 @@ def fetch_single_feed(feed_cfg, today, now, per_feed_limit=20):
             raw_summary = item.findtext(f"{ns}summary") or item.findtext(f"{ns}content")
             summary = clean_text(raw_summary, is_summary=True)
             pub_raw = item.findtext(f"{ns}published") or item.findtext(f"{ns}updated")
+            link_el = item.find(f"{ns}link")
+            link = (link_el.attrib.get("href", "") if link_el is not None else "").strip()
         else:
             title = clean_text(item.findtext("title"), is_summary=False)
             raw_summary = item.findtext("description")
             summary = clean_text(raw_summary, is_summary=True)
             pub_raw = item.findtext("pubDate") or item.findtext(dc_date_tag)
+            link = (item.findtext("link") or "").strip()
 
         if not title or len(title) < 15:
             continue
@@ -749,6 +1098,7 @@ def fetch_single_feed(feed_cfg, today, now, per_feed_limit=20):
 
         art = {
             "key": key,
+            "url": link,
             "source": source,
             "groups": set(groups),
             "title": title,
@@ -787,6 +1137,8 @@ def fetch_articles(feeds, per_feed_limit=20):
             ordered.append(art)
         else:
             by_key[k]["groups"].update(art["groups"])
+            if not by_key[k]["url"] and art["url"]:
+                by_key[k]["url"] = art["url"]
 
     return ordered
 
@@ -827,13 +1179,13 @@ def matches_category(art, cat_key):
     return False
 
 
-def pick_best_for_category(articles, cat_key, used_keys, min_score=None):
+def get_candidates_for_category(articles, cat_key, used_keys, min_score=None):
     candidates = [
         a for a in articles
         if a["key"] not in used_keys and matches_category(a, cat_key)
     ]
     if not candidates:
-        return None
+        return []
 
     if cat_key == "gadgety_it":
         gadget_matches = [
@@ -845,22 +1197,54 @@ def pick_best_for_category(articles, cat_key, used_keys, min_score=None):
 
     candidates.sort(key=lambda a: (a["score"], a["dt"].timestamp()), reverse=True)
     if min_score is not None:
-        quality = [a for a in candidates if a["score"] >= min_score]
-        return quality[0] if quality else None
-
-    return candidates[0]
+        candidates = [a for a in candidates if a["score"] >= min_score]
+    return candidates
 
 
-def select_three_articles(articles):
+def pick_complete_article_for_category(articles, cat_key, used_keys, min_score, cache, today_iso):
     """
-    Vyberie 3 rovnocenné správy s najvyššou pridanou hodnotou:
-    - Mixuje medzi všetkými 5 hlavnými kategóriami (s jemnou hodinovou rotáciou).
-    - 5 záložných kategórií použije len vtedy, ak hlavné kategórie nemajú 3 kvalitné správy.
+    Pre danú kategóriu nájde najkvalitnejší odomknutý článok s uceleným AI zhrnutím.
+    Ak je prvý kandidát za paywallom, plynulo vyskúša ďalšieho (max 3 pokusy na kategóriu).
+    """
+    candidates = get_candidates_for_category(articles, cat_key, used_keys, min_score=min_score)
+    if not candidates:
+        return None
+
+    rss_backup = None
+
+    for cand in candidates[:3]:
+        status, summary_text, provider = summarize_article_with_ai(cand, cache, today_iso)
+        if status == "ok":
+            entry = dict(cand, summary=summary_text, ai_provider=provider)
+            return entry
+        if status == "fallback" and not is_teaser_rss(cand) and rss_backup is None:
+            rss_backup = dict(cand, summary=summary_text, ai_provider=provider)
+
+    # Ak žiadny z top 3 nemal odomknutý plný text, použijeme zálohu s úplným RSS perexom
+    if rss_backup is not None:
+        return rss_backup
+
+    # Posledná poistka len pri záchrannom kole (min_score is None)
+    if min_score is None:
+        for cand in candidates[:3]:
+            if cand["summary"] and not TEASER_RE.search(f"{cand['title']} {cand['summary']}"):
+                return dict(cand, ai_provider="RSS-fallback")
+        return dict(candidates[0], ai_provider="RSS-fallback")
+
+    return None
+
+
+def select_three_articles(articles, cache):
+    """
+    Vyberie 3 rovnocenné ucelené správy s najvyššou pridanou hodnotou:
+    - Mixuje medzi 5 hlavnými kategóriami (hodinová rotácia).
+    - 5 záložných kategórií použije len ak hlavné nemajú 3 kvalitné ucelené správy.
     """
     if not articles:
         return []
 
     now = datetime.now(TZ_LOCAL)
+    today_iso = now.date().isoformat()
     rotation_seed = now.timetuple().tm_yday * 24 + now.hour
 
     def rotated(items):
@@ -872,32 +1256,39 @@ def select_three_articles(articles):
     selected = []
 
     def fill_from_categories(cat_list, is_fallback, min_score):
-        pool = []
+        # Zoradíme kategórie podľa kvality najlepšieho dostupného článku + hodinovej rotácie
+        ranked_cats = []
         for order_idx, (label, key) in enumerate(rotated(cat_list)):
             if key in used_cats:
                 continue
-            art = pick_best_for_category(articles, key, used_keys, min_score=min_score)
-            if art is not None:
-                # Kvalita má hlavnú váhu, hodinová rotácia zabezpečuje striedanie kategórií
-                rank = art["score"] - order_idx * 3.5
-                pool.append((rank, label, key, art))
+            cands = get_candidates_for_category(articles, key, used_keys, min_score=min_score)
+            if not cands:
+                continue
+            rank = cands[0]["score"] - order_idx * 3.5
+            ranked_cats.append((rank, label, key))
 
-        pool.sort(key=lambda x: (x[0], x[3]["dt"].timestamp()), reverse=True)
-        for _, label, key, art in pool:
+        ranked_cats.sort(key=lambda x: x[0], reverse=True)
+
+        for _, label, key in ranked_cats:
             if len(selected) >= TOTAL_ARTICLES:
                 break
-            if art["key"] in used_keys or key in used_cats:
+            chosen = pick_complete_article_for_category(
+                articles, key, used_keys, min_score, cache, today_iso
+            )
+            if chosen is None or chosen["key"] in used_keys:
                 continue
-            selected.append(dict(art, display_tag=label, is_fallback=is_fallback))
-            used_keys.add(art["key"])
+            chosen["display_tag"] = label
+            chosen["is_fallback"] = is_fallback
+            selected.append(chosen)
+            used_keys.add(chosen["key"])
             used_cats.add(key)
 
-    # 1. Kolo: kvalitné články z 5 hlavných kategórií
-    fill_from_categories(MAIN_CATEGORIES, is_fallback=False, min_score=15)
+    # 1. Kolo: kvalitné ucelené články z 5 hlavných kategórií
+    fill_from_categories(MAIN_CATEGORIES, is_fallback=False, min_score=10)
 
     # 2. Kolo: kvalitné články zo 5 záložných kategórií (iba ak chýbajú hlavné)
     if len(selected) < TOTAL_ARTICLES:
-        fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=10)
+        fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=8)
 
     # 3. Záchranné kolo (skoro ráno pri malom počte dnešných článkov)
     if len(selected) < TOTAL_ARTICLES:
@@ -905,18 +1296,19 @@ def select_three_articles(articles):
     if len(selected) < TOTAL_ARTICLES:
         fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=None)
 
-    # Hlavné kategórie pred záložnými, v rámci nich od najvyššej pridanej hodnoty
     selected.sort(key=lambda a: (a["is_fallback"], -a["score"], -a["dt"].timestamp()))
 
     for idx, art in enumerate(selected, start=1):
         role = "ZÁLOHA" if art["is_fallback"] else "HLAVNÁ KAT."
         print(
-            f"SPRÁVA {idx} [{role}: {art['display_tag']} | skóre {art['score']}]: "
+            f"SPRÁVA {idx} [{role}: {art['display_tag']} | skóre {art['score']} | {art.get('ai_provider', 'RSS')}]: "
             f"{art['source']} ({art['dt'].strftime('%d.%m. %H:%M')}) - {art['title']}"
         )
 
     return selected
 
+
+# --- VYKRESLENIE 1-BIT BMP (800×480, 3 ROVNOCENNÉ SPRÁVY, PÍSMO 17/14) ---
 
 def wrap_text_full(draw, text, font, max_width):
     """Zalomí celý text podľa šírky v pixeloch bez skracovania a bez troch bodiek."""
@@ -974,7 +1366,7 @@ def fit_three_equal_articles(draw, articles, presets, content_w, avail_h):
     """
     Primárne vykreslí všetky 3 správy písmom 17 / 14 px.
     Ak sú všetky 3 extrémne dlhé, plynulo zmenší na záložnú sadu a prípadne skráti
-    najdlhší perex po celých vetách (nikdy na '...').
+    najdlhší text po celých vetách (nikdy na '...').
     """
     min_div_space = 16
 
@@ -1181,7 +1573,11 @@ def render_dashboard(selected_articles, weather_str):
 
 
 if __name__ == "__main__":
+    today_local = datetime.now(TZ_LOCAL).date()
+    summary_cache = load_summary_cache(today_local)
     all_articles = fetch_articles(FEEDS)
-    selected = select_three_articles(all_articles)
+    selected = select_three_articles(all_articles, summary_cache)
+    save_summary_cache(summary_cache)
     weather = fetch_weather()
     render_dashboard(selected, weather)
+
