@@ -47,7 +47,7 @@ BROWSER_UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
-APP_UA = "EInkSvetovyDennik/2.2 github.com/domino7082-1"
+APP_UA = "EInkSvetovyDennik/2.3 github.com/domino7082-1"
 
 # Interný stav behu (zabraňuje opakovanému skúšaniu nefunkčných modelov a 429 na doménach)
 _DEAD_GEMINI_MODELS = set()
@@ -132,7 +132,7 @@ KEYWORDS = {
     "gadgety_it": [
         "smartfón", "mobil", "iphone", "samsung", "xiaomi", "android", "windows",
         "notebook", "laptop", "tablet", "aplikáci", "operátor", "orange", "telekom",
-        r"\bo2\b", "4ka", "internet", "wi-fi", "aktualizáci", "recenzi", "konzol",
+        r"\bo2\b", "4ka", "internet", "wi-fi", "aktualizáci", "konzol",
         "slúchadl", "hodink", "fotoaparát", "displej",
     ],
     "veda_vesmir": [
@@ -155,7 +155,7 @@ KEYWORDS = {
     ],
 }
 
-# Vzory pre vyradenie video článkov, online prenosov, galérií a neinformatívneho obsahu
+# Vzory pre vyradenie videí, online prenosov, galérií, nákupných poradní, darčekových tipov a PR obsahu
 UNWANTED_RE = re.compile(
     r"(?:"
     r"\(\s*\+?\s*video\s*\)|\[\s*video\s*\]|\bvideo\b|\bvideoreportáž|\bvideorozhovor"
@@ -164,6 +164,13 @@ UNWANTED_RE = re.compile(
     r"|^online\b|\bonline\s*:|\bonline\s+prenos|\bpriamy\s+prenos|\bsledujte\s+naživo"
     r"|\bminúta\s+po\s+minúte|^live\b|\blive\s*:|^naživo\b|\bnaživo\s*:"
     r"|kde\s+sledovať|\bkurzy\b|tipy\s+na\s+stávk|\bkvíz\b|\banketa\b|\bhoroskop\b|\bsúťaž\b"
+    r"|\bporadňa\s*:|vianočn[áýéo]\s+(?:poradň|sprievodc|tipy|darček|nákup)"
+    r"|nákupn[ýáéí]\s+sprievodc|sprievodc[au]\s+(?:výberom|nákupom|darček)"
+    r"|(?:^|:\s*)vyberáme\b|pod\s+stromček|tipy\s+na\s+darček|darček(?:y|ov)?\s+pre\b"
+    r"|ako\s+vybrať\s+(?:správn|najlepš|nov|smart|mobil|notebook|hodink|darček|televízor|slúchadl)"
+    r"|black\s+friday|cyber\s+monday|za\s+super\s+cenu|akciov[áýé]\s+ponuk"
+    r"|\b(?:pr|komerčný|sponzorovaný)\s+článok\b|platen[áýé]\s+spoluprác|\bpartner\s+článku\b"
+    r"|\b(?:top|najlepších)\s+\d+\s+(?:tipov|darčekov|modelov|smartfónov|hodiniek|aplikácií|filmov|seriálov)"
     r")",
     re.IGNORECASE,
 )
@@ -179,6 +186,18 @@ CLICKBAIT_RE = re.compile(
 TEASER_RE = re.compile(
     r"(?:o\s+tom,\s*(?:prečo|ako|čo)|vysvetľuje,\s*(?:prečo|ako)|prezradil|"
     r"urobili\s+presne\s+to,\s*čo\s+mali|týždeň\s+v(?:o)?\s+svetovej|rozhovor\s*:)",
+    re.IGNORECASE,
+)
+
+# Meta-opisy bez konkrétnych faktov (keď text len opisuje, o čom je sprievodca/článok)
+META_SUMMARY_RE = re.compile(
+    r"(?:"
+    r"\btento\s+(?:vianočný\s+|nákupný\s+)?(?:článok|sprievodca|prehľad|zoznam|test|výber|text|rozhovor)\b"
+    r"|\b(?:vianočný|nákupný)\s+sprievodca\b"
+    r"|\bčlánok\s+(?:podrobne\s+|tiež\s+|zároveň\s+)?(?:hodnotí|porovnáva|predstavuje|prináša|ponúka|zhŕňa|sa\s+venuje|vysvetľuje|radí|ukazuje)\b"
+    r"|\b(?:sprievodca|prehľad|autor)\s+(?:uľahčuje\s+výber|porovnáva|radí,\s*ako\s+vybrať|ponúka\s+tipy)\b"
+    r"|\b(?:dozviete\s+sa|viac\s+si\s+prečítate|nájdete\s+v\s+článku)\b"
+    r")",
     re.IGNORECASE,
 )
 
@@ -550,7 +569,7 @@ def clean_text(raw, is_summary=False):
 
 
 def is_unwanted_article(title, summary):
-    """Vyradí video články, živé/online prenosy, galérie, podcasty a kvízy."""
+    """Vyradí videá, online prenosy, galérie, nákupné poradne, darčekové tipy a PR obsah."""
     return bool(UNWANTED_RE.search(title) or UNWANTED_RE.search(summary))
 
 
@@ -726,14 +745,15 @@ def save_summary_cache(cache):
 
 
 AI_SYSTEM_PROMPT = (
-    "Si vecný slovenský spravodajský editor pre E-Ink noviny. "
-    "Tvojou úlohou je napísať ucelené, samostatne zrozumiteľné zhrnutie článku po slovensky. "
+    "Si prísny a vecný slovenský spravodajský editor pre E-Ink noviny. "
+    "Tvojou úlohou je napísať ucelené, samostatne zrozumiteľné faktické zhrnutie článku po slovensky. "
     "Pravidlá:\n"
     "1. Napíš presne 2 až 3 hutné, úplné vety v rozsahu približne 200 až 290 znakov (maximálne 320 znakov).\n"
-    "2. Vždy jasne uveď pointu: čo presne sa stalo, prečo sa to stalo a aký je výsledok, rozhodnutie alebo dopad.\n"
-    "3. Nikdy nepoužívaj upútavky ani prázdne frázy typu 'článok sa venuje', 'dozviete sa', 'viac si prečítate'.\n"
+    "2. Píš priamo konkrétne fakty, čísla, zistenia a pointu: čo presne sa stalo, prečo a aký je výsledok alebo dopad.\n"
+    "3. Nikdy neopisuj článok zvonka. Prísne zakázané sú frázy ako 'Tento článok', 'Tento sprievodca', 'Článok hodnotí/porovnáva/sa venuje', 'dozviete sa', 'viac si prečítate'.\n"
     "4. Vychádzaj výhradne z poskytnutého textu, nič si nevymýšľaj. Žiadne odrážky, žiadny markdown, žiadne tri bodky na konci.\n"
-    "5. Ak je text zjavne neúplný alebo zamknutý (paywall) a neobsahuje skutočnú odpoveď ani rozuzlenie, odpovedz presne jediným slovom: PAYWALL"
+    "5. Ak je text zjavne neúplný alebo zamknutý (paywall) a neobsahuje odpoveď ani rozuzlenie, odpovedz presne jediným slovom: PAYWALL\n"
+    "6. Ak nejde o skutočnú správu, udalosť, objav ani konkrétne zistenie, ale iba o nákupného sprievodcu, poradňu pri výbere, tipy na darčeky, katalóg/porovnanie produktov, promo/PR článok, zľavovú akciu alebo prázdnu upútavku bez reálnej informačnej hodnoty, odpovedz presne jediným slovom: SKIP"
 )
 
 
@@ -743,8 +763,11 @@ def _clean_ai_output(text):
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r"\*{1,2}|`", "", text)
     text = re.sub(r"\s+", " ", text).strip().strip('"„“\'')
-    if text.upper().startswith("PAYWALL"):
+    upper = text.upper()
+    if upper.startswith("PAYWALL"):
         return "PAYWALL"
+    if upper.startswith("SKIP"):
+        return "SKIP"
     if re.search(r"(\.\.\.|…)\s*$", text):
         stripped = re.sub(r"\s*(\.\.\.|…)\s*$", "", text).strip()
         sents = split_sentences(stripped)
@@ -855,7 +878,6 @@ def _call_gemini(user_prompt):
             except Exception as e:
                 print(f"Chyba Gemini [{model}]: {e}")
 
-        # Ak všetky predvolené modely vrátili 404, skúsime automaticky objavené
         if phase == 1 and all(m in _DEAD_GEMINI_MODELS for m in GEMINI_MODELS):
             models_to_try = [
                 m for m in _discover_gemini_models()
@@ -972,17 +994,23 @@ def _call_groq(user_prompt):
 
 def summarize_article_with_ai(art, cache, today_iso):
     """
-    Vytvorí alebo načíta z cache ucelené AI zhrnutie článku.
-    Vráti stav: ("ok", summary_text, provider) alebo ("paywall", "", "") alebo ("fallback", rss_summary, "RSS").
+    Vytvorí alebo načíta z cache ucelené faktické AI zhrnutie článku.
+    Vráti stav: ("ok", text, provider) | ("paywall", "", reason) | ("skip", "", reason) | ("fallback", rss, "RSS").
     """
     cache_key = art["url"] or art["key"]
     cached = cache.get(cache_key)
     if cached and cache_key != CAROUSEL_STATE_KEY:
         status = cached.get("status")
         if status == "ok" and cached.get("summary"):
+            if META_SUMMARY_RE.search(cached["summary"]):
+                cache[cache_key] = {"status": "skip", "date": today_iso}
+                print(f"Vyradený meta-opis z cache: {art['title']}")
+                return "skip", "", "cache:meta-skip"
             return "ok", cached["summary"], f"cache:{cached.get('provider', 'AI')}"
         if status == "paywall":
             return "paywall", "", "cache:paywall"
+        if status == "skip":
+            return "skip", "", "cache:skip"
 
     if not GEMINI_API_KEY and not GROQ_API_KEY:
         return "fallback", art["summary"], "RSS"
@@ -1008,6 +1036,11 @@ def summarize_article_with_ai(art, cache, today_iso):
     if summary == "PAYWALL":
         cache[cache_key] = {"status": "paywall", "date": today_iso}
         return "paywall", "", "paywall-ai"
+
+    if summary == "SKIP" or (summary and META_SUMMARY_RE.search(summary)):
+        cache[cache_key] = {"status": "skip", "date": today_iso}
+        print(f"Vyradený neinformatívny článok ({provider or 'filter'}): {art['title']}")
+        return "skip", "", "skip-ai"
 
     if summary and 70 <= len(summary) <= 520:
         cache[cache_key] = {
@@ -1120,7 +1153,7 @@ def has_keyword(text, category_key):
 def is_teaser_rss(art):
     """Rozpozná RSS perex, ktorý bez plného článku nedáva zmysel alebo zamlčuje pointu."""
     text = f"{art['title']} {art['summary']}"
-    if TEASER_RE.search(text):
+    if TEASER_RE.search(text) or META_SUMMARY_RE.search(art["summary"]):
         return True
     if not art["summary"] or len(art["summary"]) < 130:
         return True
@@ -1355,8 +1388,8 @@ def pick_complete_article_for_category(
     articles, cat_key, used_keys, min_score, cache, today_iso, recent_keys
 ):
     """
-    Pre danú kategóriu nájde najkvalitnejší odomknutý článok s uceleným AI zhrnutím.
-    Uprednostní články, ktoré neboli zobrazené v posledných behoch.
+    Pre danú kategóriu nájde najkvalitnejší odomknutý, faktický článok s uceleným AI zhrnutím.
+    Preskakuje paywall, nákupné sprievodce aj prázdne meta-opisy (max 5 pokusov na kategóriu).
     """
     candidates = get_candidates_for_category(
         articles, cat_key, used_keys, min_score=min_score, recent_keys=recent_keys
@@ -1365,22 +1398,35 @@ def pick_complete_article_for_category(
         return None
 
     rss_backup = None
+    fallback_candidates = []
 
-    for cand in candidates[:3]:
+    for cand in candidates[:5]:
         status, summary_text, provider = summarize_article_with_ai(cand, cache, today_iso)
         if status == "ok":
             return dict(cand, summary=summary_text, ai_provider=provider)
-        if status == "fallback" and not is_teaser_rss(cand) and rss_backup is None:
+        if status in ("paywall", "skip"):
+            continue
+        fallback_candidates.append(cand)
+        if (
+            status == "fallback"
+            and not is_teaser_rss(cand)
+            and not META_SUMMARY_RE.search(summary_text)
+            and rss_backup is None
+        ):
             rss_backup = dict(cand, summary=summary_text, ai_provider=provider)
 
     if rss_backup is not None:
         return rss_backup
 
-    if min_score is None:
-        for cand in candidates[:3]:
-            if cand["summary"] and not TEASER_RE.search(f"{cand['title']} {cand['summary']}"):
+    if min_score is None and fallback_candidates:
+        for cand in fallback_candidates:
+            if (
+                cand["summary"]
+                and not TEASER_RE.search(f"{cand['title']} {cand['summary']}")
+                and not META_SUMMARY_RE.search(cand["summary"])
+            ):
                 return dict(cand, ai_provider="RSS-fallback")
-        return dict(candidates[0], ai_provider="RSS-fallback")
+        return dict(fallback_candidates[0], ai_provider="RSS-fallback")
 
     return None
 
@@ -1389,7 +1435,7 @@ def select_three_articles(articles, cache):
     """
     Vyberie 3 rovnocenné ucelené správy plynulým kolotočom cez všetkých 10 kategórií:
     - Všetkých 10 kategórií má rovnakú prioritu a pri každom behu sa posúva štart kolotoča.
-    - Prázdne kategórie sa ticho preskočia bez zaseknutia.
+    - Prázdne alebo vyradené kategórie sa ticho preskočia bez zaseknutia.
     - V rámci kategórie uprednostňuje články, ktoré ešte neboli nedávno zobrazené.
     """
     if not articles:
@@ -1411,7 +1457,7 @@ def select_three_articles(articles, cache):
     selected = []
     last_pass1_idx = None
 
-    # 1. Kolo: plynulý prechod kolotočom od start_idx (kvalitné ucelené články)
+    # 1. Kolo: plynulý prechod kolotočom od start_idx (kvalitné ucelené faktické články)
     for step in range(n_cats):
         if len(selected) >= TOTAL_ARTICLES:
             break
