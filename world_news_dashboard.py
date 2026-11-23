@@ -21,6 +21,8 @@ from PIL import Image, ImageDraw, ImageFont
 WIDTH, HEIGHT = 800, 480
 OUTPUT_FILE = "world_news_output.bmp"
 CACHE_FILE = "summary_cache.json"
+CAROUSEL_STATE_KEY = "__carousel__"
+RECENT_HISTORY_LIMIT = 18
 TZ_LOCAL = ZoneInfo("Europe/Bratislava")
 NEWSPAPER_TITLE = "SVETOVÝ DENNÍK"
 
@@ -45,7 +47,7 @@ BROWSER_UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
-APP_UA = "EInkSvetovyDennik/2.1 github.com/domino7082-1"
+APP_UA = "EInkSvetovyDennik/2.2 github.com/domino7082-1"
 
 # Interný stav behu (zabraňuje opakovanému skúšaniu nefunkčných modelov a 429 na doménach)
 _DEAD_GEMINI_MODELS = set()
@@ -64,22 +66,18 @@ WORLD_CLOCKS = [
     ("TOKIO", "Asia/Tokyo"),
 ]
 
-# 5 hlavných kategórií (mixujú sa do 3 rovnocenných pozícií)
-MAIN_CATEGORIES = [
+# 10 rovnocenných kategórií v poradí plynulého kolotoča (príbuzné témy sú od seba oddelené)
+CATEGORIES = [
     ("SVET", "svet"),
-    ("EKONOMIKA A TRHY", "ekonomika"),
     ("AI A TECH", "ai_tech"),
-    ("VEDA A VESMÍR", "veda_vesmir"),
     ("ŠPORT", "sport"),
-]
-
-# 5 záložných kategórií (použijú sa len ak hlavné nemajú dosť kvalitných správ)
-FALLBACK_CATEGORIES = [
     ("DOMOV", "domov"),
-    ("ENERGIE A BÝVANIE", "energie_byvanie"),
-    ("GADGETY A IT", "gadgety_it"),
+    ("VEDA A VESMÍR", "veda_vesmir"),
+    ("EKONOMIKA A TRHY", "ekonomika"),
     ("ZDRAVIE A PRÍRODA", "zdravie_priroda"),
+    ("GADGETY A IT", "gadgety_it"),
     ("AUTO A MOBILITA", "auto"),
+    ("ENERGIE A BÝVANIE", "energie_byvanie"),
 ]
 
 # RSS zdroje: (Krátky názov zdroja, Kategórie zdroja, URL)
@@ -585,12 +583,13 @@ def _root_domain(url):
 def _throttle_domain(url, min_interval=0.8):
     """Zabraňuje chybám 429 (najmä na sme.sk) pri paralelnom sťahovaní viacerých rubrík."""
     dom = _root_domain(url)
+    effective_interval = 2.2 if dom == "sme.sk" else min_interval
     with _DOMAIN_META_LOCK:
         lock = _DOMAIN_LOCKS.setdefault(dom, threading.Lock())
     with lock:
         now_t = time.monotonic()
         last = _DOMAIN_LAST_HIT.get(dom, 0.0)
-        wait = min_interval - (now_t - last)
+        wait = effective_interval - (now_t - last)
         if wait > 0:
             time.sleep(wait)
         _DOMAIN_LAST_HIT[dom] = time.monotonic()
@@ -704,10 +703,15 @@ def load_summary_cache(today):
         if not isinstance(data, dict):
             return {}
         cutoff = (today - timedelta(days=2)).isoformat()
-        return {
-            k: v for k, v in data.items()
-            if isinstance(v, dict) and v.get("date", "") >= cutoff
-        }
+        cleaned = {}
+        for k, v in data.items():
+            if not isinstance(v, dict):
+                continue
+            if k == CAROUSEL_STATE_KEY:
+                cleaned[k] = v
+            elif v.get("date", "") >= cutoff:
+                cleaned[k] = v
+        return cleaned
     except Exception as e:
         print(f"Chyba pri čítaní cache ({CACHE_FILE}): {e}")
         return {}
@@ -973,7 +977,7 @@ def summarize_article_with_ai(art, cache, today_iso):
     """
     cache_key = art["url"] or art["key"]
     cached = cache.get(cache_key)
-    if cached:
+    if cached and cache_key != CAROUSEL_STATE_KEY:
         status = cached.get("status")
         if status == "ok" and cached.get("summary"):
             return "ok", cached["summary"], f"cache:{cached.get('provider', 'AI')}"
@@ -1094,7 +1098,7 @@ def fetch_weather():
     return f"{WEATHER_CITY}: -- °C"
 
 
-# --- NAČÍTANIE, BODOVANIE A VÝBER SPRÁV ---
+# --- NAČÍTANIE, BODOVANIE A VÝBER SPRÁV (PLYNULÝ KOLOTOČ 10 KATEGÓRIÍ) ---
 
 def normalize_key(title):
     cleaned = re.sub(r"[^a-z0-9áčďéíĺľňóôŕšťúýž]+", "", title.lower())
@@ -1319,7 +1323,7 @@ def matches_category(art, cat_key):
     return False
 
 
-def get_candidates_for_category(articles, cat_key, used_keys, min_score=None):
+def get_candidates_for_category(articles, cat_key, used_keys, min_score=None, recent_keys=None):
     candidates = [
         a for a in articles
         if a["key"] not in used_keys and matches_category(a, cat_key)
@@ -1335,18 +1339,28 @@ def get_candidates_for_category(articles, cat_key, used_keys, min_score=None):
         if gadget_matches:
             candidates = gadget_matches
 
-    candidates.sort(key=lambda a: (a["score"], a["dt"].timestamp()), reverse=True)
     if min_score is not None:
         candidates = [a for a in candidates if a["score"] >= min_score]
+
+    recent_set = set(recent_keys or [])
+    # Uprednostní ešte nezobrazené dnešné články; v rámci nich triedi podľa skóre a čerstvosti
+    candidates.sort(
+        key=lambda a: (0 if a["key"] in recent_set else 1, a["score"], a["dt"].timestamp()),
+        reverse=True,
+    )
     return candidates
 
 
-def pick_complete_article_for_category(articles, cat_key, used_keys, min_score, cache, today_iso):
+def pick_complete_article_for_category(
+    articles, cat_key, used_keys, min_score, cache, today_iso, recent_keys
+):
     """
     Pre danú kategóriu nájde najkvalitnejší odomknutý článok s uceleným AI zhrnutím.
-    Ak je prvý kandidát za paywallom, plynulo vyskúša ďalšieho (max 3 pokusy na kategóriu).
+    Uprednostní články, ktoré neboli zobrazené v posledných behoch.
     """
-    candidates = get_candidates_for_category(articles, cat_key, used_keys, min_score=min_score)
+    candidates = get_candidates_for_category(
+        articles, cat_key, used_keys, min_score=min_score, recent_keys=recent_keys
+    )
     if not candidates:
         return None
 
@@ -1373,71 +1387,99 @@ def pick_complete_article_for_category(articles, cat_key, used_keys, min_score, 
 
 def select_three_articles(articles, cache):
     """
-    Vyberie 3 rovnocenné ucelené správy s najvyššou pridanou hodnotou:
-    - Mixuje medzi 5 hlavnými kategóriami (hodinová rotácia).
-    - 5 záložných kategórií použije len ak hlavné nemajú 3 kvalitné ucelené správy.
+    Vyberie 3 rovnocenné ucelené správy plynulým kolotočom cez všetkých 10 kategórií:
+    - Všetkých 10 kategórií má rovnakú prioritu a pri každom behu sa posúva štart kolotoča.
+    - Prázdne kategórie sa ticho preskočia bez zaseknutia.
+    - V rámci kategórie uprednostňuje články, ktoré ešte neboli nedávno zobrazené.
     """
     if not articles:
         return []
 
     now = datetime.now(TZ_LOCAL)
     today_iso = now.date().isoformat()
-    rotation_seed = now.timetuple().tm_yday * 24 + now.hour
+    n_cats = len(CATEGORIES)
 
-    def rotated(items):
-        offset = rotation_seed % len(items)
-        return items[offset:] + items[:offset]
+    state = cache.get(CAROUSEL_STATE_KEY)
+    if not isinstance(state, dict):
+        state = {}
+
+    start_idx = int(state.get("next_index", 0)) % n_cats
+    recent_keys = state.get("recent_keys") if isinstance(state.get("recent_keys"), list) else []
 
     used_keys = set()
     used_cats = set()
     selected = []
+    last_pass1_idx = None
 
-    def fill_from_categories(cat_list, is_fallback, min_score):
-        ranked_cats = []
-        for order_idx, (label, key) in enumerate(rotated(cat_list)):
-            if key in used_cats:
-                continue
-            cands = get_candidates_for_category(articles, key, used_keys, min_score=min_score)
-            if not cands:
-                continue
-            rank = cands[0]["score"] - order_idx * 3.5
-            ranked_cats.append((rank, label, key))
+    # 1. Kolo: plynulý prechod kolotočom od start_idx (kvalitné ucelené články)
+    for step in range(n_cats):
+        if len(selected) >= TOTAL_ARTICLES:
+            break
+        idx = (start_idx + step) % n_cats
+        label, cat_key = CATEGORIES[idx]
+        if cat_key in used_cats:
+            continue
 
-        ranked_cats.sort(key=lambda x: x[0], reverse=True)
+        chosen = pick_complete_article_for_category(
+            articles, cat_key, used_keys, min_score=8,
+            cache=cache, today_iso=today_iso, recent_keys=recent_keys,
+        )
+        if chosen is None or chosen["key"] in used_keys:
+            continue
 
-        for _, label, key in ranked_cats:
+        chosen["display_tag"] = label
+        selected.append(chosen)
+        used_keys.add(chosen["key"])
+        used_cats.add(cat_key)
+        last_pass1_idx = idx
+
+    # 2. Záchranné kolo (skoro ráno pri malom počte dnešných článkov, bez limitu skóre)
+    used_rescue = False
+    if len(selected) < TOTAL_ARTICLES:
+        used_rescue = True
+        for step in range(n_cats):
             if len(selected) >= TOTAL_ARTICLES:
                 break
+            idx = (start_idx + step) % n_cats
+            label, cat_key = CATEGORIES[idx]
+            if cat_key in used_cats:
+                continue
+
             chosen = pick_complete_article_for_category(
-                articles, key, used_keys, min_score, cache, today_iso
+                articles, cat_key, used_keys, min_score=None,
+                cache=cache, today_iso=today_iso, recent_keys=recent_keys,
             )
             if chosen is None or chosen["key"] in used_keys:
                 continue
+
             chosen["display_tag"] = label
-            chosen["is_fallback"] = is_fallback
             selected.append(chosen)
             used_keys.add(chosen["key"])
-            used_cats.add(key)
+            used_cats.add(cat_key)
 
-    # 1. Kolo: kvalitné ucelené články z 5 hlavných kategórií
-    fill_from_categories(MAIN_CATEGORIES, is_fallback=False, min_score=10)
+    # Výpočet ďalšej pozície kolotoča a uloženie zobrazených článkov do pamäte
+    if not used_rescue and last_pass1_idx is not None:
+        next_index = (last_pass1_idx + 1) % n_cats
+    else:
+        next_index = (start_idx + TOTAL_ARTICLES) % n_cats
 
-    # 2. Kolo: kvalitné články zo 5 záložných kategórií (iba ak chýbajú hlavné)
-    if len(selected) < TOTAL_ARTICLES:
-        fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=8)
+    updated_recent = [k for k in recent_keys if k not in used_keys]
+    updated_recent.extend(art["key"] for art in selected)
+    updated_recent = updated_recent[-RECENT_HISTORY_LIMIT:]
 
-    # 3. Záchranné kolo (skoro ráno pri malom počte dnešných článkov)
-    if len(selected) < TOTAL_ARTICLES:
-        fill_from_categories(MAIN_CATEGORIES, is_fallback=False, min_score=None)
-    if len(selected) < TOTAL_ARTICLES:
-        fill_from_categories(FALLBACK_CATEGORIES, is_fallback=True, min_score=None)
+    cache[CAROUSEL_STATE_KEY] = {
+        "next_index": next_index,
+        "recent_keys": updated_recent,
+        "date": today_iso,
+    }
 
-    selected.sort(key=lambda a: (a["is_fallback"], -a["score"], -a["dt"].timestamp()))
-
+    print(
+        f"Kolotoč kategórií: štart #{start_idx + 1} ({CATEGORIES[start_idx][0]}) "
+        f"→ ďalší beh #{next_index + 1} ({CATEGORIES[next_index][0]})"
+    )
     for idx, art in enumerate(selected, start=1):
-        role = "ZÁLOHA" if art["is_fallback"] else "HLAVNÁ KAT."
         print(
-            f"SPRÁVA {idx} [{role}: {art['display_tag']} | skóre {art['score']} | {art.get('ai_provider', 'RSS')}]: "
+            f"SPRÁVA {idx} [{art['display_tag']} | skóre {art['score']} | {art.get('ai_provider', 'RSS')}]: "
             f"{art['source']} ({art['dt'].strftime('%d.%m. %H:%M')}) - {art['title']}"
         )
 
