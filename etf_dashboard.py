@@ -23,7 +23,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v12-data-reliability"
+SCRIPT_VERSION = "2026-11-27-v13-data-reliability"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -53,10 +53,10 @@ ETF_CONFIG = [
         "region": "USA",
         "fallback_price": 694.06,
         "fallback_day_pct": -3.51,
-        "fallback_ath": 755.30,
+        "fallback_ath": 754.68,
         "fallback_ath_date": "10/26",
         "fallback_min_52w": 562.40,
-        "fallback_max_52w": 755.30,
+        "fallback_max_52w": 754.68,
         "fallback_perf": {"1m": -4.2, "3m": -2.8, "6m": 1.1, "1y": 14.6},
     },
     {
@@ -484,7 +484,7 @@ def paste_inverted_block(img_1bit, x0, y0, x1, y1, draw_fn):
     img_1bit.paste(sub_1bit, (int(x0), int(y0)))
 
 
-# --- SŤAHOVANIE ETF DÁT: 1) YAHOO (curl_cffi/requests) -> 2) YFINANCE -> 3) STOOQ CSV ---
+# --- SŤAHOVANIE ETF DÁT: 1) YAHOO max -> 2) YFINANCE -> 3) STOOQ CSV -> 4) YAHOO 2y ---
 
 class YahooClient:
     """Spravuje HTTP reláciu pre Yahoo Finance (curl_cffi Chrome TLS + cookie/crumb + retry)."""
@@ -568,7 +568,7 @@ def fetch_etf_via_yfinance(symbol):
         lows = [None if math.isnan(v) else float(v) for v in hist["Low"].tolist()]
         highs = [None if math.isnan(v) else float(v) for v in hist["High"].tolist()]
 
-        valid_closes = [v for v in closes if v is not None]
+        valid_closes = [v for v in closes if v is not None and v > 0]
         if not valid_closes:
             return None
 
@@ -740,7 +740,7 @@ def load_cached_etf(cache, cfg):
 def fetch_etf_data(cfg, client, cache=None):
     """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH.
 
-    Poradie zdrojov: Yahoo -> yfinance -> Stooq -> cache posledných dát -> ETF_CONFIG.
+    Poradie zdrojov: Yahoo (max) -> yfinance -> Stooq -> Yahoo (2y) -> cache -> ETF_CONFIG.
     """
     symbol = cfg["yahoo"]
     stooq_symbol = cfg.get("stooq", symbol.lower())
@@ -760,13 +760,10 @@ def fetch_etf_data(cfg, client, cache=None):
     perf_1y = cfg["fallback_perf"]["1y"]
 
     try:
+        # Najprv zdroje s plnou históriou (kvôli presnému ATH); 2y až ako posledná API záloha
         chart = client.fetch_chart(symbol, "max", "1d")
         if chart is not None:
             source = "Yahoo Finance"
-        else:
-            chart = client.fetch_chart(symbol, "2y", "1d")
-            if chart is not None:
-                source = "Yahoo Finance"
 
         if chart is None:
             chart = fetch_etf_via_yfinance(symbol)
@@ -778,23 +775,57 @@ def fetch_etf_data(cfg, client, cache=None):
             if chart is not None:
                 source = "Stooq"
 
+        if chart is None:
+            chart = client.fetch_chart(symbol, "2y", "1d")
+            if chart is not None:
+                source = "Yahoo Finance"
+
         if chart:
             meta = chart.get("meta", {})
             timestamps = chart.get("timestamp", [])
             quote = chart.get("indicators", {}).get("quote", [{}])[0]
             raw_closes = quote.get("close", [])
 
-            points = []
+            # Len kladné konečné záverečné ceny (ochrana pred None, NaN, inf a 0.0)
+            raw_points = []
             for idx in range(min(len(timestamps), len(raw_closes))):
                 c_val = raw_closes[idx]
                 if c_val is not None:
-                    points.append((int(timestamps[idx]), float(c_val)))
+                    val = float(c_val)
+                    if math.isfinite(val) and val > 0:
+                        raw_points.append((int(timestamps[idx]), val))
+
+            # Jeden záznam na obchodný deň (odstráni duplicitné bary v ten istý deň)
+            raw_points.sort(key=lambda p: p[0])
+            by_day = {}
+            for ts, val in raw_points:
+                by_day[ts_to_bratislava(ts).date()] = (ts, val)
+            points = [by_day[d] for d in sorted(by_day)]
+
+            # Filter na jednodňové „bad ticks“ v Close (skok > 25 %, ktorý sa na ďalší deň vráti)
+            if len(points) >= 3:
+                cleaned = [points[0]]
+                for i in range(1, len(points) - 1):
+                    prev_v = cleaned[-1][1]
+                    curr_v = points[i][1]
+                    next_v = points[i + 1][1]
+                    if (
+                        abs(curr_v / prev_v - 1.0) > 0.25
+                        and abs(curr_v / next_v - 1.0) > 0.25
+                        and abs(next_v / prev_v - 1.0) < 0.15
+                    ):
+                        continue
+                    cleaned.append(points[i])
+                cleaned.append(points[-1])
+                points = cleaned
 
             reg_price = meta.get("regularMarketPrice")
             if reg_price is not None:
-                price = float(reg_price)
-                live = True
-            elif points:
+                rp = float(reg_price)
+                if math.isfinite(rp) and rp > 0:
+                    price = rp
+                    live = True
+            if not live and points:
                 price = points[-1][1]
                 live = True
 
@@ -804,11 +835,20 @@ def fetch_etf_data(cfg, client, cache=None):
             elif points:
                 market_ts = points[-1][0]
 
+            # Spoľahlivý výpočet predošlého záveru (porovnáva dátum kurzu s posledným barom)
             prev_close = meta.get("regularMarketPreviousClose")
-            if prev_close is None and len(points) >= 2:
-                prev_close = points[-2][1]
-            if prev_close and float(prev_close) > 0:
-                day_pct = ((price / float(prev_close)) - 1.0) * 100.0
+            if prev_close is not None:
+                pc = float(prev_close)
+                prev_close = pc if (math.isfinite(pc) and pc > 0) else None
+            if prev_close is None and points:
+                mkt_date = ts_to_bratislava(market_ts).date() if market_ts else None
+                last_date = ts_to_bratislava(points[-1][0]).date()
+                if mkt_date and last_date == mkt_date:
+                    prev_close = points[-2][1] if len(points) >= 2 else None
+                else:
+                    prev_close = points[-1][1]
+            if prev_close and prev_close > 0:
+                day_pct = ((price / prev_close) - 1.0) * 100.0
 
             if points:
                 latest_ts = points[-1][0]
@@ -838,7 +878,7 @@ def fetch_etf_data(cfg, client, cache=None):
 
                 best_ts, best_val = max(points, key=lambda p: p[1])
                 if best_val > 0:
-                    ath = max(best_val, price)
+                    ath = best_val
                     ath_date_str = ts_to_bratislava(best_ts).strftime("%m/%y")
     except Exception as e:
         print(f"Chyba spracovania {symbol}: {e} (používam záložné dáta)")
@@ -854,7 +894,8 @@ def fetch_etf_data(cfg, client, cache=None):
 
     if price > ath:
         ath = price
-        ath_date_str = get_now_bratislava().strftime("%m/%y")
+        ref_ts = market_ts if market_ts else int(time.time())
+        ath_date_str = ts_to_bratislava(ref_ts).strftime("%m/%y")
     low_52w = min(low_52w, price)
     high_52w = max(high_52w, price)
 
