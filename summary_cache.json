@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 0,
+    "next_index": 7,
     "recent_keys": [
-      "kauzyprikávičkezastropovanieenergiíjeschválenému",
-      "trumppodporilnasadeniearmádyvirakuvládachcedosta",
-      "poriadnevyhrotenýšlágervnitrehrdinaslovanadokona",
-      "nakupovaťvgelnicisaoplatí",
-      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp",
-      "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
       "neustálaúnavasmdačastémočenietietonenápadnéprízn",
       "ruskýelektrickýuazskončilfiaskomterazchcúznehosp",
       "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
@@ -20,7 +14,13 @@
       "putinpredstavilnovújadrovúponorkuruskochcedoroku",
       "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
       "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
-      "putinposilňujeruskénámorníctvonovéjadrovéponorky"
+      "putinposilňujeruskénámorníctvonovéjadrovéponorky",
+      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
+      "prišielakoveľkáposilazoslovanadozápasovsavrátina",
+      "nocnasobotuprinesiemrázsneženieajnebezpečnúpoľad",
+      "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
+      "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
+      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -68,6 +68,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Vo veku 37 rokov zomrel bývalý švédsky futbalový útočník a mládežnícky reprezentant Ken Fagerberg. Niekdajšieho veľkého talenta našli bez známok života v jeho dome na Faerských ostrovoch."
+  },
+  "https://sport.aktuality.sk/futbal/clanok/martin-trnovsky-zranenie-navrat-podbrezova-2026112720185096622": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Brankár Martin Trnovský z Podbrezovej absentuje od konca augusta pre štvorcentimetrovú ruptúru šľachy stehenného svalu. Po letnom príchode zo Slovana odchytal iba štyri zápasy, no po takmer plnom tréningu sa do bránky vráti v prvom jarnom kole."
   },
   "https://sport.aktuality.sk/futbal/clanok/matus-bero-sa-s-ferencvarosom-vezie-na-vitaznej-vlne-v-hre-bude-aj-dalsia-partia-slovakov-2026112512174628820": {
     "date": "2026-11-26",
@@ -604,6 +610,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Parlament schválil zákon o ochrane detí pred radikalizáciou, za ktorý hlasovalo všetkých 144 poslancov. Vznikne národný a regionálny systém koordinácie, preventívnej pomoci a rád."
+  },
+  "https://www.aktuality.sk/clanok/VrZ3pu9/noc-na-sobotu-prinesie-mraz-snezenie-aj-nebezpecnu-poladovicu/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Noc na sobotu prinesie oblačné až zamračené počasie so slabým snežením, dažďom a tvorbou poľadovice. Nočné teploty klesnú na 1 až minus 4, v údoliach ojedinele na minus 6 stupňov."
   },
   "https://www.aktuality.sk/clanok/W50UhHx/lekari-varuju-pred-zastavenim-operacii-v-trnave-po-vycerpani-limitu-poistovne/": {
     "date": "2026-11-27",
