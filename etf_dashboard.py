@@ -23,7 +23,8 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v14-equal-bar-widths"
+SCRIPT_VERSION = "2026-11-27-v15-exact-daily-data"
+CACHE_VERSION = 2  # Zvýšenie zneplatní starú cache z mesačných/týždenných sviečok
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -43,7 +44,7 @@ CACHE_FILE = os.path.join(BASE_DIR, "etf_cache.json")  # posledné úspešne sti
 
 DAYS_SHORT = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
 
-# Definícia 4 ETF fondov (Xetra, EUR) + záložné dáta pri výpadku všetkých API
+# Definícia 4 ETF fondov (Xetra, EUR) + záložné dáta (záverečné ceny) pri výpadku všetkých API
 ETF_CONFIG = [
     {
         "ticker": "SXR8",
@@ -51,8 +52,8 @@ ETF_CONFIG = [
         "stooq": "sxr8.de",
         "name": "Core S&P 500",
         "region": "USA",
-        "fallback_price": 694.06,
-        "fallback_day_pct": -3.51,
+        "fallback_price": 719.18,
+        "fallback_day_pct": 0.00,
         "fallback_ath": 754.68,
         "fallback_ath_date": "10/26",
         "fallback_min_52w": 562.40,
@@ -65,12 +66,12 @@ ETF_CONFIG = [
         "stooq": "exus.de",
         "name": "MSCI World ex USA",
         "region": "EX-US",
-        "fallback_price": 38.500,
-        "fallback_day_pct": -2.37,
-        "fallback_ath": 41.180,
+        "fallback_price": 39.915,
+        "fallback_day_pct": 0.00,
+        "fallback_ath": 41.110,
         "fallback_ath_date": "11/26",
         "fallback_min_52w": 33.420,
-        "fallback_max_52w": 41.180,
+        "fallback_max_52w": 41.110,
         "fallback_perf": {"1m": -3.1, "3m": -1.4, "6m": 1.2, "1y": 11.4},
     },
     {
@@ -79,12 +80,12 @@ ETF_CONFIG = [
         "stooq": "is3n.de",
         "name": "Core MSCI EM IMI",
         "region": "EM",
-        "fallback_price": 40.955,
-        "fallback_day_pct": -4.93,
-        "fallback_ath": 51.006,
+        "fallback_price": 43.495,
+        "fallback_day_pct": 0.00,
+        "fallback_ath": 50.690,
         "fallback_ath_date": "06/26",
         "fallback_min_52w": 38.120,
-        "fallback_max_52w": 51.006,
+        "fallback_max_52w": 50.690,
         "fallback_perf": {"1m": -6.8, "3m": -9.2, "6m": -10.7, "1y": 4.8},
     },
     {
@@ -93,12 +94,12 @@ ETF_CONFIG = [
         "stooq": "iusn.de",
         "name": "MSCI World Small Cap",
         "region": "SMALL",
-        "fallback_price": 8.728,
-        "fallback_day_pct": -2.50,
-        "fallback_ath": 9.362,
+        "fallback_price": 9.117,
+        "fallback_day_pct": 0.00,
+        "fallback_ath": 9.327,
         "fallback_ath_date": "08/26",
         "fallback_min_52w": 7.410,
-        "fallback_max_52w": 9.362,
+        "fallback_max_52w": 9.327,
         "fallback_perf": {"1m": -3.4, "3m": -2.1, "6m": 1.2, "1y": 12.1},
     },
 ]
@@ -344,6 +345,19 @@ def ts_to_bratislava(ts):
     return datetime.datetime.fromtimestamp(ts)
 
 
+def subtract_months(date_obj, months):
+    """Odpočíta kalendárne mesiace od dátumu (ošetruje 29./30./31. deň v mesiaci)."""
+    total_months = date_obj.year * 12 + (date_obj.month - 1) - months
+    year = total_months // 12
+    month = (total_months % 12) + 1
+    if month == 12:
+        next_month_first = datetime.date(year + 1, 1, 1)
+    else:
+        next_month_first = datetime.date(year, month + 1, 1)
+    last_day = (next_month_first - datetime.timedelta(days=1)).day
+    return datetime.date(year, month, min(date_obj.day, last_day))
+
+
 # --- MENINY A SVIATKY (DOLNÁ LIŠTA) ---
 
 def get_easter_sunday(year):
@@ -406,21 +420,22 @@ def fmt_eur(val, with_symbol=True):
 
 
 def fmt_pct(val, show_plus=True, decimals=1, with_percent=True, arrow=False):
-    """Naformátuje percento so skutočným matematickým mínus (−), ktoré má rovnakú šírku ako +."""
-    if val is None:
+    """Naformátuje percento so skutočným matematickým mínus (−), bez falošného „−0,0%“."""
+    if val is None or not math.isfinite(val):
         return "—"
-    if val < 0:
-        sign = MINUS_SIGN
-        num_val = abs(val)
-        prefix = "▼ " if arrow else ""
-    elif val > 0:
-        sign = "+" if show_plus else ""
-        num_val = val
-        prefix = "▲ " if arrow else ""
-    else:
+    rounded = round(float(val), decimals)
+    if rounded == 0.0:
         sign = ""
         num_val = 0.0
         prefix = ""
+    elif rounded < 0:
+        sign = MINUS_SIGN
+        num_val = abs(rounded)
+        prefix = "▼ " if arrow else ""
+    else:
+        sign = "+" if show_plus else ""
+        num_val = rounded
+        prefix = "▲ " if arrow else ""
     num_str = f"{num_val:.{decimals}f}".replace(".", ",")
     suffix = "%" if with_percent else ""
     return f"{prefix}{sign}{num_str}{suffix}"
@@ -484,7 +499,7 @@ def paste_inverted_block(img_1bit, x0, y0, x1, y1, draw_fn):
     img_1bit.paste(sub_1bit, (int(x0), int(y0)))
 
 
-# --- SŤAHOVANIE ETF DÁT: 1) YAHOO max -> 2) YFINANCE -> 3) STOOQ CSV -> 4) YAHOO 2y ---
+# --- SŤAHOVANIE ETF DÁT: 1) YAHOO (period1..now 1d) -> 2) YFINANCE -> 3) STOOQ CSV -> 4) YAHOO 2y ---
 
 class YahooClient:
     """Spravuje HTTP reláciu pre Yahoo Finance (curl_cffi Chrome TLS + cookie/crumb + retry)."""
@@ -517,30 +532,50 @@ class YahooClient:
         except Exception as e:
             print(f"[Yahoo] cookie/crumb poznámka: {e}")
 
-    def fetch_chart(self, symbol, range_str="max", interval_str="1d"):
+    def fetch_chart(self, symbol, range_str="max", interval_str="1d", period1=None):
+        """Stiahne graf z Yahoo Finance.
+
+        Pre plnú dennú históriu posiela explicitný rozsah `period1..period2` namiesto
+        `range=max`, pretože `range=max&interval=1d` Yahoo ticho zhrubuje na mesačné/týždenné bary.
+        """
         hosts = ("query1.finance.yahoo.com", "query2.finance.yahoo.com")
         last_err = None
 
         for attempt in range(3):
             host = hosts[attempt % len(hosts)]
-            params = f"range={range_str}&interval={interval_str}&includePrePost=false"
+            if period1 is not None:
+                now_ts = int(time.time()) + 86400
+                params = f"period1={int(period1)}&period2={now_ts}&interval={interval_str}&includePrePost=false"
+            elif range_str == "max" and interval_str == "1d":
+                now_ts = int(time.time()) + 86400
+                params = f"period1=0&period2={now_ts}&interval=1d&includePrePost=false"
+            else:
+                params = f"range={range_str}&interval={interval_str}&includePrePost=false"
             if self.crumb:
                 params += f"&crumb={self.crumb}"
             url = f"https://{host}/v8/finance/chart/{symbol}?{params}"
 
             try:
-                resp = self.session.get(url, timeout=12)
+                resp = self.session.get(url, timeout=14)
                 if resp.status_code == 200:
                     data = resp.json()
                     result = data.get("chart", {}).get("result")
                     if result:
-                        return result[0]
+                        chart = result[0]
+                        gran = chart.get("meta", {}).get("dataGranularity")
+                        if interval_str == "1d" and gran and gran != "1d":
+                            print(f"[Yahoo] {symbol}: odmietam nečakanú granularitu '{gran}' (očakávané '1d')")
+                            return None
+                        return chart
                     last_err = f"Prázdny výsledok ({host})"
                 elif resp.status_code in (401, 403, 429):
                     last_err = f"HTTP {resp.status_code} ({host}, {self.backend})"
                     print(f"[Yahoo] {symbol}: {last_err} – pokus {attempt + 1}/3")
                     self._warm_up_cookie_crumb()
                     time.sleep(1.5 * (attempt + 1))
+                elif resp.status_code in (400, 404, 422):
+                    last_err = f"HTTP {resp.status_code} ({host})"
+                    break
                 else:
                     last_err = f"HTTP {resp.status_code} ({host})"
                     time.sleep(1.0)
@@ -554,7 +589,7 @@ class YahooClient:
 
 
 def fetch_etf_via_yfinance(symbol):
-    """Záložné stiahnutie cez knižnicu yfinance (ak je nainštalovaná)."""
+    """Záložné stiahnutie plnej dennej histórie cez knižnicu yfinance (ak je nainštalovaná)."""
     if yf is None:
         return None
     try:
@@ -563,24 +598,29 @@ def fetch_etf_via_yfinance(symbol):
         if hist is None or hist.empty:
             return None
 
-        timestamps = [int(ts.timestamp()) for ts in hist.index]
-        closes = [None if math.isnan(v) else float(v) for v in hist["Close"].tolist()]
-        lows = [None if math.isnan(v) else float(v) for v in hist["Low"].tolist()]
-        highs = [None if math.isnan(v) else float(v) for v in hist["High"].tolist()]
+        timestamps = []
+        closes = []
+        for idx_ts, val in zip(hist.index, hist["Close"].tolist()):
+            if val is None:
+                continue
+            fval = float(val)
+            if math.isfinite(fval) and fval > 0:
+                timestamps.append(int(idx_ts.timestamp()))
+                closes.append(fval)
 
-        valid_closes = [v for v in closes if v is not None and v > 0]
-        if not valid_closes:
+        if not closes:
             return None
 
         meta = {
-            "regularMarketPrice": valid_closes[-1],
+            "dataGranularity": "1d",
+            "regularMarketPrice": closes[-1],
             "regularMarketTime": timestamps[-1],
-            "regularMarketPreviousClose": valid_closes[-2] if len(valid_closes) >= 2 else None,
+            "regularMarketPreviousClose": closes[-2] if len(closes) >= 2 else None,
         }
         return {
             "meta": meta,
             "timestamp": timestamps,
-            "indicators": {"quote": [{"close": closes, "low": lows, "high": highs}]},
+            "indicators": {"quote": [{"close": closes}]},
         }
     except Exception as e:
         print(f"[yfinance] {symbol} zlyhal: {e}")
@@ -588,10 +628,10 @@ def fetch_etf_via_yfinance(symbol):
 
 
 def fetch_etf_via_stooq(stooq_symbol):
-    """Nezávislá záloha mimo Yahoo: denná história z Stooq.com CSV (Xetra)."""
+    """Nezávislá záloha mimo Yahoo: plná denná história z Stooq.com CSV (Xetra)."""
     url = f"https://stooq.com/q/d/l/?s={stooq_symbol.lower()}&i=d"
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=12)
+        resp = requests.get(url, headers=HEADERS, timeout=14)
         if resp.status_code != 200:
             print(f"[Stooq] {stooq_symbol}: HTTP {resp.status_code}")
             return None
@@ -611,12 +651,12 @@ def fetch_etf_via_stooq(stooq_symbol):
                 continue
             try:
                 y, m, d = map(int, date_s.split("-"))
+                c_val = float(close_s)
+                if not (math.isfinite(c_val) and c_val > 0):
+                    continue
                 dt = datetime.datetime(y, m, d, 17, 30, tzinfo=tz) if tz else datetime.datetime(y, m, d, 17, 30)
                 ts = int(dt.timestamp())
-                c_val = float(close_s)
-                h_val = float(row["High"]) if row.get("High") else c_val
-                l_val = float(row["Low"]) if row.get("Low") else c_val
-                rows.append((ts, c_val, l_val, h_val))
+                rows.append((ts, c_val))
             except ValueError:
                 continue
 
@@ -626,10 +666,9 @@ def fetch_etf_via_stooq(stooq_symbol):
         rows.sort(key=lambda r: r[0])
         timestamps = [r[0] for r in rows]
         closes = [r[1] for r in rows]
-        lows = [r[2] for r in rows]
-        highs = [r[3] for r in rows]
 
         meta = {
+            "dataGranularity": "1d",
             "regularMarketPrice": closes[-1],
             "regularMarketTime": timestamps[-1],
             "regularMarketPreviousClose": closes[-2] if len(closes) >= 2 else None,
@@ -637,33 +676,124 @@ def fetch_etf_via_stooq(stooq_symbol):
         return {
             "meta": meta,
             "timestamp": timestamps,
-            "indicators": {"quote": [{"close": closes, "low": lows, "high": highs}]},
+            "indicators": {"quote": [{"close": closes}]},
         }
     except Exception as e:
         print(f"[Stooq] {stooq_symbol} zlyhal: {e}")
         return None
 
 
-def get_return_over_days(points, latest_price, days_back):
-    """Vypočíta % výkonnosť oproti najbližšiemu obchodnému dňu spred `days_back` dní."""
-    if not points or latest_price <= 0:
+def extract_daily_points(chart):
+    """Vráti vyčistený zoznam denných záverov `[(date, ts, close), ...]` bez bad ticks."""
+    timestamps = chart.get("timestamp") or []
+    quotes = chart.get("indicators", {}).get("quote") or [{}]
+    raw_closes = quotes[0].get("close") or []
+
+    # 1) Len kladné konečné záverečné ceny (ochrana pred None, NaN, inf a 0.0)
+    raw_points = []
+    for idx in range(min(len(timestamps), len(raw_closes))):
+        c_val = raw_closes[idx]
+        if c_val is not None:
+            val = float(c_val)
+            if math.isfinite(val) and val > 0:
+                raw_points.append((int(timestamps[idx]), val))
+
+    if not raw_points:
+        return []
+
+    # 2) Jeden záznam na obchodný deň v bratislavskom čase (odstráni duplicitné bary)
+    raw_points.sort(key=lambda p: p[0])
+    by_day = {}
+    for ts, val in raw_points:
+        day = ts_to_bratislava(ts).date()
+        by_day[day] = (ts, val)
+    points = [(d, by_day[d][0], by_day[d][1]) for d in sorted(by_day)]
+
+    # 3) Ochrana pred chybným prvým záznamom (napr. 10x skok v deň zalistovania)
+    if len(points) >= 3:
+        v0, v1, v2 = points[0][2], points[1][2], points[2][2]
+        if abs(v0 / v1 - 1.0) > 0.25 and abs(v1 / v2 - 1.0) < 0.12:
+            points = points[1:]
+
+    # 4) Filter na jednodňové „bad ticks“ v Close (skok > 20 %, ktorý sa na ďalší deň vráti)
+    #    Reálny split ani krach trhu neodstráni, lebo vtedy sa nasledujúci deň nevráti k prev_v.
+    if len(points) >= 3:
+        cleaned = [points[0]]
+        for i in range(1, len(points) - 1):
+            prev_v = cleaned[-1][2]
+            curr_v = points[i][2]
+            next_v = points[i + 1][2]
+            if (
+                abs(curr_v / prev_v - 1.0) > 0.20
+                and abs(curr_v / next_v - 1.0) > 0.20
+                and abs(next_v / prev_v - 1.0) < 0.12
+            ):
+                continue
+            cleaned.append(points[i])
+        cleaned.append(points[-1])
+        points = cleaned
+
+    return points
+
+
+def validate_daily_series(daily_points, meta, symbol, source_name):
+    """Overí, že ide skutočne o denné dáta (nie týždenné ani mesačné)."""
+    gran = meta.get("dataGranularity")
+    if gran and gran != "1d":
+        print(f"[{source_name}] {symbol}: odmietam granularitu '{gran}' namiesto '1d'")
+        return False
+
+    if len(daily_points) < 2:
+        print(f"[{source_name}] {symbol}: príliš málo záznamov ({len(daily_points)})")
+        return False
+
+    # Empirická kontrola rozostupu dní za posledných max. 60 obchodných dní:
+    # pri denných dátach je medián vždy 1 deň (týždenné = 7, mesačné ~30).
+    sample = daily_points[-61:]
+    gaps = [
+        (sample[i][0] - sample[i - 1][0]).days
+        for i in range(1, len(sample))
+    ]
+    if gaps:
+        gaps.sort()
+        median_gap = gaps[len(gaps) // 2]
+        if median_gap > 2:
+            print(f"[{source_name}] {symbol}: odmietam nedenné dáta (medián rozostupu {median_gap} dní)")
+            return False
+
+    return True
+
+
+def get_return_over_months(daily_points, ref_date, latest_price, months_back):
+    """Vypočíta % výkonnosť oproti poslednému obchodnému dňu k dátumu pred `months_back` mesiacmi."""
+    if not daily_points or latest_price <= 0:
         return None
-    latest_ts = points[-1][0]
-    target_ts = latest_ts - days_back * 86400
+    target_date = subtract_months(ref_date, months_back)
 
-    if points[0][0] > target_ts + 14 * 86400:
+    # Ak fond v danom období ešte neexistoval (> 14 dní po cieľovom dátume)
+    if daily_points[0][0] > target_date + datetime.timedelta(days=14):
         return None
 
-    best_price = None
-    best_diff = float("inf")
-    for ts, close_val in points:
-        diff = abs(ts - target_ts)
-        if diff < best_diff:
-            best_diff = diff
-            best_price = close_val
+    # Štandardná burzová konvencia: posledný obchodný deň <= target_date
+    ref_price = None
+    ref_day = None
+    for d, _ts, close_val in daily_points:
+        if d <= target_date:
+            ref_day = d
+            ref_price = close_val
+        else:
+            break
 
-    if best_price and best_price > 0:
-        return ((latest_price / best_price) - 1.0) * 100.0
+    if ref_price is None:
+        first_d, _first_ts, first_val = daily_points[0]
+        if (first_d - target_date).days <= 14:
+            ref_day = first_d
+            ref_price = first_val
+    elif (target_date - ref_day).days > 14:
+        return None
+
+    if ref_price and ref_price > 0:
+        return ((latest_price / ref_price) - 1.0) * 100.0
     return None
 
 
@@ -701,11 +831,12 @@ def save_cache(cache):
 
 
 def update_cache(cache, etfs):
-    """Uloží do cache iba ETF so živými dátami. Vráti True, ak sa niečo zmenilo."""
+    """Uloží do cache iba ETF so živými a validnými dennými dátami."""
     changed = False
     for e in etfs:
         if e.get("live"):
             entry = {k: e.get(k) for k in CACHE_FIELDS}
+            entry["cache_version"] = CACHE_VERSION
             entry["saved_at"] = int(time.time())
             cache[e["ticker"]] = entry
             changed = True
@@ -717,9 +848,13 @@ def load_cached_etf(cache, cfg):
     entry = (cache or {}).get(cfg["ticker"])
     if not isinstance(entry, dict):
         return None
+    if entry.get("cache_version") != CACHE_VERSION:
+        return None
     try:
         for k in CACHE_REQUIRED_NUMERIC:
-            float(entry[k])
+            v = float(entry[k])
+            if not math.isfinite(v):
+                return None
         if float(entry["price"]) <= 0:
             return None
     except (KeyError, TypeError, ValueError):
@@ -737,175 +872,107 @@ def load_cached_etf(cache, cfg):
     return result
 
 
-def fetch_etf_data(cfg, client, cache=None):
-    """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH.
+def parse_chart_into_etf(chart, source_name, is_full_history, cfg, cached_entry=None):
+    """Spracuje a zvaliduje surový graf do kompletných denných metrík ETF, alebo vráti None."""
+    meta = chart.get("meta") or {}
+    daily_points = extract_daily_points(chart)
+    if not validate_daily_series(daily_points, meta, cfg["ticker"], source_name):
+        return None
 
-    Poradie zdrojov: Yahoo (max) -> yfinance -> Stooq -> Yahoo (2y) -> cache -> ETF_CONFIG.
-    """
-    symbol = cfg["yahoo"]
-    stooq_symbol = cfg.get("stooq", symbol.lower())
-    live = False
-    source = "fallback"
-    market_ts = None
+    # 1) Aktuálna cena a čas kurzu
+    price = None
+    reg_price = meta.get("regularMarketPrice")
+    if reg_price is not None:
+        rp = float(reg_price)
+        if math.isfinite(rp) and rp > 0:
+            price = rp
+    if price is None:
+        price = daily_points[-1][2]
 
-    price = cfg["fallback_price"]
-    day_pct = cfg["fallback_day_pct"]
-    ath = cfg["fallback_ath"]
-    ath_date_str = cfg["fallback_ath_date"]
-    low_52w = cfg["fallback_min_52w"]
-    high_52w = cfg["fallback_max_52w"]
-    perf_1m = cfg["fallback_perf"]["1m"]
-    perf_3m = cfg["fallback_perf"]["3m"]
-    perf_6m = cfg["fallback_perf"]["6m"]
-    perf_1y = cfg["fallback_perf"]["1y"]
+    reg_time = meta.get("regularMarketTime")
+    market_ts = int(reg_time) if reg_time else daily_points[-1][1]
+    mkt_date = ts_to_bratislava(market_ts).date()
 
-    try:
-        # Najprv zdroje s plnou históriou (kvôli presnému ATH); 2y až ako posledná API záloha
-        chart = client.fetch_chart(symbol, "max", "1d")
-        if chart is not None:
-            source = "Yahoo Finance"
+    # 2) Predošlý záver: striktne posledný obchodný deň PRIAMO PRED dátumom kurzu (d < mkt_date)
+    prev_close = None
+    prev_day = None
+    for d, _ts, val in reversed(daily_points):
+        if d < mkt_date:
+            prev_day = d
+            prev_close = val
+            break
 
-        if chart is None:
-            chart = fetch_etf_via_yfinance(symbol)
-            if chart is not None:
-                source = "Yahoo Finance"
+    # Záložne meta.regularMarketPreviousClose, len ak v denných dátach chýba alebo je medzera > 10 dní
+    if prev_close is None or (prev_day is not None and (mkt_date - prev_day).days > 10):
+        meta_prev = meta.get("regularMarketPreviousClose")
+        if meta_prev is not None:
+            mp = float(meta_prev)
+            if math.isfinite(mp) and mp > 0:
+                prev_close = mp
 
-        if chart is None:
-            chart = fetch_etf_via_stooq(stooq_symbol)
-            if chart is not None:
-                source = "Stooq"
+    # Poistka proti poškodenému API feedu alebo neprispôsobenému splitu (> 45 % za 1 deň)
+    if prev_close and prev_close > 0:
+        if abs(price / prev_close - 1.0) > 0.45:
+            print(
+                f"[{source_name}] {cfg['ticker']}: podozrivý jednodňový skok "
+                f"({prev_close:.3f} -> {price:.3f}) – odmietam zdroj"
+            )
+            return None
+        day_pct = ((price / prev_close) - 1.0) * 100.0
+    else:
+        day_pct = None
 
-        if chart is None:
-            chart = client.fetch_chart(symbol, "2y", "1d")
-            if chart is not None:
-                source = "Yahoo Finance"
+    # 3) Synchronizácia dnešného záznamu s aktuálnym kurzom (napr. záverečná aukcia 17:35)
+    if daily_points[-1][0] == mkt_date:
+        daily_points[-1] = (mkt_date, market_ts, price)
 
-        if chart:
-            meta = chart.get("meta", {})
-            timestamps = chart.get("timestamp", [])
-            quote = chart.get("indicators", {}).get("quote", [{}])[0]
-            raw_closes = quote.get("close", [])
+    # 4) Výkonnosť za presné kalendárne obdobia (1M / 3M / 6M / 1R)
+    perf_1m = get_return_over_months(daily_points, mkt_date, price, 1)
+    perf_3m = get_return_over_months(daily_points, mkt_date, price, 3)
+    perf_6m = get_return_over_months(daily_points, mkt_date, price, 6)
+    perf_1y = get_return_over_months(daily_points, mkt_date, price, 12)
 
-            # Len kladné konečné záverečné ceny (ochrana pred None, NaN, inf a 0.0)
-            raw_points = []
-            for idx in range(min(len(timestamps), len(raw_closes))):
-                c_val = raw_closes[idx]
-                if c_val is not None:
-                    val = float(c_val)
-                    if math.isfinite(val) and val > 0:
-                        raw_points.append((int(timestamps[idx]), val))
+    # 5) 52-týždňové rozpätie výhradne zo ZÁVEREČNÝCH cien
+    cutoff_52w = subtract_months(mkt_date, 12)
+    closes_52w = [val for d, _ts, val in daily_points if d >= cutoff_52w]
+    if closes_52w:
+        low_52w = min(min(closes_52w), price)
+        high_52w = max(max(closes_52w), price)
+    else:
+        low_52w = price
+        high_52w = price
 
-            # Jeden záznam na obchodný deň (odstráni duplicitné bary v ten istý deň)
-            raw_points.sort(key=lambda p: p[0])
-            by_day = {}
-            for ts, val in raw_points:
-                by_day[ts_to_bratislava(ts).date()] = (ts, val)
-            points = [by_day[d] for d in sorted(by_day)]
-
-            # Filter na jednodňové „bad ticks“ v Close (skok > 25 %, ktorý sa na ďalší deň vráti)
-            if len(points) >= 3:
-                cleaned = [points[0]]
-                for i in range(1, len(points) - 1):
-                    prev_v = cleaned[-1][1]
-                    curr_v = points[i][1]
-                    next_v = points[i + 1][1]
-                    if (
-                        abs(curr_v / prev_v - 1.0) > 0.25
-                        and abs(curr_v / next_v - 1.0) > 0.25
-                        and abs(next_v / prev_v - 1.0) < 0.15
-                    ):
-                        continue
-                    cleaned.append(points[i])
-                cleaned.append(points[-1])
-                points = cleaned
-
-            reg_price = meta.get("regularMarketPrice")
-            if reg_price is not None:
-                rp = float(reg_price)
-                if math.isfinite(rp) and rp > 0:
-                    price = rp
-                    live = True
-            if not live and points:
-                price = points[-1][1]
-                live = True
-
-            reg_time = meta.get("regularMarketTime")
-            if reg_time:
-                market_ts = int(reg_time)
-            elif points:
-                market_ts = points[-1][0]
-
-            # Spoľahlivý výpočet predošlého záveru (porovnáva dátum kurzu s posledným barom)
-            prev_close = meta.get("regularMarketPreviousClose")
-            if prev_close is not None:
-                pc = float(prev_close)
-                prev_close = pc if (math.isfinite(pc) and pc > 0) else None
-            if prev_close is None and points:
-                mkt_date = ts_to_bratislava(market_ts).date() if market_ts else None
-                last_date = ts_to_bratislava(points[-1][0]).date()
-                if mkt_date and last_date == mkt_date:
-                    prev_close = points[-2][1] if len(points) >= 2 else None
-                else:
-                    prev_close = points[-1][1]
-            if prev_close and prev_close > 0:
-                day_pct = ((price / prev_close) - 1.0) * 100.0
-
-            if points:
-                latest_ts = points[-1][0]
-                cutoff_1y = latest_ts - 365 * 86400
-
-                r1m = get_return_over_days(points, price, 30)
-                r3m = get_return_over_days(points, price, 91)
-                r6m = get_return_over_days(points, price, 183)
-                r1y = get_return_over_days(points, price, 365)
-
-                if r1m is not None:
-                    perf_1m = r1m
-                if r3m is not None:
-                    perf_3m = r3m
-                if r6m is not None:
-                    perf_6m = r6m
-                if r1y is not None:
-                    perf_1y = r1y
-
-                # ATH aj 52T rozpätie len zo ZÁVEREČNÝCH cien. Intraday maximá/minimá
-                # z Yahoo majú pri Xetra ETF občas chybné výkyvy, ktoré by navždy
-                # pokazili ATH aj pokles od ATH.
-                closes_1y = [c for ts, c in points if ts >= cutoff_1y]
-                if closes_1y:
-                    low_52w = min(closes_1y)
-                    high_52w = max(closes_1y)
-
-                best_ts, best_val = max(points, key=lambda p: p[1])
-                if best_val > 0:
-                    ath = best_val
-                    ath_date_str = ts_to_bratislava(best_ts).strftime("%m/%y")
-    except Exception as e:
-        print(f"Chyba spracovania {symbol}: {e} (používam záložné dáta)")
-
-    # Bez živých dát: najprv posledné úspešne stiahnuté dáta z cache,
-    # až potom natvrdo zadané záložné hodnoty z ETF_CONFIG
-    if not live:
-        cached = load_cached_etf(cache, cfg)
-        if cached is not None:
-            when = ts_to_bratislava(cached["market_ts"]).strftime("%d.%m.%Y %H:%M") if cached.get("market_ts") else "?"
-            print(f"  {cfg['ticker']}: OFFLINE – posledné dáta z cache ({when})")
-            return cached
-
-    if price > ath:
+    # 6) ATH výhradne z denných ZÁVEREČNÝCH cien (vrátane dnešnej aktuálnej ceny)
+    best_day, _best_ts, best_val = max(daily_points, key=lambda p: p[2])
+    if price > best_val:
         ath = price
-        ref_ts = market_ts if market_ts else int(time.time())
-        ath_date_str = ts_to_bratislava(ref_ts).strftime("%m/%y")
-    low_52w = min(low_52w, price)
-    high_52w = max(high_52w, price)
+        ath_day = mkt_date
+    else:
+        ath = best_val
+        ath_day = best_day
+    ath_date_str = ath_day.strftime("%m/%y")
+
+    # Pri núdzovej skrátenej histórii (2y) nezahodíme známe vyššie ATH z platnej cache
+    if not is_full_history and cached_entry is not None:
+        try:
+            c_ath = float(cached_entry["ath"])
+            if math.isfinite(c_ath) and c_ath > ath:
+                ath = c_ath
+                ath_date_str = cached_entry.get("ath_date") or ath_date_str
+        except (KeyError, TypeError, ValueError):
+            pass
 
     drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
-
     span_52w = high_52w - low_52w
     pos_52w = (price - low_52w) / span_52w if span_52w > 0 else 0.5
     pos_52w = max(0.0, min(1.0, pos_52w))
 
-    print(f"  {cfg['ticker']}: {price:.3f} EUR | ATH {ath:.3f} ({drawdown_pct:.1f}%) | zdroj={source}")
+    print(
+        f"  {cfg['ticker']}: {price:.3f} € "
+        f"(pred: {prev_close:.3f} €, {fmt_pct(day_pct, decimals=2)}) | "
+        f"ATH {ath:.3f} € ({ath_day.strftime('%d.%m.%Y')}, {drawdown_pct:.1f}%) | "
+        f"{len(daily_points)} dní | zdroj={source_name}"
+    )
 
     return {
         "ticker": cfg["ticker"],
@@ -923,10 +990,87 @@ def fetch_etf_data(cfg, client, cache=None):
         "low_52w": low_52w,
         "high_52w": high_52w,
         "pos_52w": pos_52w,
-        "live": live,
-        "offline": not live,
-        "source": source,
+        "live": True,
+        "offline": False,
+        "source": source_name,
         "market_ts": market_ts,
+    }
+
+
+def fetch_etf_data(cfg, client, cache=None):
+    """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH z presných denných dát.
+
+    Poradie zdrojov (všetky overené na 1d granularitu):
+    1) Yahoo Finance (plná 1d história: period1=0, prípadne od 2000-01-01)
+    2) yfinance (plná 1d história)
+    3) Stooq CSV (plná 1d história)
+    4) Yahoo Finance (2y 1d záloha + zlúčenie s cache ATH)
+    5) lokálna cache (etf_cache.json)
+    6) záložné dáta z ETF_CONFIG
+    """
+    symbol = cfg["yahoo"]
+    stooq_symbol = cfg.get("stooq", symbol.lower())
+    cached_etf = load_cached_etf(cache, cfg)
+
+    candidates = [
+        ("Yahoo Finance", True, lambda: client.fetch_chart(symbol, "max", "1d", period1=0)),
+        ("Yahoo Finance", True, lambda: client.fetch_chart(symbol, "max", "1d", period1=946684800)),
+        ("Yahoo Finance", True, lambda: fetch_etf_via_yfinance(symbol)),
+        ("Stooq", True, lambda: fetch_etf_via_stooq(stooq_symbol)),
+        ("Yahoo Finance", False, lambda: client.fetch_chart(symbol, "2y", "1d")),
+    ]
+
+    for source_name, is_full_history, fetcher in candidates:
+        try:
+            chart = fetcher()
+            if chart is None:
+                continue
+            parsed = parse_chart_into_etf(chart, source_name, is_full_history, cfg, cached_etf)
+            if parsed is not None:
+                return parsed
+        except Exception as e:
+            print(f"[{source_name}] Chyba spracovania {symbol}: {e}")
+
+    # Bez živých dát: najprv posledné úspešne stiahnuté dáta z cache
+    if cached_etf is not None:
+        when = (
+            ts_to_bratislava(cached_etf["market_ts"]).strftime("%d.%m.%Y %H:%M")
+            if cached_etf.get("market_ts")
+            else "?"
+        )
+        print(f"  {cfg['ticker']}: OFFLINE – posledné dáta z cache ({when})")
+        return cached_etf
+
+    # Posledná záchrana: natvrdo zadané záložné hodnoty z ETF_CONFIG
+    price = cfg["fallback_price"]
+    ath = max(cfg["fallback_ath"], price)
+    low_52w = min(cfg["fallback_min_52w"], price)
+    high_52w = max(cfg["fallback_max_52w"], price)
+    drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
+    span_52w = high_52w - low_52w
+    pos_52w = max(0.0, min(1.0, (price - low_52w) / span_52w if span_52w > 0 else 0.5))
+
+    print(f"  {cfg['ticker']}: OFFLINE – záložné dáta z konfigurácie")
+    return {
+        "ticker": cfg["ticker"],
+        "name": cfg["name"],
+        "region": cfg["region"],
+        "price": price,
+        "day_pct": cfg["fallback_day_pct"],
+        "ath": ath,
+        "ath_date": cfg["fallback_ath_date"],
+        "drawdown_pct": drawdown_pct,
+        "perf_1m": cfg["fallback_perf"]["1m"],
+        "perf_3m": cfg["fallback_perf"]["3m"],
+        "perf_6m": cfg["fallback_perf"]["6m"],
+        "perf_1y": cfg["fallback_perf"]["1y"],
+        "low_52w": low_52w,
+        "high_52w": high_52w,
+        "pos_52w": pos_52w,
+        "live": False,
+        "offline": True,
+        "source": "fallback",
+        "market_ts": None,
     }
 
 
@@ -1317,6 +1461,7 @@ def create_etf_dashboard():
     # C. PÄTIČKA (y = 452..480) — zdroj + čas dát + meniny/sviatok
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
+
     def _fmt_ts(ts):
         return ts_to_bratislava(ts).strftime("%d.%m.%Y %H:%M")
 
