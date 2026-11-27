@@ -1,4 +1,11 @@
+Kompletný Python skript pre reTerminal E1001 (etf_output.bmp, 800×480 px, 1-bit BMP) podľa tvojho finálneho návrhu:
+ * Mriežka 2×2 karty (388×195 px) bez riadku EUR/USD, s veľkou 26 px cenou, ATH údajmi a 1M · 3M · 6M · 1R výkonnosťou.
+ * Jednoriadkový graf poklesu od ATH: popis Pokles od ATH zarovnaný na začiatok rovnakého riadku ako lišta grafu (0% až −25% s ryskami po 5 %), bez sumy v eurách a bez štítkov „BEŽNÝ“ / „DOKUP!“.
+ * Inverzný štítok ATH (čierne pozadie, biely text s prahom 110) a plná výplň lišty pri poklese ≤ −10,0%.
+ * Väčšia 18 px medzera za 52T a čisté 10 px odstupy okolo posuvníka.
+ * Dolná lišta s časom aktualizácie dát a meninami/sviatkom, bez Xetra a LIVE.
 import datetime
+import math
 import os
 import re
 import time
@@ -153,12 +160,13 @@ def get_fonts():
         fonts["bold_14"] = ImageFont.truetype(font_bold, 14)
         fonts["bold_13"] = ImageFont.truetype(font_bold, 13)
         fonts["bold_12"] = ImageFont.truetype(font_bold, 12)
+        fonts["bold_11"] = ImageFont.truetype(font_bold, 11)
         fonts["reg_13"] = ImageFont.truetype(font_reg, 13)
     except IOError:
         default = ImageFont.load_default()
         keys = [
             "header", "header_date", "price_lg", "ticker",
-            "bold_14", "bold_13", "bold_12", "reg_13",
+            "bold_14", "bold_13", "bold_12", "bold_11", "reg_13",
         ]
         fonts = {k: default for k in keys}
     return fonts
@@ -404,7 +412,7 @@ def get_return_over_days(points, latest_price, days_back):
 
 
 def fetch_etf_data(cfg):
-    """Stiahne živú cenu, čas posledného kurzu, 1M/3M/6M/1R výkonnosť, 1R krivku, 52T rozpätie a ATH."""
+    """Stiahne živú cenu, čas posledného kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH."""
     symbol = cfg["yahoo"]
     live = False
     market_ts = None
@@ -419,10 +427,9 @@ def fetch_etf_data(cfg):
     perf_3m = cfg["fallback_perf"]["3m"]
     perf_6m = cfg["fallback_perf"]["6m"]
     perf_1y = cfg["fallback_perf"]["1y"]
-    series_1y = []
 
     try:
-        # 1. Denné dáta za 2 roky (presné 1M, 3M, 6M, 1R, 52T min/max aj 1R sparkline)
+        # 1. Denné dáta za 2 roky (presné 1M, 3M, 6M, 1R a 52T min/max)
         chart_2y = fetch_yahoo_chart(symbol, "2y", "1d")
         if chart_2y:
             meta = chart_2y.get("meta", {})
@@ -461,9 +468,6 @@ def fetch_etf_data(cfg):
             if points:
                 latest_ts = points[-1][0]
                 cutoff_1y = latest_ts - 365 * 86400
-
-                # Ročná krivka (posledných 365 dní)
-                series_1y = [p[1] for p in points if p[0] >= cutoff_1y]
 
                 r1m = get_return_over_days(points, price, 30)
                 r3m = get_return_over_days(points, price, 91)
@@ -534,12 +538,6 @@ def fetch_etf_data(cfg):
     low_52w = min(low_52w, price)
     high_52w = max(high_52w, price)
 
-    if len(series_1y) < 5:
-        series_1y = [
-            low_52w, ath * 0.85, ath * 0.90, ath * 0.88, ath * 0.94,
-            ath * 0.97, ath, ath * 0.96, ath * 0.93, price,
-        ]
-
     drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
     needed_gain_pct = ((ath / price) - 1.0) * 100.0 if (0 < price < ath) else 0.0
 
@@ -564,7 +562,6 @@ def fetch_etf_data(cfg):
         "low_52w": low_52w,
         "high_52w": high_52w,
         "pos_52w": pos_52w,
-        "series": series_1y,
         "live": live,
         "market_ts": market_ts,
     }
@@ -572,59 +569,101 @@ def fetch_etf_data(cfg):
 
 # --- KRESLIACE POMOCNÉ FUNKCIE (E-INK) ---
 
-def draw_dashed_hline(draw, x0, x1, y, dash=3, gap=4, color=TEXT_COLOR):
-    x = x0
-    while x < x1:
-        draw.line([(x, y), (min(x + dash, x1), y)], fill=color, width=1)
-        x += dash + gap
+def draw_dashed_vline(draw, x, y0, y1, dash=2, gap=2, color=TEXT_COLOR):
+    y = y0
+    while y < y1:
+        draw.line([(x, y), (x, min(y + dash, y1))], fill=color, width=1)
+        y += dash + gap
 
 
-def draw_sparkline_clean(draw, x0, y0, x1, y1, series, ath, fonts):
-    """Vykreslí čistý 1R sparkline graf s prerušovanou čiarou ATH a ceduľkou 1R zvonka vpravo dole."""
-    draw.rectangle([x0, y0, x1, y1], outline=TEXT_COLOR, width=1)
-    pad_x = 6
-    pad_y = 6
-
-    plot_x0 = x0 + pad_x
-    plot_x1 = x1 - pad_x
-    plot_y0 = y0 + pad_y
-    plot_y1 = y1 - pad_y
-
-    min_v = min(series)
-    max_v = max(max(series), ath)
-    span = max_v - min_v
-    if span <= 0:
-        span = 1.0
-
-    # Prerušovaná vodorovná čiara historického maxima (ATH)
-    ath_y = plot_y1 - int(((ath - min_v) / span) * (plot_y1 - plot_y0))
-    draw_dashed_hline(draw, x0 + 2, x1 - 2, ath_y, dash=3, gap=3)
-
-    # Krivka ročného vývoja (2 px)
-    pts = []
-    n = len(series)
-    for i, val in enumerate(series):
-        px = plot_x0 + int((i / max(1, n - 1)) * (plot_x1 - plot_x0))
-        py = plot_y1 - int(((val - min_v) / span) * (plot_y1 - plot_y0))
-        pts.append((px, py))
-
-    if len(pts) >= 2:
-        draw.line(pts, fill=TEXT_COLOR, width=2)
-
-    # Bodka na poslednej cene
-    lx, ly = pts[-1]
-    draw.ellipse([lx - 3, ly - 3, lx + 3, ly + 3], fill=TEXT_COLOR)
-
-    # Ceduľka "1R" zvonka vpravo dole vedľa grafu (28x19 px, nezasahuje do krivky)
-    tag_x0 = x1
-    tag_x1 = x1 + 28
-    tag_y0 = y1 - 19
-    tag_y1 = y1
-    draw.rectangle([tag_x0, tag_y0, tag_x1, tag_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=1)
-    draw_text_centered_in_box(draw, tag_x0, tag_y0, tag_x1, tag_y1, "1R", fonts["bold_13"], fill=TEXT_COLOR)
+def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
+    x0, y0, x1, y1 = int(x0), int(y0), int(x1), int(y1)
+    if x1 <= x0 or y1 <= y0:
+        return
+    if fill_solid:
+        draw.rectangle([x0, y0, x1, y1], fill=TEXT_COLOR, outline=TEXT_COLOR)
+        return
+    draw.rectangle([x0, y0, x1, y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=1)
+    w = x1 - x0
+    h = y1 - y0
+    for k in range(step, w + h, step):
+        sx = x0 + max(0, k - h)
+        sy = y0 + min(h, k)
+        ex = x0 + min(w, k)
+        ey = y0 + max(0, k - w)
+        draw.line([(sx, sy), (ex, ey)], fill=TEXT_COLOR, width=1)
 
 
-# --- HLAVNÉ VYKRESLENIE DASHBOARDU (VERZIA 4 · KARTY 2×2) ---
+def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
+    """Vykreslí popis 'Pokles od ATH' v rovnakom riadku ako lištu poklesu (0% až -25%) so stupnicou."""
+    label = "Pokles od ATH"
+    label_font = fonts["bold_12"]
+    scale_font = fonts["bold_11"]
+
+    bar_h = 20
+    bar_y0 = y0
+    bar_y1 = y0 + bar_h
+
+    # Popis zarovnaný vľavo a vertikálne vycentrovaný k lište grafu
+    lbl_bbox = draw.textbbox((0, 0), label, font=label_font)
+    lbl_w = lbl_bbox[2] - lbl_bbox[0]
+    lbl_h = lbl_bbox[3] - lbl_bbox[1]
+    lbl_y = bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1]
+    draw.text((x0, lbl_y), label, font=label_font, fill=TEXT_COLOR)
+
+    bar_x0 = int(x0 + lbl_w + 10)
+    bar_x1 = int(x1)
+    bar_w = bar_x1 - bar_x0
+    if bar_w <= 20:
+        return
+
+    dd_abs = abs(min(0.0, drawdown_pct))
+    scale_max = max(25.0, float(math.ceil(dd_abs / 5.0) * 5))
+    step_pct = 5.0 if scale_max <= 25.0 else 10.0
+
+    # Vonkajší rámik lišty
+    draw.rectangle([bar_x0, bar_y0, bar_x1, bar_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=2)
+
+    # Výplň aktuálneho poklesu (od -10% plná čierna, pod 10% šrafovaná)
+    if dd_abs > 0.05:
+        fill_w = max(2, int((min(dd_abs, scale_max) / scale_max) * (bar_w - 2)))
+        draw_hatched_rect(
+            draw,
+            bar_x0 + 1,
+            bar_y0 + 1,
+            bar_x0 + 1 + fill_w,
+            bar_y1 - 1,
+            step=4,
+            fill_solid=(drawdown_pct <= ATH_INVERT_THRESHOLD),
+        )
+
+    # Zvislé deliace rysky a popisky stupnice priamo pod lištou
+    tick_vals = []
+    cur = 0.0
+    while cur < scale_max:
+        tick_vals.append(cur)
+        cur += step_pct
+    tick_vals.append(scale_max)
+
+    tick_lbl_y = bar_y1 + 5
+    for val in tick_vals:
+        tx = bar_x0 + int((val / scale_max) * bar_w)
+        if 0 < val < scale_max:
+            draw_dashed_vline(draw, tx, bar_y0 + 2, bar_y1 - 2, dash=2, gap=2)
+            draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
+        else:
+            draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
+
+        lbl_txt = "0%" if val == 0 else f"{MINUS_SIGN}{int(val)}%"
+        if val == 0:
+            draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="left")
+        elif val == scale_max:
+            draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="right")
+        else:
+            draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
+
+
+# --- HLAVNÉ VYKRESLENIE DASHBOARDU (KARTY 2×2 · NÁVRH 2) ---
 
 def create_etf_dashboard():
     # Krok 1: Všetky čierne prvky na bielom pozadí kreslíme do odtieňov sivej ('L')
@@ -735,24 +774,26 @@ def create_etf_dashboard():
         )
         draw_text_aligned(draw, inner_r, cy + 76, na_ath_str, fonts["bold_12"], align="right")
 
-        # 3. 1R Sparkline graf (x = inner_l .. inner_r - 28) + externá ceduľka 1R vpravo dole
-        spark_x0 = inner_l
-        spark_x1 = inner_r - 28  # 28 px rezervovaných pre ceduľku "1R" zvonka vpravo dole
-        spark_y0 = cy + 96
-        spark_y1 = cy + 149
-        draw_sparkline_clean(draw, spark_x0, spark_y0, spark_x1, spark_y1, e["series"], e["ath"], fonts)
+        # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + stupnica)
+        draw_ath_drawdown_meter(draw, inner_l, cy + 101, inner_r, e["drawdown_pct"], fonts)
 
-        # 4. 52-týždňový rozsah (Min | posuvník | Max)
-        row_52w_y = cy + 154
-        low_txt = f"52T {fmt_eur(e['low_52w'], with_symbol=False)}"
+        # 4. 52-týždňový rozsah (52T + 18 px medzera + Min | posuvník | Max)
+        row_52w_y = cy + 148
+        lbl_52t = "52T"
+        low_txt = fmt_eur(e["low_52w"], with_symbol=False)
         high_txt = fmt_eur(e["high_52w"], with_symbol=False)
-        draw.text((inner_l, row_52w_y), low_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
+
+        draw.text((inner_l, row_52w_y), lbl_52t, font=fonts["bold_12"], fill=TEXT_COLOR)
+        lbl_52t_w = draw.textlength(lbl_52t, font=fonts["bold_12"])
+
+        low_x = int(inner_l + lbl_52t_w + 18)  # Zväčšená medzera za "52T"
+        draw.text((low_x, row_52w_y), low_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
         draw_text_aligned(draw, inner_r, row_52w_y, high_txt, fonts["bold_12"], align="right")
 
         low_w = draw.textlength(low_txt, font=fonts["bold_12"])
         high_w = draw.textlength(high_txt, font=fonts["bold_12"])
-        bar_x0 = int(inner_l + low_w + 8)
-        bar_x1 = int(inner_r - high_w - 8)
+        bar_x0 = int(low_x + low_w + 10)
+        bar_x1 = int(inner_r - high_w - 10)
         bar_y = row_52w_y + 7
         if bar_x1 > bar_x0 + 16:
             draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=TEXT_COLOR, width=2)
@@ -762,8 +803,8 @@ def create_etf_dashboard():
             draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
         # 5. Výkonnostný riadok (1M · 3M · 6M · 1R)
-        draw.line([(inner_l, cy + 171), (inner_r, cy + 171)], fill=TEXT_COLOR, width=1)
-        perf_y = cy + 175
+        draw.line([(inner_l, cy + 168), (inner_r, cy + 168)], fill=TEXT_COLOR, width=1)
+        perf_y = cy + 173
         draw_text_aligned(
             draw, inner_l, perf_y, f"1M {fmt_pct(e['perf_1m'], decimals=1)}", fonts["bold_12"], align="left"
         )
@@ -818,3 +859,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
