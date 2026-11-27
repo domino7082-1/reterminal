@@ -1,4 +1,6 @@
+import csv
 import datetime
+import io
 import math
 import os
 import time
@@ -20,6 +22,8 @@ try:
 except ImportError:
     yf = None
 
+SCRIPT_VERSION = "2026-11-27-v3"
+
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
 HEIGHT = 480
@@ -34,11 +38,12 @@ ATH_INVERT_THRESHOLD = -10.0  # Hranica poklesu od ATH pre inverzný čierny št
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE = os.path.join(BASE_DIR, "etf_output.bmp")
 
-# Definícia 4 ETF fondov (Xetra, EUR) + záložné dáta pri výpadku API
+# Definícia 4 ETF fondov (Xetra, EUR) + záložné dáta pri výpadku všetkých API
 ETF_CONFIG = [
     {
         "ticker": "SXR8",
         "yahoo": "SXR8.DE",
+        "stooq": "sxr8.de",
         "name": "Core S&P 500",
         "region": "USA",
         "fallback_price": 694.06,
@@ -52,6 +57,7 @@ ETF_CONFIG = [
     {
         "ticker": "EXUS",
         "yahoo": "EXUS.DE",
+        "stooq": "exus.de",
         "name": "MSCI World ex USA",
         "region": "EX-US",
         "fallback_price": 38.500,
@@ -65,6 +71,7 @@ ETF_CONFIG = [
     {
         "ticker": "IS3N",
         "yahoo": "IS3N.DE",
+        "stooq": "is3n.de",
         "name": "Core MSCI EM IMI",
         "region": "EM",
         "fallback_price": 40.955,
@@ -78,6 +85,7 @@ ETF_CONFIG = [
     {
         "ticker": "IUSN",
         "yahoo": "IUSN.DE",
+        "stooq": "iusn.de",
         "name": "MSCI World Small Cap",
         "region": "SMALL",
         "fallback_price": 8.728,
@@ -98,8 +106,6 @@ HEADERS = {
     ),
     "Accept": "application/json,text/plain,*/*",
     "Accept-Language": "sk-SK,sk;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Origin": "https://finance.yahoo.com",
-    "Referer": "https://finance.yahoo.com/",
 }
 
 # Dni v slovenskom kalendári, keď sa zobrazuje sviatok namiesto menín
@@ -127,7 +133,7 @@ FIXED_HOLIDAYS_SK = {
     (12, 26): "2. sviatok vianočný",
 }
 
-# Kompletný vstavaný slovenský meninový kalendár (366 dní, bez závislosti od externých webov)
+# Kompletný vstavaný slovenský meninový kalendár (366 dní, 100 % offline)
 SLOVAK_NAMEDAYS = {
     # Január
     (1, 2): "Alexandra, Karina", (1, 3): "Daniela", (1, 4): "Drahoslav",
@@ -335,7 +341,7 @@ def get_now_bratislava():
 
 
 def ts_to_bratislava(ts):
-    """Prevedie Unix timestamp (z Yahoo Finance) na lokálny bratislavský čas."""
+    """Prevedie Unix timestamp na lokálny bratislavský čas."""
     if ZoneInfo is not None:
         try:
             return datetime.datetime.fromtimestamp(ts, tz=ZoneInfo("Europe/Bratislava"))
@@ -380,7 +386,7 @@ def get_slovak_holiday(date_obj):
 
 
 def get_nameday_or_holiday(now):
-    """Vráti text pre dolnú lištu z vstavaného SK kalendára (100 % spoľahlivé offline)."""
+    """Vráti text pre dolnú lištu z vstavaného SK kalendára (100 % offline)."""
     today_date = now.date()
     key = (today_date.month, today_date.day)
 
@@ -398,7 +404,7 @@ def get_nameday_or_holiday(now):
     return ""
 
 
-# --- FORMÁTOVANIE ČÍSEL S ČITATEĽNÝM ZNAMIENKOM MÍNUS (−) ---
+# --- FORMÁTOVANIE ČÍSEL A PRESNÉ ZAROVNANIE TEXTU ---
 
 def fmt_eur(val, with_symbol=True):
     s = f"{val:.2f}".replace(".", ",") if abs(val) >= 100 else f"{val:.3f}".replace(".", ",")
@@ -424,23 +430,24 @@ def fmt_pct(val, show_plus=True, decimals=1, with_percent=True):
 
 
 def draw_text_aligned(draw, x, y, text, font, fill=TEXT_COLOR, align="left"):
-    w = draw.textlength(text, font=font)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
     if align == "right":
-        cur_x = x - w
+        cur_x = round(x - tw - bbox[0])
     elif align == "center":
-        cur_x = x - w / 2.0
+        cur_x = round(x - tw / 2.0 - bbox[0])
     else:
-        cur_x = x
+        cur_x = round(x - bbox[0])
     draw.text((cur_x, y), text, font=font, fill=fill)
 
 
 def draw_text_centered_in_box(draw, x0, y0, x1, y1, text, font, fill=TEXT_COLOR):
-    """Presne vycentruje text horizontálne aj vertikálne v zadanom obdĺžniku."""
+    """Presne vycentruje text horizontálne aj vertikálne podľa reálnych pixelov (textbbox)."""
     bbox = draw.textbbox((0, 0), text, font=font)
     tw = bbox[2] - bbox[0]
     th = bbox[3] - bbox[1]
-    tx = x0 + ((x1 - x0) - tw) / 2.0 - bbox[0]
-    ty = y0 + ((y1 - y0) - th) / 2.0 - bbox[1]
+    tx = round(x0 + ((x1 - x0) - tw) / 2.0 - bbox[0])
+    ty = round(y0 + ((y1 - y0) - th) / 2.0 - bbox[1])
     draw.text((tx, ty), text, font=font, fill=fill)
 
 
@@ -460,10 +467,10 @@ def paste_inverted_block(img_1bit, x0, y0, x1, y1, draw_fn):
     img_1bit.paste(sub_1bit, (int(x0), int(y0)))
 
 
-# --- SŤAHOVANIE ETF DÁT Z YAHOO FINANCE (ODOLNÉ PROTI HTTP 429 V GITHUB ACTIONS) ---
+# --- SŤAHOVANIE ETF DÁT: 1) YAHOO (curl_cffi/requests) -> 2) YFINANCE -> 3) STOOQ CSV ---
 
 class YahooClient:
-    """Spravuje HTTP reláciu (uprednostní curl_cffi Chrome TLS), cookie/crumb a retry pri 429."""
+    """Spravuje HTTP reláciu pre Yahoo Finance (curl_cffi Chrome TLS + cookie/crumb + retry)."""
 
     def __init__(self):
         if cffi_requests is not None:
@@ -491,13 +498,13 @@ class YahooClient:
                 if txt and "Too Many Requests" not in txt and "<" not in txt:
                     self.crumb = txt
         except Exception as e:
-            print(f"Poznámka (Yahoo cookie/crumb): {e}")
+            print(f"[Yahoo] cookie/crumb poznámka: {e}")
 
     def fetch_chart(self, symbol, range_str="max", interval_str="1d"):
         hosts = ("query1.finance.yahoo.com", "query2.finance.yahoo.com")
         last_err = None
 
-        for attempt in range(4):
+        for attempt in range(3):
             host = hosts[attempt % len(hosts)]
             params = f"range={range_str}&interval={interval_str}&includePrePost=false"
             if self.crumb:
@@ -514,42 +521,19 @@ class YahooClient:
                     last_err = f"Prázdny výsledok ({host})"
                 elif resp.status_code in (401, 403, 429):
                     last_err = f"HTTP {resp.status_code} ({host}, {self.backend})"
-                    print(f"Yahoo {symbol}: {last_err} – pokus {attempt + 1}/4")
+                    print(f"[Yahoo] {symbol}: {last_err} – pokus {attempt + 1}/3")
                     self._warm_up_cookie_crumb()
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(1.5 * (attempt + 1))
                 else:
                     last_err = f"HTTP {resp.status_code} ({host})"
-                    time.sleep(1.5)
+                    time.sleep(1.0)
             except Exception as e:
                 last_err = str(e)
-                time.sleep(1.5)
+                time.sleep(1.0)
 
         if last_err:
-            print(f"Yahoo chart zlyhal pre {symbol} ({range_str}/{interval_str}): {last_err}")
+            print(f"[Yahoo] {symbol} zlyhal: {last_err}")
         return None
-
-
-def get_return_over_days(points, latest_price, days_back):
-    """Vypočíta % výkonnosť oproti najbližšiemu obchodnému dňu spred `days_back` dní."""
-    if not points or latest_price <= 0:
-        return None
-    latest_ts = points[-1][0]
-    target_ts = latest_ts - days_back * 86400
-
-    if points[0][0] > target_ts + 14 * 86400:
-        return None
-
-    best_price = None
-    best_diff = float("inf")
-    for ts, close_val in points:
-        diff = abs(ts - target_ts)
-        if diff < best_diff:
-            best_diff = diff
-            best_price = close_val
-
-    if best_price and best_price > 0:
-        return ((latest_price / best_price) - 1.0) * 100.0
-    return None
 
 
 def fetch_etf_via_yfinance(symbol):
@@ -582,14 +566,96 @@ def fetch_etf_via_yfinance(symbol):
             "indicators": {"quote": [{"close": closes, "low": lows, "high": highs}]},
         }
     except Exception as e:
-        print(f"yfinance zlyhal pre {symbol}: {e}")
+        print(f"[yfinance] {symbol} zlyhal: {e}")
         return None
 
 
+def fetch_etf_via_stooq(stooq_symbol):
+    """Nezávislá záloha mimo Yahoo: denná história z Stooq.com CSV (Xetra)."""
+    url = f"https://stooq.com/q/d/l/?s={stooq_symbol.lower()}&i=d"
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=12)
+        if resp.status_code != 200:
+            print(f"[Stooq] {stooq_symbol}: HTTP {resp.status_code}")
+            return None
+        text = resp.text.strip()
+        if not text or not text.startswith("Date,"):
+            first_line = text.splitlines()[0][:80] if text else "prázdna odpoveď"
+            print(f"[Stooq] {stooq_symbol}: neplatné CSV ({first_line})")
+            return None
+
+        tz = ZoneInfo("Europe/Bratislava") if ZoneInfo is not None else None
+        rows = []
+        reader = csv.DictReader(io.StringIO(text))
+        for row in reader:
+            date_s = (row.get("Date") or "").strip()
+            close_s = (row.get("Close") or "").strip()
+            if not date_s or not close_s:
+                continue
+            try:
+                y, m, d = map(int, date_s.split("-"))
+                dt = datetime.datetime(y, m, d, 17, 30, tzinfo=tz) if tz else datetime.datetime(y, m, d, 17, 30)
+                ts = int(dt.timestamp())
+                c_val = float(close_s)
+                h_val = float(row["High"]) if row.get("High") else c_val
+                l_val = float(row["Low"]) if row.get("Low") else c_val
+                rows.append((ts, c_val, l_val, h_val))
+            except ValueError:
+                continue
+
+        if not rows:
+            return None
+
+        rows.sort(key=lambda r: r[0])
+        timestamps = [r[0] for r in rows]
+        closes = [r[1] for r in rows]
+        lows = [r[2] for r in rows]
+        highs = [r[3] for r in rows]
+
+        meta = {
+            "regularMarketPrice": closes[-1],
+            "regularMarketTime": timestamps[-1],
+            "regularMarketPreviousClose": closes[-2] if len(closes) >= 2 else None,
+        }
+        return {
+            "meta": meta,
+            "timestamp": timestamps,
+            "indicators": {"quote": [{"close": closes, "low": lows, "high": highs}]},
+        }
+    except Exception as e:
+        print(f"[Stooq] {stooq_symbol} zlyhal: {e}")
+        return None
+
+
+def get_return_over_days(points, latest_price, days_back):
+    """Vypočíta % výkonnosť oproti najbližšiemu obchodnému dňu spred `days_back` dní."""
+    if not points or latest_price <= 0:
+        return None
+    latest_ts = points[-1][0]
+    target_ts = latest_ts - days_back * 86400
+
+    if points[0][0] > target_ts + 14 * 86400:
+        return None
+
+    best_price = None
+    best_diff = float("inf")
+    for ts, close_val in points:
+        diff = abs(ts - target_ts)
+        if diff < best_diff:
+            best_diff = diff
+            best_price = close_val
+
+    if best_price and best_price > 0:
+        return ((latest_price / best_price) - 1.0) * 100.0
+    return None
+
+
 def fetch_etf_data(cfg, client):
-    """Stiahne živú cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH v 1 požiadavke."""
+    """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH (Yahoo -> yfinance -> Stooq)."""
     symbol = cfg["yahoo"]
+    stooq_symbol = cfg.get("stooq", symbol.lower())
     live = False
+    source = "fallback"
     market_ts = None
 
     price = cfg["fallback_price"]
@@ -604,12 +670,23 @@ def fetch_etf_data(cfg, client):
     perf_1y = cfg["fallback_perf"]["1y"]
 
     try:
-        # Jediná požiadavka (celá denná história -> cena, výkonnosti, 52T aj presné ATH)
         chart = client.fetch_chart(symbol, "max", "1d")
-        if chart is None:
+        if chart is not None:
+            source = "Yahoo Finance"
+        else:
             chart = client.fetch_chart(symbol, "2y", "1d")
+            if chart is not None:
+                source = "Yahoo Finance"
+
         if chart is None:
             chart = fetch_etf_via_yfinance(symbol)
+            if chart is not None:
+                source = "Yahoo Finance"
+
+        if chart is None:
+            chart = fetch_etf_via_stooq(stooq_symbol)
+            if chart is not None:
+                source = "Stooq"
 
         if chart:
             meta = chart.get("meta", {})
@@ -718,6 +795,8 @@ def fetch_etf_data(cfg, client):
     pos_52w = (price - low_52w) / span_52w if span_52w > 0 else 0.5
     pos_52w = max(0.0, min(1.0, pos_52w))
 
+    print(f"  {cfg['ticker']}: {price:.3f} EUR | ATH {ath:.3f} ({drawdown_pct:.1f}%) | zdroj={source}")
+
     return {
         "ticker": cfg["ticker"],
         "name": cfg["name"],
@@ -736,6 +815,7 @@ def fetch_etf_data(cfg, client):
         "high_52w": high_52w,
         "pos_52w": pos_52w,
         "live": live,
+        "source": source,
         "market_ts": market_ts,
     }
 
@@ -768,7 +848,7 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
 
 
 def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
-    """Vykreslí popis 'Pokles od ATH' v rovnakom riadku ako lištu poklesu s centrovanou stupnicou."""
+    """Vykreslí popis 'Pokles od ATH' v rovnakom riadku ako lištu s presne vycentrovanou stupnicou."""
     label = "Pokles od ATH"
     label_font = fonts["bold_12"]
     scale_font = fonts["bold_11"]
@@ -781,12 +861,12 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
     lbl_bbox = draw.textbbox((0, 0), label, font=label_font)
     lbl_w = lbl_bbox[2] - lbl_bbox[0]
     lbl_h = lbl_bbox[3] - lbl_bbox[1]
-    lbl_y = bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1]
-    draw.text((x0, lbl_y), label, font=label_font, fill=TEXT_COLOR)
+    lbl_y = round(bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1])
+    draw.text((round(x0 - lbl_bbox[0]), lbl_y), label, font=label_font, fill=TEXT_COLOR)
 
-    # Rezerva vpravo (-17 px), aby bolo −25% vycentrované pod pravou ryskami rovnako ako ostatné hodnoty
-    bar_x0 = int(x0 + lbl_w + 11)
-    bar_x1 = int(x1 - 17)
+    # Rezerva vpravo (-19 px), aby bolo −25% presne vycentrované pod pravou ryskami a neprečnievalo
+    bar_x0 = int(x0 + lbl_w + 13)
+    bar_x1 = int(x1 - 19)
     bar_w = bar_x1 - bar_x0
     if bar_w <= 20:
         return
@@ -811,7 +891,7 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
             fill_solid=(drawdown_pct <= ATH_INVERT_THRESHOLD),
         )
 
-    # Zvislé deliace rysky a rovnomerne vycentrované popisky stupnice pod lištou
+    # Zvislé deliace rysky a popisky vycentrované presne na stred každej rysky
     tick_vals = []
     cur = 0.0
     while cur < scale_max:
@@ -840,16 +920,20 @@ def create_etf_dashboard():
     now = get_now_bratislava()
 
     client = YahooClient()
+    print(f"Backend HTTP: {client.backend} | yfinance={'áno' if yf else 'nie'}")
+
     etfs = []
     for idx, cfg in enumerate(ETF_CONFIG):
         if idx > 0:
-            time.sleep(0.8)  # Krátka pauza medzi požiadavkami proti rate-limitu
+            time.sleep(0.6)
         etfs.append(fetch_etf_data(cfg, client))
 
-    any_live = any(e["live"] for e in etfs)
+    live_sources = sorted({e["source"] for e in etfs if e["live"]})
+    any_live = len(live_sources) > 0
     market_times = [e["market_ts"] for e in etfs if e.get("market_ts")]
     latest_market_dt = ts_to_bratislava(max(market_times)) if market_times else now
     footer_nameday_text = get_nameday_or_holiday(now)
+    print(f"Dátum (BA): {now.strftime('%d.%m.%Y %H:%M')} | {footer_nameday_text}")
 
     header_h = 46
     inverted_tasks = []  # Čierne bloky s bielym textom (vykreslia sa s vlastným prahom)
@@ -947,7 +1031,7 @@ def create_etf_dashboard():
         )
         draw_text_aligned(draw, inner_r, cy + 76, na_ath_str, fonts["bold_12"], align="right")
 
-        # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + vycentrovaná stupnica)
+        # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + centrovaná stupnica)
         draw_ath_drawdown_meter(draw, inner_l, cy + 101, inner_r, e["drawdown_pct"], fonts)
 
         # 4. 52-týždňový rozsah (52T + 18 px medzera + Min | posuvník | Max)
@@ -997,8 +1081,9 @@ def create_etf_dashboard():
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
     if any_live:
+        src_label = " / ".join(live_sources)
         data_time_str = latest_market_dt.strftime("%d.%m.%Y %H:%M")
-        status_txt = f"Yahoo Finance · Dáta: {data_time_str}"
+        status_txt = f"{src_label} · Dáta: {data_time_str}"
     else:
         status_txt = f"ZÁLOŽNÉ DÁTA · API nedostupné · {now.strftime('%d.%m.%Y %H:%M')}"
 
@@ -1025,7 +1110,7 @@ def create_etf_dashboard():
 
 
 def main():
-    print("Sťahujem ETF dáta a generujem etf_output.bmp...")
+    print(f"Spúšťam etf_dashboard.py ({SCRIPT_VERSION})...")
     image = create_etf_dashboard()
     image.save(OUTPUT_FILE)
     print(f"Hotovo. Uložené do: {OUTPUT_FILE}")
