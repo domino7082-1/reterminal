@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v10-ath-in-title"
+SCRIPT_VERSION = "2026-11-27-v11-bar-20px"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -837,7 +837,8 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
         draw.line([(sx, sy), (ex, ey)], fill=TEXT_COLOR, width=1)
 
 
-def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, drawdown_pct, fonts):
+def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, drawdown_pct, fonts,
+                                scale_y=None):
     """Vykreslí graf poklesu od ATH sprava doľava (0% na pravom okraji, −25% na ľavom).
 
     Nad lištou je nadpis s hodnotou, napr. „Pokles od ATH: −8,1%“
@@ -902,7 +903,8 @@ def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, dr
         cur += step_pct
     tick_vals.append(scale_max)
 
-    tick_lbl_y = bar_y1 + 4
+    # scale_y = y pozícia textu stupnice (None = hneď pod lištou)
+    tick_lbl_y = bar_y1 + 4 if scale_y is None else scale_y
     for val in tick_vals:
         tx = bar_x1 - int(round((val / scale_max) * bar_w))
         if 0 < val < scale_max:
@@ -1095,11 +1097,12 @@ def create_etf_dashboard():
             draw,
             c3_x0,
             c3_x1,
-            ry + 27,           # účiarie nadpisu
-            ry + 36,           # horný okraj lišty
-            value_row_y - 4,   # dolný okraj lišty (stupnica tak sedí s riadkom percent)
+            ry + 27,           # účiarie nadpisu (v línii s posuvníkom)
+            ry + 43,           # horný okraj lišty
+            ry + 62,           # dolný okraj lišty → výška 20 px, v strede so štítkami 1M…1R
             e["drawdown_pct"],
             fonts,
+            scale_y=value_row_y,  # stupnica v línii s percentami výkonnosti
         )
 
         # 4. Pravý blok (x = 551..785): 52T posuvník + tabuľka výkonnosti 1M · 3M · 6M · 1R
