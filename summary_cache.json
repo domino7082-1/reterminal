@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 8,
+    "next_index": 5,
     "recent_keys": [
-      "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
-      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
-      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
-      "ruskélodeotočilivstredozemnommoriukrajinskýútokn",
-      "známytrénerktorýpripravovalajmikeatysonavyjadril",
-      "nakupovaťvgelnicisaoplatí",
       "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
       "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
       "vlakjuvliekolstovkymetrovpokoľajniciachmladážena",
@@ -20,7 +14,13 @@
       "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
       "vučikomplikuještudentomvládnutiemajiteľjemublízk",
       "putinposilňujeruskénámorníctvonovéjadrovéponorky",
-      "predraženýpaušálčipredplatnémajúsvojvýznampsycho"
+      "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
+      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
+      "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
+      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
+      "pofiaskuvoktagoneďalšíproblémnaváhejakubíksipred",
+      "nocnasobotuprinesiemrázsneženieajnebezpečnúpoľad",
+      "svetovýnewsfilterputinobmenilvládupremiérmáslabš"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -69,6 +69,10 @@
     "status": "ok",
     "summary": "Vo veku 37 rokov zomrel bývalý švédsky futbalový útočník a mládežnícky reprezentant Ken Fagerberg. Niekdajšieho veľkého talenta našli bez známok života v jeho dome na Faerských ostrovoch."
   },
+  "https://sport.aktuality.sk/futbal/clanok/levante-doma-nedokazalo-zastavit-rozbehnuteho-novacika-zo-santanderu-2026112713214564209": {
+    "date": "2026-11-27",
+    "status": "skip"
+  },
   "https://sport.aktuality.sk/futbal/clanok/martin-trnovsky-zranenie-navrat-podbrezova-2026112720185096622": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -93,11 +97,19 @@
     "status": "ok",
     "summary": "Francúzsky futbalový tréner Franck Haise skončil na lavičke Stade Rennes po sérii piatich zápasov bez víťazstva. Posledným impulzom pre jeho odvolanie bola štvrtková prehra v Európskej lige na pôde NEC Nijmegen 1:3."
   },
+  "https://sport.aktuality.sk/futbal/clanok/reis-bol-pri-golovej-prestrelke-bremy-nedokazali-zdolat-posledny-tim-tabulky-2026112713191229435": {
+    "date": "2026-11-27",
+    "status": "skip"
+  },
   "https://sport.aktuality.sk/futbal/clanok/reprezentacia-slovensko-weiss-calzona-slavia-rozhovor-2026112715223188710": {
     "date": "2026-11-27",
     "status": "skip"
   },
   "https://sport.aktuality.sk/futbal/clanok/simeone-atletico-madrid-januarove-posily-elche-2026112715515385571": {
+    "date": "2026-11-27",
+    "status": "skip"
+  },
+  "https://sport.aktuality.sk/futbal/clanok/sparta-praha-novy-trener-ronny-deila-2026112721394692451": {
     "date": "2026-11-27",
     "status": "skip"
   },
@@ -210,6 +222,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Neporazený bojovník UFC Navajo Stirling knokautoval Jiřího Procházku dve sekundy pred koncom druhého kola. Po tomto víťazstve sa posunul na tretiu priečku rebríčka poloťažkej divízie a vyzval Magomeda Ankalaeva. Stirling Procházkovi radí, aby zvoľnil svoju obrovskú intenzitu."
+  },
+  "https://sport.aktuality.sk/mma/clanok/po-fiasku-v-oktagone-dalsi-problem-na-vahe-jakubik-si-pred-pml-22-servitku-pred-usta-nedaval-2026112720005457412": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Hafeni Nafuka opäť nesplnil váhový limit pred turnajom PML 22 v Trenčíne, keď ho prekročil o 300 gramov. Slovenský bojovník Marián Jakubík napriek neprofesionálnemu prístupu súpera zápas prijal. Duel sa uskutoční v sobotu 28. novembra na trenčianskom Zimnom štadióne."
   },
   "https://sport.aktuality.sk/mma/clanok/prehral-s-budayom-v-ufc-predstavil-sa-v-oktagone-navajo-stirling-vyzval-tazkotonaznika-na-suboj-po-jeho-kritike-2026112719224470539": {
     "date": "2026-11-27",
