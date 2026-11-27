@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v5"
+SCRIPT_VERSION = "2026-11-27-v6-rows-rtl"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -135,7 +135,6 @@ FIXED_HOLIDAYS_SK = {
 
 # Kompletný vstavaný slovenský meninový kalendár (366 dní, 100 % offline)
 SLOVAK_NAMEDAYS = {
-    # Január
     (1, 2): "Alexandra, Karina", (1, 3): "Daniela", (1, 4): "Drahoslav",
     (1, 5): "Andrea", (1, 6): "Antónia", (1, 7): "Bohuslava",
     (1, 8): "Severín", (1, 9): "Alexej", (1, 10): "Dáša",
@@ -146,7 +145,6 @@ SLOVAK_NAMEDAYS = {
     (1, 23): "Miloš", (1, 24): "Timotej", (1, 25): "Gejza",
     (1, 26): "Tamara", (1, 27): "Bohuš", (1, 28): "Alfonz",
     (1, 29): "Gašpar", (1, 30): "Ema", (1, 31): "Emil",
-    # Február
     (2, 1): "Tatiana", (2, 2): "Erik, Erika", (2, 3): "Blažej",
     (2, 4): "Veronika", (2, 5): "Agáta", (2, 6): "Dorota",
     (2, 7): "Vanda", (2, 8): "Zoja", (2, 9): "Zdenko",
@@ -157,7 +155,6 @@ SLOVAK_NAMEDAYS = {
     (2, 22): "Etela", (2, 23): "Roman, Romana", (2, 24): "Matej",
     (2, 25): "Frederik, Frederika", (2, 26): "Viktor", (2, 27): "Alexander",
     (2, 28): "Zlatica", (2, 29): "Radomír",
-    # Marec
     (3, 1): "Albín", (3, 2): "Anežka", (3, 3): "Bohumil, Bohumila",
     (3, 4): "Kazimír", (3, 5): "Fridrich", (3, 6): "Radoslav, Radoslava",
     (3, 7): "Tomáš", (3, 8): "Alan, Alana", (3, 9): "Františka",
@@ -169,7 +166,6 @@ SLOVAK_NAMEDAYS = {
     (3, 25): "Marián", (3, 26): "Emanuel", (3, 27): "Alena",
     (3, 28): "Soňa", (3, 29): "Miroslav", (3, 30): "Vieroslava",
     (3, 31): "Benjamín",
-    # Apríl
     (4, 1): "Hugo", (4, 2): "Zita", (4, 3): "Richard",
     (4, 4): "Izidor", (4, 5): "Miroslava", (4, 6): "Irena",
     (4, 7): "Zoltán", (4, 8): "Albert", (4, 9): "Milena",
@@ -180,7 +176,6 @@ SLOVAK_NAMEDAYS = {
     (4, 22): "Slavomír", (4, 23): "Vojtech", (4, 24): "Juraj",
     (4, 25): "Marek", (4, 26): "Jaroslava", (4, 27): "Jaroslav",
     (4, 28): "Jarmila", (4, 29): "Lea", (4, 30): "Anastázia",
-    # Máj
     (5, 2): "Žigmund", (5, 3): "Galina", (5, 4): "Florián",
     (5, 5): "Lesana, Lesia", (5, 6): "Hermína", (5, 7): "Monika",
     (5, 8): "Ingrida", (5, 9): "Roland", (5, 10): "Viktória",
@@ -191,7 +186,6 @@ SLOVAK_NAMEDAYS = {
     (5, 23): "Želmíra", (5, 24): "Ela", (5, 25): "Urban",
     (5, 26): "Dušan", (5, 27): "Iveta", (5, 28): "Viliam",
     (5, 29): "Vilma", (5, 30): "Ferdinand", (5, 31): "Petronela, Petrana",
-    # Jún
     (6, 1): "Žaneta", (6, 2): "Xénia, Oxana", (6, 3): "Karolína",
     (6, 4): "Lenka", (6, 5): "Laura", (6, 6): "Norbert",
     (6, 7): "Róbert", (6, 8): "Medard", (6, 9): "Stanislava",
@@ -202,7 +196,6 @@ SLOVAK_NAMEDAYS = {
     (6, 22): "Paulína", (6, 23): "Sidónia", (6, 24): "Ján",
     (6, 25): "Tadeáš, Olívia", (6, 26): "Adriana", (6, 27): "Ladislav, Ladislava",
     (6, 28): "Beáta", (6, 29): "Peter, Pavol, Petra", (6, 30): "Melánia",
-    # Júl
     (7, 1): "Diana", (7, 2): "Berta", (7, 3): "Miloslav",
     (7, 4): "Prokop", (7, 5): "Cyril, Metod", (7, 6): "Patrik, Patrícia",
     (7, 7): "Oliver", (7, 8): "Ivan", (7, 9): "Lujza",
@@ -214,7 +207,6 @@ SLOVAK_NAMEDAYS = {
     (7, 25): "Jakub", (7, 26): "Anna, Hana", (7, 27): "Božena",
     (7, 28): "Krištof", (7, 29): "Marta", (7, 30): "Libuša",
     (7, 31): "Ignác",
-    # August
     (8, 1): "Božidara", (8, 2): "Gustáv", (8, 3): "Jerguš",
     (8, 4): "Dominik, Dominika", (8, 5): "Hortenzia", (8, 6): "Jozefína",
     (8, 7): "Štefánia", (8, 8): "Oskar", (8, 9): "Ľubomíra",
@@ -226,7 +218,6 @@ SLOVAK_NAMEDAYS = {
     (8, 25): "Ľudovít", (8, 26): "Samuel", (8, 27): "Silvia",
     (8, 28): "Augustín", (8, 29): "Nikola, Nikolaj", (8, 30): "Ružena",
     (8, 31): "Nora",
-    # September
     (9, 1): "Drahoslava", (9, 2): "Linda, Rebeka", (9, 3): "Belo",
     (9, 4): "Rozália", (9, 5): "Regína", (9, 6): "Alica",
     (9, 7): "Marianna", (9, 8): "Miriama", (9, 9): "Martina",
@@ -237,7 +228,6 @@ SLOVAK_NAMEDAYS = {
     (9, 22): "Móric", (9, 23): "Zdenka", (9, 24): "Ľuboš, Ľubor",
     (9, 25): "Vladislav", (9, 26): "Edita", (9, 27): "Cyprián",
     (9, 28): "Václav", (9, 29): "Michal, Michaela", (9, 30): "Jarolím",
-    # Október
     (10, 1): "Arnold", (10, 2): "Levoslav", (10, 3): "Stela",
     (10, 4): "František", (10, 5): "Viera", (10, 6): "Natália",
     (10, 7): "Eliška", (10, 8): "Brigita", (10, 9): "Dionýz",
@@ -249,7 +239,6 @@ SLOVAK_NAMEDAYS = {
     (10, 25): "Aurel", (10, 26): "Demeter", (10, 27): "Sabína",
     (10, 28): "Dobromila", (10, 29): "Klára", (10, 30): "Šimon, Simona",
     (10, 31): "Aurélia",
-    # November
     (11, 3): "Hubert", (11, 4): "Karol", (11, 5): "Imrich",
     (11, 6): "Renáta", (11, 7): "René", (11, 8): "Bohumír",
     (11, 9): "Teodor", (11, 10): "Tibor", (11, 11): "Martin, Maroš",
@@ -260,7 +249,6 @@ SLOVAK_NAMEDAYS = {
     (11, 24): "Emília", (11, 25): "Katarína", (11, 26): "Kornel",
     (11, 27): "Milan", (11, 28): "Henrieta", (11, 29): "Vratko",
     (11, 30): "Ondrej, Andrej",
-    # December
     (12, 1): "Edmund", (12, 2): "Bibiána", (12, 3): "Oldrich",
     (12, 4): "Barbora", (12, 5): "Oto", (12, 6): "Mikuláš",
     (12, 7): "Ambróz", (12, 8): "Marína", (12, 9): "Izabela",
@@ -309,9 +297,9 @@ def get_fonts():
 
         fonts["header"] = ImageFont.truetype(font_bold, 18)
         fonts["header_date"] = ImageFont.truetype(font_bold, 14)
-        fonts["price_lg"] = ImageFont.truetype(font_bold, 26)
+        fonts["price_lg"] = ImageFont.truetype(font_bold, 28)
         fonts["ticker"] = ImageFont.truetype(font_bold, 16)
-        fonts["bold_16"] = ImageFont.truetype(font_bold, 16)
+        fonts["bold_15"] = ImageFont.truetype(font_bold, 15)
         fonts["bold_14"] = ImageFont.truetype(font_bold, 14)
         fonts["bold_13"] = ImageFont.truetype(font_bold, 13)
         fonts["bold_12"] = ImageFont.truetype(font_bold, 12)
@@ -320,7 +308,7 @@ def get_fonts():
     except IOError:
         default = ImageFont.load_default()
         keys = [
-            "header", "header_date", "price_lg", "ticker", "bold_16",
+            "header", "header_date", "price_lg", "ticker", "bold_15",
             "bold_14", "bold_13", "bold_12", "bold_11", "reg_13",
         ]
         fonts = {k: default for k in keys}
@@ -412,22 +400,25 @@ def fmt_eur(val, with_symbol=True):
     return f"{s} €" if with_symbol else s
 
 
-def fmt_pct(val, show_plus=True, decimals=1, with_percent=True):
+def fmt_pct(val, show_plus=True, decimals=1, with_percent=True, arrow=False):
     """Naformátuje percento so skutočným matematickým mínus (−), ktoré má rovnakú šírku ako +."""
     if val is None:
         return "—"
     if val < 0:
         sign = MINUS_SIGN
         num_val = abs(val)
-    elif show_plus and val > 0:
-        sign = "+"
+        prefix = "▼ " if arrow else ""
+    elif val > 0:
+        sign = "+" if show_plus else ""
         num_val = val
+        prefix = "▲ " if arrow else ""
     else:
         sign = ""
-        num_val = abs(val)
+        num_val = 0.0
+        prefix = ""
     num_str = f"{num_val:.{decimals}f}".replace(".", ",")
     suffix = "%" if with_percent else ""
-    return f"{sign}{num_str}{suffix}"
+    return f"{prefix}{sign}{num_str}{suffix}"
 
 
 def draw_text_aligned(draw, x, y, text, font, fill=TEXT_COLOR, align="left"):
@@ -764,7 +755,6 @@ def fetch_etf_data(cfg, client):
                 elif highs_1y:
                     high_52w = max(highs_1y)
 
-                # Historické ATH a dátum maxima (MM/RR) priamo z dennej histórie
                 best_val = 0.0
                 best_ts = None
                 for idx in range(len(timestamps)):
@@ -846,26 +836,25 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
         draw.line([(sx, sy), (ex, ey)], fill=TEXT_COLOR, width=1)
 
 
-def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
-    """Vykreslí popis 'Pokles od ATH' v rovnakom riadku ako lištu s presne vycentrovanou stupnicou."""
+def draw_ath_drawdown_meter_rtl(draw, x0, y0, x1, drawdown_pct, fonts):
+    """Vykreslí graf poklesu od ATH sprava doľava (0% na pravom okraji, −25% na ľavom)."""
     label = "Pokles od ATH"
     label_font = fonts["bold_12"]
     scale_font = fonts["bold_11"]
 
-    bar_h = 20
+    bar_h = 18
     bar_y0 = y0
     bar_y1 = y0 + bar_h
 
-    # Popis zarovnaný vľavo a vertikálne vycentrovaný k lište grafu
     lbl_bbox = draw.textbbox((0, 0), label, font=label_font)
     lbl_w = lbl_bbox[2] - lbl_bbox[0]
     lbl_h = lbl_bbox[3] - lbl_bbox[1]
     lbl_y = round(bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1])
     draw.text((round(x0 - lbl_bbox[0]), lbl_y), label, font=label_font, fill=TEXT_COLOR)
 
-    # Rezerva vpravo (-19 px), aby bolo −25% presne vycentrované pod pravou ryskou a neprečnievalo
-    bar_x0 = int(x0 + lbl_w + 13)
-    bar_x1 = int(x1 - 19)
+    # Rezerva vľavo (-18 px) a vpravo (-12 px), aby krajné hodnoty neprečnievali
+    bar_x0 = int(x0 + lbl_w + 18)
+    bar_x1 = int(x1 - 12)
     bar_w = bar_x1 - bar_x0
     if bar_w <= 20:
         return
@@ -877,20 +866,20 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
     # Vonkajší rámik lišty
     draw.rectangle([bar_x0, bar_y0, bar_x1, bar_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=2)
 
-    # Výplň aktuálneho poklesu (od -10% plná čierna, pod 10% šrafovaná)
+    # Výplň rastie sprava doľava od bar_x1 (0%) smerom k bar_x0 (-scale_max%)
     if dd_abs > 0.05:
         fill_w = max(2, int((min(dd_abs, scale_max) / scale_max) * (bar_w - 2)))
         draw_hatched_rect(
             draw,
-            bar_x0 + 1,
+            bar_x1 - 1 - fill_w,
             bar_y0 + 1,
-            bar_x0 + 1 + fill_w,
+            bar_x1 - 1,
             bar_y1 - 1,
             step=4,
             fill_solid=(drawdown_pct <= ATH_INVERT_THRESHOLD),
         )
 
-    # Zvislé deliace rysky a popisky vycentrované presne na stred každej rysky
+    # Zvislé rysky a popisky: vpravo 0%, vľavo -25% (alebo -scale_max%)
     tick_vals = []
     cur = 0.0
     while cur < scale_max:
@@ -898,9 +887,9 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
         cur += step_pct
     tick_vals.append(scale_max)
 
-    tick_lbl_y = bar_y1 + 5
+    tick_lbl_y = bar_y1 + 4
     for val in tick_vals:
-        tx = bar_x0 + int(round((val / scale_max) * bar_w))
+        tx = bar_x1 - int(round((val / scale_max) * bar_w))
         if 0 < val < scale_max:
             draw_dashed_vline(draw, tx, bar_y0 + 2, bar_y1 - 2, dash=2, gap=2)
         draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
@@ -909,10 +898,9 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
         draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
 
 
-# --- HLAVNÉ VYKRESLENIE DASHBOARDU (KARTY 2×2) ---
+# --- HLAVNÉ VYKRESLENIE DASHBOARDU (4 ŠIROKÉ RIADKY) ---
 
 def create_etf_dashboard():
-    # Krok 1: Všetky čierne prvky na bielom pozadí kreslíme do odtieňov sivej ('L')
     img_gray = Image.new(RENDER_MODE, (WIDTH, HEIGHT), BACKGROUND_COLOR)
     draw = ImageDraw.Draw(img_gray)
     fonts = get_fonts()
@@ -935,10 +923,10 @@ def create_etf_dashboard():
     print(f"Dátum (BA): {now.strftime('%d.%m.%Y %H:%M')} | {footer_nameday_text}")
 
     header_h = 46
-    inverted_tasks = []  # Čierne bloky s bielym textom (vykreslia sa s vlastným prahom)
+    inverted_tasks = []
 
     # ==========================================================
-    # A. HLAVIČKA (y = 0..46): Názov | Dátum a čas
+    # A. HLAVIČKA (y = 0..46): Názov | Dátum a čas (bez priemerov)
     # ==========================================================
     def draw_header(hd, hw, hh):
         title_left = "ETF PORTFÓLIO · XETRA"
@@ -953,15 +941,13 @@ def create_etf_dashboard():
     inverted_tasks.append((0, 0, WIDTH, header_h, draw_header))
 
     # ==========================================================
-    # B. MRIEŽKA 2×2 ETF KARIET (x = 8..792, y = 50..448)
+    # B. 4 ŠIROKÉ RIADKY ETF (x = 8..792, y = 50..448)
     # ==========================================================
     margin_x = 8
-    gap_x = 8
-    card_w = (WIDTH - 2 * margin_x - gap_x) // 2  # 388 px
-
+    row_w = WIDTH - 2 * margin_x  # 784 px
     start_y = 50
-    gap_y = 8
-    card_h = 195  # 50 + 195 + 8 + 195 = 448 px (4 px odstup od pätičky y = 452)
+    gap_y = 6
+    row_h = 96  # 4 * 96 + 3 * 6 = 402 px (50..452)
 
     def make_centered_inverted_drawer(label_text, font_obj):
         def _draw(sd, sw, sh):
@@ -969,107 +955,116 @@ def create_etf_dashboard():
         return _draw
 
     for idx, e in enumerate(etfs[:4]):
-        col = idx % 2
-        row = idx // 2
-        cx = margin_x + col * (card_w + gap_x)
-        cy = start_y + row * (card_h + gap_y)
-        inner_l = cx + 10
-        inner_r = cx + card_w - 10
+        rx = margin_x
+        ry = start_y + idx * (row_h + gap_y)
+        r_right = rx + row_w
 
-        # Vonkajší rámik karty (2 px)
-        draw.rectangle([cx, cy, cx + card_w, cy + card_h], outline=TEXT_COLOR, width=2)
+        draw.rectangle([rx, ry, r_right, ry + row_h], outline=TEXT_COLOR, width=2)
 
-        # 1. Horný riadok karty: Ticker štítok + Región (vľavo) | Dnes (vpravo ako prvé)
+        # 1. Ľavý blok (x = 18..206): Ticker štítok + Región + Názov + ATH
+        c1_x = rx + 10
         inverted_tasks.append((
-            inner_l,
-            cy + 9,
-            inner_l + 64,
-            cy + 34,
+            c1_x,
+            ry + 9,
+            c1_x + 64,
+            ry + 33,
             make_centered_inverted_drawer(e["ticker"], fonts["ticker"]),
         ))
-        draw.text((inner_l + 72, cy + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
+        draw.text((c1_x + 72, ry + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
+        draw.text((c1_x, ry + 38), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
+        draw.text(
+            (c1_x, ry + 62),
+            f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})",
+            font=fonts["bold_13"],
+            fill=TEXT_COLOR,
+        )
 
-        day_str = f"Dnes: {fmt_pct(e['day_pct'], decimals=2)}"
-        draw_text_aligned(draw, inner_r, cy + 12, day_str, fonts["bold_16"], align="right")
+        # 2. Stredný ľavý blok (x = 212..348): Veľká cena (28B) + Dnes: (15B)
+        c2_r = rx + 340
+        draw_text_aligned(draw, c2_r, ry + 14, fmt_eur(e["price"]), fonts["price_lg"], align="right")
+        draw_text_aligned(
+            draw,
+            c2_r,
+            ry + 55,
+            f"Dnes: {fmt_pct(e['day_pct'], decimals=2, arrow=True)}",
+            fonts["bold_15"],
+            align="right",
+        )
 
-        # 2. Názov fondu, veľká cena (vľavo) | štítok ATH -XX% a ATH cena/dátum (vpravo)
-        draw.text((inner_l, cy + 39), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
-        draw.text((inner_l, cy + 56), fmt_eur(e["price"]), font=fonts["price_lg"], fill=TEXT_COLOR)
+        # 3. Stredný pravý blok (x = 356..584): Obrátený graf Pokles od ATH + 52T posuvník
+        c3_x0 = rx + 348
+        c3_x1 = rx + 576
+        draw_ath_drawdown_meter_rtl(draw, c3_x0, ry + 11, c3_x1, e["drawdown_pct"], fonts)
 
-        if abs(e["drawdown_pct"]) < 0.05:
-            ath_badge_txt = "NA MAXIME"
-        else:
-            ath_badge_txt = f"ATH {fmt_pct(e['drawdown_pct'], show_plus=False, decimals=1)}"
-
-        badge_x0 = inner_r - 126
-        badge_y0 = cy + 37
-        badge_x1 = inner_r
-        badge_y1 = cy + 63
-
-        if e["drawdown_pct"] <= ATH_INVERT_THRESHOLD:
-            inverted_tasks.append((
-                badge_x0,
-                badge_y0,
-                badge_x1,
-                badge_y1,
-                make_centered_inverted_drawer(ath_badge_txt, fonts["bold_14"]),
-            ))
-        else:
-            draw.rectangle([badge_x0, badge_y0, badge_x1, badge_y1], outline=TEXT_COLOR, width=2)
-            draw_text_centered_in_box(
-                draw, badge_x0, badge_y0, badge_x1, badge_y1, ath_badge_txt, fonts["bold_14"], fill=TEXT_COLOR
-            )
-
-        ath_info = f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})"
-        draw_text_aligned(draw, inner_r, cy + 70, ath_info, fonts["bold_14"], align="right")
-
-        # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + centrovaná stupnica)
-        draw_ath_drawdown_meter(draw, inner_l, cy + 101, inner_r, e["drawdown_pct"], fonts)
-
-        # 4. 52-týždňový rozsah (52T + 18 px medzera + Min | posuvník | Max)
-        row_52w_y = cy + 148
+        row_52w_y = ry + 64
         lbl_52t = "52T"
         low_txt = fmt_eur(e["low_52w"], with_symbol=False)
         high_txt = fmt_eur(e["high_52w"], with_symbol=False)
-
-        draw.text((inner_l, row_52w_y), lbl_52t, font=fonts["bold_12"], fill=TEXT_COLOR)
+        draw.text((c3_x0, row_52w_y), lbl_52t, font=fonts["bold_12"], fill=TEXT_COLOR)
         lbl_52t_w = draw.textlength(lbl_52t, font=fonts["bold_12"])
-
-        low_x = int(inner_l + lbl_52t_w + 18)  # Zväčšená medzera za "52T"
+        low_x = int(c3_x0 + lbl_52t_w + 18)
         draw.text((low_x, row_52w_y), low_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
-        draw_text_aligned(draw, inner_r, row_52w_y, high_txt, fonts["bold_12"], align="right")
+        draw_text_aligned(draw, c3_x1, row_52w_y, high_txt, fonts["bold_12"], align="right")
 
         low_w = draw.textlength(low_txt, font=fonts["bold_12"])
         high_w = draw.textlength(high_txt, font=fonts["bold_12"])
         bar_x0 = int(low_x + low_w + 10)
-        bar_x1 = int(inner_r - high_w - 10)
+        bar_x1 = int(c3_x1 - high_w - 10)
         bar_y = row_52w_y + 7
-        if bar_x1 > bar_x0 + 16:
+        if bar_x1 > bar_x0 + 14:
             draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=TEXT_COLOR, width=2)
             draw.line([(bar_x0, bar_y - 4), (bar_x0, bar_y + 4)], fill=TEXT_COLOR, width=1)
             draw.line([(bar_x1, bar_y - 4), (bar_x1, bar_y + 4)], fill=TEXT_COLOR, width=1)
             marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
             draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 5. Výkonnostný riadok (1M: · 3M: · 6M: · 1R:)
-        draw.line([(inner_l, cy + 168), (inner_r, cy + 168)], fill=TEXT_COLOR, width=1)
-        perf_y = cy + 173
+        # 4. Pravý blok (x = 592..782): Štítok ATH -XX,X% + 2x2 výkonnosť (1M · 3M · 6M · 1R)
+        c4_x0 = rx + 584
+        c4_x1 = r_right - 10
+        draw.line([(c4_x0 - 4, ry + 8), (c4_x0 - 4, ry + row_h - 8)], fill=TEXT_COLOR, width=1)
+
+        ath_badge_txt = (
+            "NA MAXIME"
+            if abs(e["drawdown_pct"]) < 0.05
+            else f"ATH {fmt_pct(e['drawdown_pct'], show_plus=False, decimals=1)}"
+        )
+        bx0 = c4_x0
+        by0 = ry + 9
+        bx1 = c4_x1
+        by1 = ry + 34
+
+        if e["drawdown_pct"] <= ATH_INVERT_THRESHOLD:
+            inverted_tasks.append((
+                bx0,
+                by0,
+                bx1,
+                by1,
+                make_centered_inverted_drawer(ath_badge_txt, fonts["bold_14"]),
+            ))
+        else:
+            draw.rectangle([bx0, by0, bx1, by1], outline=TEXT_COLOR, width=2)
+            draw_text_centered_in_box(
+                draw, bx0, by0, bx1, by1, ath_badge_txt, fonts["bold_14"], fill=TEXT_COLOR
+            )
+
+        p_mid_x = (c4_x0 + c4_x1) / 2.0
+        p_r1_y = ry + 45
+        p_r2_y = ry + 69
         draw_text_aligned(
-            draw, inner_l, perf_y, f"1M: {fmt_pct(e['perf_1m'], decimals=1)}", fonts["bold_12"], align="left"
+            draw, c4_x0, p_r1_y, f"1M: {fmt_pct(e['perf_1m'], decimals=1)}", fonts["bold_12"], align="left"
         )
         draw_text_aligned(
-            draw, cx + 146, perf_y, f"3M: {fmt_pct(e['perf_3m'], decimals=1)}", fonts["bold_12"], align="center"
+            draw, c4_x1, p_r1_y, f"3M: {fmt_pct(e['perf_3m'], decimals=1)}", fonts["bold_12"], align="right"
         )
         draw_text_aligned(
-            draw, cx + 244, perf_y, f"6M: {fmt_pct(e['perf_6m'], decimals=1)}", fonts["bold_12"], align="center"
+            draw, c4_x0, p_r2_y, f"6M: {fmt_pct(e['perf_6m'], decimals=1)}", fonts["bold_12"], align="left"
         )
         draw_text_aligned(
-            draw, inner_r, perf_y, f"1R: {fmt_pct(e['perf_1y'], decimals=1)}", fonts["bold_12"], align="right"
+            draw, c4_x1, p_r2_y, f"1R: {fmt_pct(e['perf_1y'], decimals=1)}", fonts["bold_12"], align="right"
         )
 
     # ==========================================================
     # C. PÄTIČKA (y = 452..480) — zdroj + čas dát + meniny/sviatok
-    #    (rezerva vpravo od x = 640 pre Battery: XX% na reTerminale)
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
     if any_live:
@@ -1082,7 +1077,7 @@ def create_etf_dashboard():
     if footer_nameday_text:
         status_txt = f"{status_txt} · {footer_nameday_text}"
 
-    max_footer_w = 628  # x = 12..640 (neprekryje sa s "Battery: XX%" vpravo dole)
+    max_footer_w = 628
     while draw.textlength(status_txt, font=fonts["bold_12"]) > max_footer_w and len(status_txt) > 6:
         status_txt = status_txt[:-2].rstrip() + "…"
 
