@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v8-perf-table"
+SCRIPT_VERSION = "2026-11-27-v9-slider-wide"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -1065,12 +1065,10 @@ def create_etf_dashboard():
         draw_ath_drawdown_meter_rtl(draw, c3_x0, ry + 11, c3_x1, e["drawdown_pct"], fonts)
 
         row_52w_y = ry + 69  # v jednej línii s riadkom 6M / 1R
-        lbl_52t = "52T"
+        # 52T posuvník bez popisku: min | ——■—— | max cez celú šírku stĺpca
         low_txt = fmt_eur(e["low_52w"], with_symbol=False)
         high_txt = fmt_eur(e["high_52w"], with_symbol=False)
-        draw.text((c3_x0, row_52w_y), lbl_52t, font=fonts["bold_12"], fill=TEXT_COLOR)
-        lbl_52t_w = draw.textlength(lbl_52t, font=fonts["bold_12"])
-        low_x = int(c3_x0 + lbl_52t_w + 6)
+        low_x = int(c3_x0)
         draw.text((low_x, row_52w_y), low_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
         draw_text_aligned(draw, c3_x1, row_52w_y, high_txt, fonts["bold_12"], align="right")
 
