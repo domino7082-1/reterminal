@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v4"
+SCRIPT_VERSION = "2026-11-27-v5"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -979,7 +979,7 @@ def create_etf_dashboard():
         # Vonkajší rámik karty (2 px)
         draw.rectangle([cx, cy, cx + card_w, cy + card_h], outline=TEXT_COLOR, width=2)
 
-        # 1. Horný riadok karty: Ticker štítok + Región | ATH štítok (inverzný pri <= -10%)
+        # 1. Horný riadok karty: Ticker štítok + Región (vľavo) | Dnes (vpravo ako prvé)
         inverted_tasks.append((
             inner_l,
             cy + 9,
@@ -989,15 +989,22 @@ def create_etf_dashboard():
         ))
         draw.text((inner_l + 72, cy + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
 
+        day_str = f"Dnes: {fmt_pct(e['day_pct'], decimals=2)}"
+        draw_text_aligned(draw, inner_r, cy + 12, day_str, fonts["bold_16"], align="right")
+
+        # 2. Názov fondu, veľká cena (vľavo) | štítok ATH -XX% a ATH cena/dátum (vpravo)
+        draw.text((inner_l, cy + 39), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
+        draw.text((inner_l, cy + 56), fmt_eur(e["price"]), font=fonts["price_lg"], fill=TEXT_COLOR)
+
         if abs(e["drawdown_pct"]) < 0.05:
             ath_badge_txt = "NA MAXIME"
         else:
             ath_badge_txt = f"ATH {fmt_pct(e['drawdown_pct'], show_plus=False, decimals=1)}"
 
         badge_x0 = inner_r - 126
-        badge_y0 = cy + 9
+        badge_y0 = cy + 37
         badge_x1 = inner_r
-        badge_y1 = cy + 35
+        badge_y1 = cy + 63
 
         if e["drawdown_pct"] <= ATH_INVERT_THRESHOLD:
             inverted_tasks.append((
@@ -1013,15 +1020,8 @@ def create_etf_dashboard():
                 draw, badge_x0, badge_y0, badge_x1, badge_y1, ath_badge_txt, fonts["bold_14"], fill=TEXT_COLOR
             )
 
-        # 2. Názov fondu, veľká cena (vľavo) + zväčšené Dnes (16B) a ATH (14B) (vpravo)
-        draw.text((inner_l, cy + 39), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
-        draw.text((inner_l, cy + 56), fmt_eur(e["price"]), font=fonts["price_lg"], fill=TEXT_COLOR)
-
-        day_str = f"Dnes: {fmt_pct(e['day_pct'], decimals=2)}"
-        draw_text_aligned(draw, inner_r, cy + 44, day_str, fonts["bold_16"], align="right")
-
         ath_info = f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})"
-        draw_text_aligned(draw, inner_r, cy + 69, ath_info, fonts["bold_14"], align="right")
+        draw_text_aligned(draw, inner_r, cy + 70, ath_info, fonts["bold_14"], align="right")
 
         # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + centrovaná stupnica)
         draw_ath_drawdown_meter(draw, inner_l, cy + 101, inner_r, e["drawdown_pct"], fonts)
