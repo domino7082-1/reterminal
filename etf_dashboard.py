@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v6-rows-rtl"
+SCRIPT_VERSION = "2026-11-27-v7-rows-rtl-dividers"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -837,31 +837,48 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
 
 
 def draw_ath_drawdown_meter_rtl(draw, x0, y0, x1, drawdown_pct, fonts):
-    """Vykreslí graf poklesu od ATH sprava doľava (0% na pravom okraji, −25% na ľavom)."""
+    """Vykreslí graf poklesu od ATH sprava doľava (0% na pravom okraji, −25% na ľavom).
+
+    Popisok „Pokles od ATH“ je NAD lištou (y0 = horný okraj písma popisku),
+    takže lišta môže využiť celú šírku stĺpca x0..x1.
+    """
     label = "Pokles od ATH"
     label_font = fonts["bold_12"]
     scale_font = fonts["bold_11"]
 
-    bar_h = 18
-    bar_y0 = y0
-    bar_y1 = y0 + bar_h
+    dd_abs = abs(min(0.0, drawdown_pct))
+    if dd_abs <= 25.0:
+        scale_max, step_pct = 25.0, 5.0
+    else:
+        # Pri hlbšom poklese stupnica po 10 % až po najbližšiu desiatku (−30, −40 …),
+        # aby sa posledné dva popisky neprekrývali
+        scale_max, step_pct = float(math.ceil(dd_abs / 10.0) * 10), 10.0
 
+    # 1) Popisok nad lištou, zarovnaný doľava
     lbl_bbox = draw.textbbox((0, 0), label, font=label_font)
-    lbl_w = lbl_bbox[2] - lbl_bbox[0]
     lbl_h = lbl_bbox[3] - lbl_bbox[1]
-    lbl_y = round(bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1])
-    draw.text((round(x0 - lbl_bbox[0]), lbl_y), label, font=label_font, fill=TEXT_COLOR)
+    draw.text(
+        (round(x0 - lbl_bbox[0]), round(y0 - lbl_bbox[1])),
+        label,
+        font=label_font,
+        fill=TEXT_COLOR,
+    )
 
-    # Rezerva vľavo (-18 px) a vpravo (-12 px), aby krajné hodnoty neprečnievali
-    bar_x0 = int(x0 + lbl_w + 18)
-    bar_x1 = int(x1 - 12)
+    bar_h = 16
+    bar_y0 = int(y0 + lbl_h + 5)
+    bar_y1 = bar_y0 + bar_h
+
+    # 2) Rezerva vľavo/vpravo = polovica šírky krajných popiskov stupnice,
+    #    aby „−25%“ ani „0%“ neprečnievali cez okraj stĺpca (a deliace čiary)
+    def _half_w(txt):
+        bb = draw.textbbox((0, 0), txt, font=scale_font)
+        return int(math.ceil((bb[2] - bb[0]) / 2.0))
+
+    bar_x0 = int(x0 + _half_w(f"{MINUS_SIGN}{int(scale_max)}%") + 1)
+    bar_x1 = int(x1 - _half_w("0%") - 1)
     bar_w = bar_x1 - bar_x0
     if bar_w <= 20:
         return
-
-    dd_abs = abs(min(0.0, drawdown_pct))
-    scale_max = max(25.0, float(math.ceil(dd_abs / 5.0) * 5))
-    step_pct = 5.0 if scale_max <= 25.0 else 10.0
 
     # Vonkajší rámik lišty
     draw.rectangle([bar_x0, bar_y0, bar_x1, bar_y1], fill=BACKGROUND_COLOR, outline=TEXT_COLOR, width=2)
@@ -894,7 +911,13 @@ def draw_ath_drawdown_meter_rtl(draw, x0, y0, x1, drawdown_pct, fonts):
             draw_dashed_vline(draw, tx, bar_y0 + 2, bar_y1 - 2, dash=2, gap=2)
         draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
 
-        lbl_txt = "0%" if val == 0 else f"{MINUS_SIGN}{int(val)}%"
+        # Znak % len pri krajných hodnotách, aby sa vnútorné popisky nedotýkali
+        if val == 0:
+            lbl_txt = "0%"
+        elif val >= scale_max:
+            lbl_txt = f"{MINUS_SIGN}{int(val)}%"
+        else:
+            lbl_txt = f"{MINUS_SIGN}{int(val)}"
         draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
 
 
@@ -979,8 +1002,14 @@ def create_etf_dashboard():
             fill=TEXT_COLOR,
         )
 
-        # 2. Stredný ľavý blok (x = 212..348): Veľká cena (28B) + Dnes: (15B)
-        c2_r = rx + 340
+        # Zvislé deliace čiary: cena | graf | výkonnosť
+        div1_x = rx + 342   # medzi cenou a grafom (x = 350)
+        div2_x = rx + 580   # medzi grafom a pravým blokom (x = 588)
+        for dx in (div1_x, div2_x):
+            draw.line([(dx, ry + 8), (dx, ry + row_h - 8)], fill=TEXT_COLOR, width=1)
+
+        # 2. Stredný ľavý blok (x = 203..340): Veľká cena (28B) + Dnes: (15B)
+        c2_r = div1_x - 10
         draw_text_aligned(draw, c2_r, ry + 14, fmt_eur(e["price"]), fonts["price_lg"], align="right")
         draw_text_aligned(
             draw,
@@ -991,18 +1020,18 @@ def create_etf_dashboard():
             align="right",
         )
 
-        # 3. Stredný pravý blok (x = 356..584): Obrátený graf Pokles od ATH + 52T posuvník
-        c3_x0 = rx + 348
-        c3_x1 = rx + 576
+        # 3. Stredný pravý blok (x = 360..578): „Pokles od ATH“ nad obráteným grafom + 52T posuvník
+        c3_x0 = div1_x + 10
+        c3_x1 = div2_x - 10
         draw_ath_drawdown_meter_rtl(draw, c3_x0, ry + 11, c3_x1, e["drawdown_pct"], fonts)
 
-        row_52w_y = ry + 64
+        row_52w_y = ry + 69  # v jednej línii s riadkom 6M / 1R
         lbl_52t = "52T"
         low_txt = fmt_eur(e["low_52w"], with_symbol=False)
         high_txt = fmt_eur(e["high_52w"], with_symbol=False)
         draw.text((c3_x0, row_52w_y), lbl_52t, font=fonts["bold_12"], fill=TEXT_COLOR)
         lbl_52t_w = draw.textlength(lbl_52t, font=fonts["bold_12"])
-        low_x = int(c3_x0 + lbl_52t_w + 18)
+        low_x = int(c3_x0 + lbl_52t_w + 8)
         draw.text((low_x, row_52w_y), low_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
         draw_text_aligned(draw, c3_x1, row_52w_y, high_txt, fonts["bold_12"], align="right")
 
@@ -1018,10 +1047,9 @@ def create_etf_dashboard():
             marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
             draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 4. Pravý blok (x = 592..782): Štítok ATH -XX,X% + 2x2 výkonnosť (1M · 3M · 6M · 1R)
-        c4_x0 = rx + 584
+        # 4. Pravý blok (x = 594..782): Štítok ATH -XX,X% + 2x2 výkonnosť (1M · 3M · 6M · 1R)
+        c4_x0 = div2_x + 6
         c4_x1 = r_right - 10
-        draw.line([(c4_x0 - 4, ry + 8), (c4_x0 - 4, ry + row_h - 8)], fill=TEXT_COLOR, width=1)
 
         ath_badge_txt = (
             "NA MAXIME"
