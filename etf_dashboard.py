@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v3"
+SCRIPT_VERSION = "2026-11-27-v4"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -311,6 +311,7 @@ def get_fonts():
         fonts["header_date"] = ImageFont.truetype(font_bold, 14)
         fonts["price_lg"] = ImageFont.truetype(font_bold, 26)
         fonts["ticker"] = ImageFont.truetype(font_bold, 16)
+        fonts["bold_16"] = ImageFont.truetype(font_bold, 16)
         fonts["bold_14"] = ImageFont.truetype(font_bold, 14)
         fonts["bold_13"] = ImageFont.truetype(font_bold, 13)
         fonts["bold_12"] = ImageFont.truetype(font_bold, 12)
@@ -319,7 +320,7 @@ def get_fonts():
     except IOError:
         default = ImageFont.load_default()
         keys = [
-            "header", "header_date", "price_lg", "ticker",
+            "header", "header_date", "price_lg", "ticker", "bold_16",
             "bold_14", "bold_13", "bold_12", "bold_11", "reg_13",
         ]
         fonts = {k: default for k in keys}
@@ -789,7 +790,6 @@ def fetch_etf_data(cfg, client):
     high_52w = max(high_52w, price)
 
     drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
-    needed_gain_pct = ((ath / price) - 1.0) * 100.0 if (0 < price < ath) else 0.0
 
     span_52w = high_52w - low_52w
     pos_52w = (price - low_52w) / span_52w if span_52w > 0 else 0.5
@@ -806,7 +806,6 @@ def fetch_etf_data(cfg, client):
         "ath": ath,
         "ath_date": ath_date_str,
         "drawdown_pct": drawdown_pct,
-        "needed_gain_pct": needed_gain_pct,
         "perf_1m": perf_1m,
         "perf_3m": perf_3m,
         "perf_6m": perf_6m,
@@ -864,7 +863,7 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
     lbl_y = round(bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1])
     draw.text((round(x0 - lbl_bbox[0]), lbl_y), label, font=label_font, fill=TEXT_COLOR)
 
-    # Rezerva vpravo (-19 px), aby bolo −25% presne vycentrované pod pravou ryskami a neprečnievalo
+    # Rezerva vpravo (-19 px), aby bolo −25% presne vycentrované pod pravou ryskou a neprečnievalo
     bar_x0 = int(x0 + lbl_w + 13)
     bar_x1 = int(x1 - 19)
     bar_w = bar_x1 - bar_x0
@@ -1014,22 +1013,15 @@ def create_etf_dashboard():
                 draw, badge_x0, badge_y0, badge_x1, badge_y1, ath_badge_txt, fonts["bold_14"], fill=TEXT_COLOR
             )
 
-        # 2. Názov fondu, veľká cena (vľavo) + Dnes, ATH a Na ATH (vpravo)
+        # 2. Názov fondu, veľká cena (vľavo) + zväčšené Dnes (16B) a ATH (14B) (vpravo)
         draw.text((inner_l, cy + 39), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
         draw.text((inner_l, cy + 56), fmt_eur(e["price"]), font=fonts["price_lg"], fill=TEXT_COLOR)
 
         day_str = f"Dnes: {fmt_pct(e['day_pct'], decimals=2)}"
-        draw_text_aligned(draw, inner_r, cy + 40, day_str, fonts["bold_14"], align="right")
+        draw_text_aligned(draw, inner_r, cy + 44, day_str, fonts["bold_16"], align="right")
 
         ath_info = f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})"
-        draw_text_aligned(draw, inner_r, cy + 60, ath_info, fonts["bold_12"], align="right")
-
-        na_ath_str = (
-            "Na ATH: 0,0%"
-            if e["needed_gain_pct"] < 0.05
-            else f"Na ATH: {fmt_pct(e['needed_gain_pct'], show_plus=True, decimals=1)}"
-        )
-        draw_text_aligned(draw, inner_r, cy + 76, na_ath_str, fonts["bold_12"], align="right")
+        draw_text_aligned(draw, inner_r, cy + 69, ath_info, fonts["bold_14"], align="right")
 
         # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + centrovaná stupnica)
         draw_ath_drawdown_meter(draw, inner_l, cy + 101, inner_r, e["drawdown_pct"], fonts)
@@ -1059,20 +1051,20 @@ def create_etf_dashboard():
             marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
             draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
 
-        # 5. Výkonnostný riadok (1M · 3M · 6M · 1R)
+        # 5. Výkonnostný riadok (1M: · 3M: · 6M: · 1R:)
         draw.line([(inner_l, cy + 168), (inner_r, cy + 168)], fill=TEXT_COLOR, width=1)
         perf_y = cy + 173
         draw_text_aligned(
-            draw, inner_l, perf_y, f"1M {fmt_pct(e['perf_1m'], decimals=1)}", fonts["bold_12"], align="left"
+            draw, inner_l, perf_y, f"1M: {fmt_pct(e['perf_1m'], decimals=1)}", fonts["bold_12"], align="left"
         )
         draw_text_aligned(
-            draw, cx + 148, perf_y, f"3M {fmt_pct(e['perf_3m'], decimals=1)}", fonts["bold_12"], align="center"
+            draw, cx + 146, perf_y, f"3M: {fmt_pct(e['perf_3m'], decimals=1)}", fonts["bold_12"], align="center"
         )
         draw_text_aligned(
-            draw, cx + 242, perf_y, f"6M {fmt_pct(e['perf_6m'], decimals=1)}", fonts["bold_12"], align="center"
+            draw, cx + 244, perf_y, f"6M: {fmt_pct(e['perf_6m'], decimals=1)}", fonts["bold_12"], align="center"
         )
         draw_text_aligned(
-            draw, inner_r, perf_y, f"1R {fmt_pct(e['perf_1y'], decimals=1)}", fonts["bold_12"], align="right"
+            draw, inner_r, perf_y, f"1R: {fmt_pct(e['perf_1y'], decimals=1)}", fonts["bold_12"], align="right"
         )
 
     # ==========================================================
