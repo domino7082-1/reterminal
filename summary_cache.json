@@ -1,11 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 9,
+    "next_index": 3,
     "recent_keys": [
-      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
-      "kauzyprikávičkezastropovanieenergiíjeschválenému",
-      "chcelzachrániťdvochdemonštrantovpredpopravouirán",
       "obrovskétrápenieduklytrenčínpokračujepotvrdilato",
       "nakupovaťvgelnicisaoplatí",
       "trumppodporilnasadeniearmádyvirakuvládachcedosta",
@@ -20,7 +17,10 @@
       "vučikomplikuještudentomvládnutiemajiteľjemublízk",
       "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
       "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
-      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu"
+      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
+      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
+      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
+      "beznádejneposlednýprešovnepredalsvojukožulacnoko"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -144,6 +144,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Montreal utrpel na ľade Colorada debakel 0:6 a pripísal si tretiu prehru v rade. Návrat Juraja Slafkovského do elitného útoku so Suzukim a Caufieldom nefungoval a trojica patrila k najhorším hráčom."
+  },
+  "https://sport.aktuality.sk/hokej/clanok/vysledky-hc-kosice-hc-presov-tipsport-liga-2026112712595185937": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Hokejisti HC Košice zvíťazili v 23. kole Tipsport ligy nad HC Prešov 4:2. Hoci Prešovčania zásluhou dvojgólového Michala Feranca dvakrát vyrovnali, Košice strhli víťazstvo na svoju stranu v záverečnej tretine."
   },
   "https://sport.aktuality.sk/hokej/clanok/vysledky-vlci-zilina-dukla-trencin-tipsport-liga-2026112713020709903": {
     "date": "2026-11-27",
