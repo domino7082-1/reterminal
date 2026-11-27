@@ -22,7 +22,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v9-slider-wide"
+SCRIPT_VERSION = "2026-11-27-v10-ath-in-title"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -33,7 +33,7 @@ THRESHOLD_ON_BLACK = 110  # Plnšie biele ťahy v čiernych hlavičkách a ští
 BACKGROUND_COLOR = 255    # Biela
 TEXT_COLOR = 0            # Čierna
 MINUS_SIGN = "\u2212"     # Skutočné matematické mínus (−), rovnaká šírka aj hrúbka ako +
-ATH_INVERT_THRESHOLD = -10.0  # Hranica poklesu od ATH pre inverzný čierny štítok
+ATH_INVERT_THRESHOLD = -10.0  # Hranica poklesu od ATH, od ktorej je výplň lišty plne čierna
 PERF_TABLE_STYLE = "stitky"   # Výkonnosť 1M/3M/6M/1R: "linky" alebo "stitky" (čierne štítky)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -837,14 +837,15 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
         draw.line([(sx, sy), (ex, ey)], fill=TEXT_COLOR, width=1)
 
 
-def draw_ath_drawdown_meter_rtl(draw, x0, y0, x1, drawdown_pct, fonts):
+def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, drawdown_pct, fonts):
     """Vykreslí graf poklesu od ATH sprava doľava (0% na pravom okraji, −25% na ľavom).
 
-    Popisok „Pokles od ATH“ je NAD lištou (y0 = horný okraj písma popisku),
-    takže lišta môže využiť celú šírku stĺpca x0..x1.
+    Nad lištou je nadpis s hodnotou, napr. „Pokles od ATH: −8,1%“
+    (popisok 12B + výraznejšia hodnota 14B, zarovnané na spoločnú účiarie).
+    Lišta využíva celú šírku stĺpca x0..x1.
     """
-    label = "Pokles od ATH"
     label_font = fonts["bold_12"]
+    value_font = fonts["bold_14"]
     scale_font = fonts["bold_11"]
 
     dd_abs = abs(min(0.0, drawdown_pct))
@@ -855,19 +856,15 @@ def draw_ath_drawdown_meter_rtl(draw, x0, y0, x1, drawdown_pct, fonts):
         # aby sa posledné dva popisky neprekrývali
         scale_max, step_pct = float(math.ceil(dd_abs / 10.0) * 10), 10.0
 
-    # 1) Popisok nad lištou, zarovnaný doľava
-    lbl_bbox = draw.textbbox((0, 0), label, font=label_font)
-    lbl_h = lbl_bbox[3] - lbl_bbox[1]
-    draw.text(
-        (round(x0 - lbl_bbox[0]), round(y0 - lbl_bbox[1])),
-        label,
-        font=label_font,
-        fill=TEXT_COLOR,
-    )
+    # 1) Nadpis s hodnotou poklesu nad lištou, zarovnaný doľava
+    label = "Pokles od ATH: "
+    value = "0,0%" if dd_abs < 0.05 else fmt_pct(drawdown_pct, show_plus=False, decimals=1)
+    draw.text((x0, title_baseline), label, font=label_font, fill=TEXT_COLOR, anchor="ls")
+    value_x = x0 + draw.textlength(label, font=label_font)
+    draw.text((value_x, title_baseline), value, font=value_font, fill=TEXT_COLOR, anchor="ls")
 
-    bar_h = 16
-    bar_y0 = int(y0 + lbl_h + 5)
-    bar_y1 = bar_y0 + bar_h
+    bar_y0 = int(bar_y0)
+    bar_y1 = int(bar_y1)
 
     # 2) Rezerva vľavo/vpravo = polovica šírky krajných popiskov stupnice,
     #    aby „−25%“ ani „0%“ neprečnievali cez okraj stĺpca (a deliace čiary)
@@ -915,6 +912,32 @@ def draw_ath_drawdown_meter_rtl(draw, x0, y0, x1, drawdown_pct, fonts):
         # Znak % len pri nule (pravý okraj), aby sa popisky nedotýkali
         lbl_txt = "0%" if val == 0 else f"{MINUS_SIGN}{int(val)}"
         draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
+
+
+def draw_52w_slider(draw, x0, x1, center_y, low_52w, high_52w, pos_52w, fonts):
+    """52-týždňový posuvník: min | ——■—— | max cez celú šírku x0..x1, zvislo vycentrovaný na center_y."""
+    font = fonts["bold_12"]
+    low_txt = fmt_eur(low_52w, with_symbol=False)
+    high_txt = fmt_eur(high_52w, with_symbol=False)
+
+    # Číslice (bez čiarky) zvislo vycentrované na čiaru posuvníka
+    digit_bb = draw.textbbox((0, 0), "0123456789", font=font)
+    text_y = round(center_y - (digit_bb[1] + digit_bb[3]) / 2.0)
+    draw_text_aligned(draw, x0, text_y, low_txt, font, align="left")
+    draw_text_aligned(draw, x1, text_y, high_txt, font, align="right")
+
+    low_w = draw.textlength(low_txt, font=font)
+    high_w = draw.textlength(high_txt, font=font)
+    bar_x0 = int(x0 + low_w + 8)
+    bar_x1 = int(x1 - high_w - 8)
+    bar_y = int(center_y)
+    if bar_x1 <= bar_x0 + 14:
+        return
+    draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=TEXT_COLOR, width=2)
+    draw.line([(bar_x0, bar_y - 5), (bar_x0, bar_y + 5)], fill=TEXT_COLOR, width=2)
+    draw.line([(bar_x1, bar_y - 5), (bar_x1, bar_y + 5)], fill=TEXT_COLOR, width=2)
+    marker_x = bar_x0 + int(round(pos_52w * (bar_x1 - bar_x0)))
+    draw.rectangle([marker_x - 3, bar_y - 6, marker_x + 3, bar_y + 6], fill=TEXT_COLOR)
 
 
 def draw_perf_table(draw, x0, x1, label_y, value_y, items, fonts, inverted_tasks, style=None):
@@ -1059,67 +1082,41 @@ def create_etf_dashboard():
             align="right",
         )
 
-        # 3. Stredný pravý blok (x = 343..535): „Pokles od ATH“ nad obráteným grafom + 52T posuvník
+        # Spoločná mriežka riadku pre stĺpce 2 a 3:
+        #   horný riadok (ry+17..27): „Pokles od ATH: −X,X%“  |  52T posuvník
+        #   dolný riadok (ry+72..81): stupnica grafu           |  percentá výkonnosti
+        top_center_y = ry + 22
+        value_row_y = ry + 69
+
+        # 3. Stredný pravý blok (x = 343..535): „Pokles od ATH: −X,X%“ nad obráteným grafom
         c3_x0 = div1_x + 8
         c3_x1 = div2_x - 8
-        draw_ath_drawdown_meter_rtl(draw, c3_x0, ry + 11, c3_x1, e["drawdown_pct"], fonts)
+        draw_ath_drawdown_meter_rtl(
+            draw,
+            c3_x0,
+            c3_x1,
+            ry + 27,           # účiarie nadpisu
+            ry + 36,           # horný okraj lišty
+            value_row_y - 4,   # dolný okraj lišty (stupnica tak sedí s riadkom percent)
+            e["drawdown_pct"],
+            fonts,
+        )
 
-        row_52w_y = ry + 69  # v jednej línii s riadkom 6M / 1R
-        # 52T posuvník bez popisku: min | ——■—— | max cez celú šírku stĺpca
-        low_txt = fmt_eur(e["low_52w"], with_symbol=False)
-        high_txt = fmt_eur(e["high_52w"], with_symbol=False)
-        low_x = int(c3_x0)
-        draw.text((low_x, row_52w_y), low_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
-        draw_text_aligned(draw, c3_x1, row_52w_y, high_txt, fonts["bold_12"], align="right")
-
-        low_w = draw.textlength(low_txt, font=fonts["bold_12"])
-        high_w = draw.textlength(high_txt, font=fonts["bold_12"])
-        bar_x0 = int(low_x + low_w + 7)
-        bar_x1 = int(c3_x1 - high_w - 7)
-        bar_y = row_52w_y + 7
-        if bar_x1 > bar_x0 + 14:
-            draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=TEXT_COLOR, width=2)
-            draw.line([(bar_x0, bar_y - 4), (bar_x0, bar_y + 4)], fill=TEXT_COLOR, width=1)
-            draw.line([(bar_x1, bar_y - 4), (bar_x1, bar_y + 4)], fill=TEXT_COLOR, width=1)
-            marker_x = bar_x0 + int(e["pos_52w"] * (bar_x1 - bar_x0))
-            draw.rectangle([marker_x - 3, bar_y - 5, marker_x + 3, bar_y + 5], fill=TEXT_COLOR)
-
-        # 4. Pravý blok (x = 551..785): Štítok ATH -XX,X% + tabuľka výkonnosti 1M · 3M · 6M · 1R
+        # 4. Pravý blok (x = 551..785): 52T posuvník + tabuľka výkonnosti 1M · 3M · 6M · 1R
         c4_x0 = div2_x + 8
         c4_x1 = r_right - 7
-
-        ath_badge_txt = (
-            "NA MAXIME"
-            if abs(e["drawdown_pct"]) < 0.05
-            else f"ATH {fmt_pct(e['drawdown_pct'], show_plus=False, decimals=1)}"
+        draw_52w_slider(
+            draw, c4_x0, c4_x1, top_center_y,
+            e["low_52w"], e["high_52w"], e["pos_52w"], fonts,
         )
-        bx0 = c4_x0
-        by0 = ry + 9
-        bx1 = c4_x1
-        by1 = ry + 34
 
-        if e["drawdown_pct"] <= ATH_INVERT_THRESHOLD:
-            inverted_tasks.append((
-                bx0,
-                by0,
-                bx1,
-                by1,
-                make_centered_inverted_drawer(ath_badge_txt, fonts["bold_14"]),
-            ))
-        else:
-            draw.rectangle([bx0, by0, bx1, by1], outline=TEXT_COLOR, width=2)
-            draw_text_centered_in_box(
-                draw, bx0, by0, bx1, by1, ath_badge_txt, fonts["bold_14"], fill=TEXT_COLOR
-            )
-
-        # Výkonnosť: obdobia v hornom riadku (v línii so stupnicou grafu),
-        # percentá pod nimi (v línii s riadkom 52T)
+        # Výkonnosť: obdobia v štítkoch, percentá pod nimi (v línii so stupnicou grafu)
         draw_perf_table(
             draw,
             c4_x0,
             c4_x1,
             ry + 46,
-            row_52w_y,
+            value_row_y,
             [
                 ("1M", e["perf_1m"]),
                 ("3M", e["perf_3m"]),
