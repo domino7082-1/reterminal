@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 0,
+    "next_index": 7,
     "recent_keys": [
-      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
-      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
-      "beznádejneposlednýprešovnepredalsvojukožulacnoko",
-      "políciaposilňujehliadkyabezpečnostnéopatreniapoč",
-      "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
-      "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
       "vlakjuvliekolstovkymetrovpokoľajniciachmladážena",
       "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
       "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
@@ -20,7 +14,13 @@
       "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
       "neustálaúnavasmdačastémočenietietonenápadnéprízn",
       "ruskýelektrickýuazskončilfiaskomterazchcúznehosp",
-      "koniecstarlinkuajmodernýchtechnológiíruskájadrov"
+      "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
+      "ukrajinadostalaspťďalšieodvlečenédetizelenskyjvy",
+      "prehralsbudayomvufcpredstavilsavoktagonenavajost",
+      "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
+      "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
+      "vučikomplikuještudentomvládnutiemajiteľjemublízk",
+      "putinpredstavilnovújadrovúponorkuruskochcedoroku"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -198,6 +198,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Neporazený bojovník UFC Navajo Stirling knokautoval Jiřího Procházku dve sekundy pred koncom druhého kola. Po tomto víťazstve sa posunul na tretiu priečku rebríčka poloťažkej divízie a vyzval Magomeda Ankalaeva. Stirling Procházkovi radí, aby zvoľnil svoju obrovskú intenzitu."
+  },
+  "https://sport.aktuality.sk/mma/clanok/prehral-s-budayom-v-ufc-predstavil-sa-v-oktagone-navajo-stirling-vyzval-tazkotonaznika-na-suboj-po-jeho-kritike-2026112719224470539": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Neporazený bojovník UFC Navajo Stirling vyzval vedenie organizácie na zápas s ťažkotonážnikom Joshom Hokitom. Reagoval tak na Hokitovu kritiku stavu poloťažkej divízie. Stirling má bilanciu 12-0 a Hokit nedávno utrpel prvú prehru kariéry."
   },
   "https://sport.aktuality.sk/mma/clanok/slovenska-stalica-oktagonu-ma-novy-zapas-v-liberci-ju-caka-cesko-slovenske-derby-2026112522260358175": {
     "date": "2026-11-26",
@@ -396,6 +402,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Bieloruský prezident Lukašenko ponúkol ukrajinskému prezidentovi Zelenskému osobnú bezpečnosť, ak s ním pricestuje do Moskvy na trojstranné rokovania s Putinom o ukončení vojny. Podľa Lukašenka by traja predstavitelia slovanských národov vyriešili konflikt najrýchlejšie. Ak Zelenskyj návrh odmietne, má podľa neho ďalej bojovať na fronte."
+  },
+  "https://www.aktuality.sk/clanok/7I4ftgu/putin-predstavil-novu-jadrovu-ponorku-rusko-chce-do-roku-2030-rozsirit-flotilu-o-dalsich-pat/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Ruský prezident Vladimir Putin uviedol do služby novú jadrovú ponorku Perm triedy Jaseň-M. Moskva plánuje do roku 2030 rozšíriť svoju flotilu o ďalších päť takýchto plavididiel určených na globálne operácie."
   },
   "https://www.aktuality.sk/clanok/9FPGako/z-ruska-a-okupovanych-uzemi-sa-vratilo-dalsich-devat-ukrajinskych-deti-najmladsie-ma-osem-rokov/": {
     "date": "2026-11-27",
