@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 9,
+    "next_index": 6,
     "recent_keys": [
-      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
-      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
-      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
-      "fotoelitnátenistkaodnašichsusedovsinechalazmrazi",
-      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
-      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp",
       "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
       "zapocitomplnostisamôžeskrývaťvážnadiagnózataktos",
       "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
@@ -20,7 +14,13 @@
       "trumppodporilnasadeniearmádyvirakuvládachcedosta",
       "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
       "neustálaúnavasmdačastémočenietietonenápadnéprízn",
-      "ruskýelektrickýuazskončilfiaskomterazchcúznehosp"
+      "ruskýelektrickýuazskončilfiaskomterazchcúznehosp",
+      "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
+      "zruskaaokupovanýchúzemísavrátiloďalšíchdevťukraj",
+      "kleinovsparingpartnermánovýzápasmartinhoríneknas",
+      "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
+      "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
+      "vučikomplikuještudentomvládnutiemajiteľjemublízk"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -94,6 +94,10 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Disciplinárna komisia SFZ udelila pokuty po vzájomnom regionálnom dueli Niké ligy. Dunajská Streda musí zaplatiť 600 eur a Komárno 500 eur za použitie pyrotechniky fanúšikmi."
+  },
+  "https://sport.aktuality.sk/futbal/clanok/v-brne-lietali-cervene-karty-domaci-artis-dokonale-vyuzil-presilovku-2026112713121246831": {
+    "date": "2026-11-27",
+    "status": "skip"
   },
   "https://sport.aktuality.sk/futbal/clanok/vysledok-club-bruggy-liverpool-fc-liga-majstrov-2026112514331061901": {
     "date": "2026-11-25",
@@ -170,6 +174,12 @@
   "https://sport.aktuality.sk/mma/clanok/dostane-celu-vyplatu-za-zruseny-zapas-ivan-buchinger-sa-vyjadril-aj-k-tomu-proti-komu-a-kedy-chce-najblizsie-bojovat-2026112520212078491": {
     "date": "2026-11-25",
     "status": "paywall"
+  },
+  "https://sport.aktuality.sk/mma/clanok/kleinov-sparingpartner-ma-novy-zapas-martin-horinek-nastupi-na-rovnakom-turnaji-ako-slovensky-bojovnik-ufc-2026112719171550475": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Slovenský bojovník Martin Horínek nastúpi 19. decembra na turnaji NWL 02 v Düsseldorfe proti Hisirovi Ozdoevovi. V zápase vo voľnom štýle do 80 kilogramov sa predstaví na rovnakej karte ako Ľudovít Klein."
   },
   "https://sport.aktuality.sk/mma/clanok/navajo-stirling-posiela-jirimu-prochazkovi-dobre-mienenu-radu-toto-by-mal-urcite-zmenit-2026112709230669742": {
     "date": "2026-11-27",
@@ -374,6 +384,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Bieloruský prezident Lukašenko ponúkol ukrajinskému prezidentovi Zelenskému osobnú bezpečnosť, ak s ním pricestuje do Moskvy na trojstranné rokovania s Putinom o ukončení vojny. Podľa Lukašenka by traja predstavitelia slovanských národov vyriešili konflikt najrýchlejšie. Ak Zelenskyj návrh odmietne, má podľa neho ďalej bojovať na fronte."
+  },
+  "https://www.aktuality.sk/clanok/9FPGako/z-ruska-a-okupovanych-uzemi-sa-vratilo-dalsich-devat-ukrajinskych-deti-najmladsie-ma-osem-rokov/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Na Ukrajinu sa z Ruska a okupovaných území vrátilo ďalších deväť detí vrátane osemročného Artema. K ich návratu prispela aj americká prvá dáma Melania Trumpová. Od začiatku invázie bolo repatriovaných 2875 detí, pričom Kyjev eviduje cez 20-tisíc deportácií."
   },
   "https://www.aktuality.sk/clanok/9OF6D7S/z-londynskej-centraly-fitch-ratings-spat-do-popradu-nas-rodinny-biznis-stoji-na-prisnej-profesionalite/": {
     "date": "2026-11-26",
@@ -1020,6 +1036,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Japonská vesmírna agentúra JAXA predstavila testovací model rovera, ktorý má v roku 2028 pátrať po vode na južnom póle Mesiaca. Misia LUPEX vzniká v spolupráci s Indiou a cieľom je využiť získanú vodu na výrobu raketového paliva pre budúce vesmírne misie."
+  },
+  "https://zive.aktuality.sk/clanok/FC2LwUd/koniec-starlinku-aj-modernych-technologii-ruska-jadrova-zbran-vo-vesmire-by-nas-vratila-o-desatrocia-spat/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Rusko môže koncom roka vypustiť družicu Sputnik-S s jadrovou bombou, čo varujú spravodajské služby NATO. Zbraň by na nízkej obežnej dráhe mohla elektromagnetickým impulzom zničiť satelity a komunikačné siete."
   },
   "https://zive.aktuality.sk/clanok/GaqQPcn/ako-to-bude-s-cenami-energii-pre-domacnosti-dolezite-oznamenie-statu/": {
     "date": "2026-11-25",
