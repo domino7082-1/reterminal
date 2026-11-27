@@ -1,9 +1,3 @@
-Kompletný Python skript pre reTerminal E1001 (etf_output.bmp, 800×480 px, 1-bit BMP) podľa tvojho finálneho návrhu:
- * Mriežka 2×2 karty (388×195 px) bez riadku EUR/USD, s veľkou 26 px cenou, ATH údajmi a 1M · 3M · 6M · 1R výkonnosťou.
- * Jednoriadkový graf poklesu od ATH: popis Pokles od ATH zarovnaný na začiatok rovnakého riadku ako lišta grafu (0% až −25% s ryskami po 5 %), bez sumy v eurách a bez štítkov „BEŽNÝ“ / „DOKUP!“.
- * Inverzný štítok ATH (čierne pozadie, biely text s prahom 110) a plná výplň lišty pri poklese ≤ −10,0%.
- * Väčšia 18 px medzera za 52T a čisté 10 px odstupy okolo posuvníka.
- * Dolná lišta s časom aktualizácie dát a meninami/sviatkom, bez Xetra a LIVE.
 import datetime
 import math
 import os
@@ -249,7 +243,7 @@ def scrape_meniny_today(now):
 
     # 1. Primárny zdroj: kto-ma-meniny.sk
     try:
-        resp = requests.get("https://kto-ma-meniny.sk/", headers=HEADERS, timeout=8)
+        resp = requests.get("[https://kto-ma-meniny.sk/](https://kto-ma-meniny.sk/)", headers=HEADERS, timeout=8)
         resp.encoding = "utf-8"
         pattern = (
             fr">\s*{re.escape(date_str_today)}\s*</div>"
@@ -266,7 +260,7 @@ def scrape_meniny_today(now):
     # 2. Záložný zdroj: zones.sk
     try:
         resp = requests.get(
-            "https://www.zones.sk/kalendar-udalosti/meniny/",
+            "[https://www.zones.sk/kalendar-udalosti/meniny/](https://www.zones.sk/kalendar-udalosti/meniny/)",
             headers=HEADERS,
             timeout=8,
         )
@@ -376,7 +370,7 @@ def paste_inverted_block(img_1bit, x0, y0, x1, y1, draw_fn):
 
 def fetch_yahoo_chart(symbol, range_str, interval_str):
     url = (
-        f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+        f"[https://query1.finance.yahoo.com/v8/finance/chart/](https://query1.finance.yahoo.com/v8/finance/chart/){symbol}"
         f"?range={range_str}&interval={interval_str}"
     )
     resp = requests.get(url, headers=HEADERS, timeout=10)
@@ -859,4 +853,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
