@@ -1,7 +1,6 @@
 import datetime
 import math
 import os
-import re
 import time
 import requests
 from PIL import Image, ImageDraw, ImageFont
@@ -10,6 +9,16 @@ try:
     from zoneinfo import ZoneInfo
 except ImportError:
     ZoneInfo = None
+
+try:
+    from curl_cffi import requests as cffi_requests
+except ImportError:
+    cffi_requests = None
+
+try:
+    import yfinance as yf
+except ImportError:
+    yf = None
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -85,19 +94,24 @@ HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    )
+        "Chrome/131.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json,text/plain,*/*",
+    "Accept-Language": "sk-SK,sk;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Origin": "https://finance.yahoo.com",
+    "Referer": "https://finance.yahoo.com/",
 }
 
-# Dni v slovenskom kalendári, keď nemá nikto meniny
+# Dni v slovenskom kalendári, keď sa zobrazuje sviatok namiesto menín
 NO_NAMEDAY_HOLIDAYS = {
     (1, 1): "Nový rok",
     (5, 1): "Sviatok práce",
     (11, 1): "Sviatok všetkých svätých",
+    (11, 2): "Pamiatka zosnulých",
     (12, 25): "1. sviatok vianočný",
 }
 
-# Pevné slovenské sviatky (záložné zobrazenie, ak zlyhá načítanie menín)
+# Pevné slovenské sviatky
 FIXED_HOLIDAYS_SK = {
     (1, 1): "Nový rok",
     (1, 6): "Zjavenie Pána (Traja králi)",
@@ -111,6 +125,146 @@ FIXED_HOLIDAYS_SK = {
     (12, 24): "Štedrý deň",
     (12, 25): "1. sviatok vianočný",
     (12, 26): "2. sviatok vianočný",
+}
+
+# Kompletný vstavaný slovenský meninový kalendár (366 dní, bez závislosti od externých webov)
+SLOVAK_NAMEDAYS = {
+    # Január
+    (1, 2): "Alexandra, Karina", (1, 3): "Daniela", (1, 4): "Drahoslav",
+    (1, 5): "Andrea", (1, 6): "Antónia", (1, 7): "Bohuslava",
+    (1, 8): "Severín", (1, 9): "Alexej", (1, 10): "Dáša",
+    (1, 11): "Malvína", (1, 12): "Ernest", (1, 13): "Rastislav",
+    (1, 14): "Radovan", (1, 15): "Dobroslav", (1, 16): "Kristína",
+    (1, 17): "Nataša", (1, 18): "Bohdana", (1, 19): "Drahomíra, Mário",
+    (1, 20): "Dalibor, Sebastián", (1, 21): "Vincent", (1, 22): "Zora",
+    (1, 23): "Miloš", (1, 24): "Timotej", (1, 25): "Gejza",
+    (1, 26): "Tamara", (1, 27): "Bohuš", (1, 28): "Alfonz",
+    (1, 29): "Gašpar", (1, 30): "Ema", (1, 31): "Emil",
+    # Február
+    (2, 1): "Tatiana", (2, 2): "Erik, Erika", (2, 3): "Blažej",
+    (2, 4): "Veronika", (2, 5): "Agáta", (2, 6): "Dorota",
+    (2, 7): "Vanda", (2, 8): "Zoja", (2, 9): "Zdenko",
+    (2, 10): "Gabriela", (2, 11): "Dezider", (2, 12): "Perla",
+    (2, 13): "Arpád", (2, 14): "Valentín", (2, 15): "Pravoslav",
+    (2, 16): "Ida, Liana", (2, 17): "Miloslava", (2, 18): "Jaromír",
+    (2, 19): "Vlasta", (2, 20): "Lívia", (2, 21): "Eleonóra",
+    (2, 22): "Etela", (2, 23): "Roman, Romana", (2, 24): "Matej",
+    (2, 25): "Frederik, Frederika", (2, 26): "Viktor", (2, 27): "Alexander",
+    (2, 28): "Zlatica", (2, 29): "Radomír",
+    # Marec
+    (3, 1): "Albín", (3, 2): "Anežka", (3, 3): "Bohumil, Bohumila",
+    (3, 4): "Kazimír", (3, 5): "Fridrich", (3, 6): "Radoslav, Radoslava",
+    (3, 7): "Tomáš", (3, 8): "Alan, Alana", (3, 9): "Františka",
+    (3, 10): "Branislav, Bruno", (3, 11): "Angela, Angelika", (3, 12): "Gregor",
+    (3, 13): "Vlastimil", (3, 14): "Matilda", (3, 15): "Svetlana",
+    (3, 16): "Boleslav", (3, 17): "Ľubica", (3, 18): "Eduard",
+    (3, 19): "Jozef", (3, 20): "Víťazoslav, Klaudius", (3, 21): "Blahoslav",
+    (3, 22): "Beňadik", (3, 23): "Adrián", (3, 24): "Gabriel",
+    (3, 25): "Marián", (3, 26): "Emanuel", (3, 27): "Alena",
+    (3, 28): "Soňa", (3, 29): "Miroslav", (3, 30): "Vieroslava",
+    (3, 31): "Benjamín",
+    # Apríl
+    (4, 1): "Hugo", (4, 2): "Zita", (4, 3): "Richard",
+    (4, 4): "Izidor", (4, 5): "Miroslava", (4, 6): "Irena",
+    (4, 7): "Zoltán", (4, 8): "Albert", (4, 9): "Milena",
+    (4, 10): "Igor", (4, 11): "Július", (4, 12): "Estera",
+    (4, 13): "Aleš", (4, 14): "Justína", (4, 15): "Fedor",
+    (4, 16): "Dana, Danica", (4, 17): "Rudolf", (4, 18): "Valér",
+    (4, 19): "Jela", (4, 20): "Marcel", (4, 21): "Ervín",
+    (4, 22): "Slavomír", (4, 23): "Vojtech", (4, 24): "Juraj",
+    (4, 25): "Marek", (4, 26): "Jaroslava", (4, 27): "Jaroslav",
+    (4, 28): "Jarmila", (4, 29): "Lea", (4, 30): "Anastázia",
+    # Máj
+    (5, 2): "Žigmund", (5, 3): "Galina", (5, 4): "Florián",
+    (5, 5): "Lesana, Lesia", (5, 6): "Hermína", (5, 7): "Monika",
+    (5, 8): "Ingrida", (5, 9): "Roland", (5, 10): "Viktória",
+    (5, 11): "Blažena", (5, 12): "Pankrác", (5, 13): "Servác",
+    (5, 14): "Bonifác", (5, 15): "Žofia", (5, 16): "Svetozár",
+    (5, 17): "Gizela", (5, 18): "Viola", (5, 19): "Gertrúda",
+    (5, 20): "Bernard", (5, 21): "Zina", (5, 22): "Júlia, Juliana",
+    (5, 23): "Želmíra", (5, 24): "Ela", (5, 25): "Urban",
+    (5, 26): "Dušan", (5, 27): "Iveta", (5, 28): "Viliam",
+    (5, 29): "Vilma", (5, 30): "Ferdinand", (5, 31): "Petronela, Petrana",
+    # Jún
+    (6, 1): "Žaneta", (6, 2): "Xénia, Oxana", (6, 3): "Karolína",
+    (6, 4): "Lenka", (6, 5): "Laura", (6, 6): "Norbert",
+    (6, 7): "Róbert", (6, 8): "Medard", (6, 9): "Stanislava",
+    (6, 10): "Margaréta", (6, 11): "Dobroslava", (6, 12): "Zlatko",
+    (6, 13): "Anton", (6, 14): "Vasil", (6, 15): "Vít",
+    (6, 16): "Blanka", (6, 17): "Adolf", (6, 18): "Vratislav",
+    (6, 19): "Alfréd", (6, 20): "Valéria", (6, 21): "Alojz",
+    (6, 22): "Paulína", (6, 23): "Sidónia", (6, 24): "Ján",
+    (6, 25): "Tadeáš, Olívia", (6, 26): "Adriana", (6, 27): "Ladislav, Ladislava",
+    (6, 28): "Beáta", (6, 29): "Peter, Pavol, Petra", (6, 30): "Melánia",
+    # Júl
+    (7, 1): "Diana", (7, 2): "Berta", (7, 3): "Miloslav",
+    (7, 4): "Prokop", (7, 5): "Cyril, Metod", (7, 6): "Patrik, Patrícia",
+    (7, 7): "Oliver", (7, 8): "Ivan", (7, 9): "Lujza",
+    (7, 10): "Amália", (7, 11): "Milota", (7, 12): "Nina",
+    (7, 13): "Margita", (7, 14): "Kamil", (7, 15): "Henrich",
+    (7, 16): "Drahomír, Drahomíra", (7, 17): "Bohuslav", (7, 18): "Kamila",
+    (7, 19): "Dušana", (7, 20): "Eliáš, Iľja", (7, 21): "Daniel",
+    (7, 22): "Magdaléna", (7, 23): "Oľga", (7, 24): "Vladimír",
+    (7, 25): "Jakub", (7, 26): "Anna, Hana", (7, 27): "Božena",
+    (7, 28): "Krištof", (7, 29): "Marta", (7, 30): "Libuša",
+    (7, 31): "Ignác",
+    # August
+    (8, 1): "Božidara", (8, 2): "Gustáv", (8, 3): "Jerguš",
+    (8, 4): "Dominik, Dominika", (8, 5): "Hortenzia", (8, 6): "Jozefína",
+    (8, 7): "Štefánia", (8, 8): "Oskar", (8, 9): "Ľubomíra",
+    (8, 10): "Vavrinec", (8, 11): "Zuzana", (8, 12): "Darina",
+    (8, 13): "Ľubomír", (8, 14): "Mojmír", (8, 15): "Marcela",
+    (8, 16): "Leonard", (8, 17): "Milica", (8, 18): "Elena, Helena",
+    (8, 19): "Lýdia", (8, 20): "Anabela", (8, 21): "Jana",
+    (8, 22): "Tichomír", (8, 23): "Filip", (8, 24): "Bartolomej",
+    (8, 25): "Ľudovít", (8, 26): "Samuel", (8, 27): "Silvia",
+    (8, 28): "Augustín", (8, 29): "Nikola, Nikolaj", (8, 30): "Ružena",
+    (8, 31): "Nora",
+    # September
+    (9, 1): "Drahoslava", (9, 2): "Linda, Rebeka", (9, 3): "Belo",
+    (9, 4): "Rozália", (9, 5): "Regína", (9, 6): "Alica",
+    (9, 7): "Marianna", (9, 8): "Miriama", (9, 9): "Martina",
+    (9, 10): "Oleg", (9, 11): "Bystrík", (9, 12): "Mária",
+    (9, 13): "Ctibor", (9, 14): "Ľudomil", (9, 15): "Jolana",
+    (9, 16): "Ľudmila", (9, 17): "Olympia", (9, 18): "Eugénia",
+    (9, 19): "Konštantín", (9, 20): "Ľuboslav, Ľuboslava", (9, 21): "Matúš",
+    (9, 22): "Móric", (9, 23): "Zdenka", (9, 24): "Ľuboš, Ľubor",
+    (9, 25): "Vladislav", (9, 26): "Edita", (9, 27): "Cyprián",
+    (9, 28): "Václav", (9, 29): "Michal, Michaela", (9, 30): "Jarolím",
+    # Október
+    (10, 1): "Arnold", (10, 2): "Levoslav", (10, 3): "Stela",
+    (10, 4): "František", (10, 5): "Viera", (10, 6): "Natália",
+    (10, 7): "Eliška", (10, 8): "Brigita", (10, 9): "Dionýz",
+    (10, 10): "Slavomíra", (10, 11): "Valentína", (10, 12): "Maximilián",
+    (10, 13): "Koloman", (10, 14): "Boris", (10, 15): "Terézia",
+    (10, 16): "Vladimíra", (10, 17): "Hedviga", (10, 18): "Lukáš",
+    (10, 19): "Kristián", (10, 20): "Vendelín", (10, 21): "Uršuľa",
+    (10, 22): "Sergej", (10, 23): "Alojzia", (10, 24): "Kvetoslava",
+    (10, 25): "Aurel", (10, 26): "Demeter", (10, 27): "Sabína",
+    (10, 28): "Dobromila", (10, 29): "Klára", (10, 30): "Šimon, Simona",
+    (10, 31): "Aurélia",
+    # November
+    (11, 3): "Hubert", (11, 4): "Karol", (11, 5): "Imrich",
+    (11, 6): "Renáta", (11, 7): "René", (11, 8): "Bohumír",
+    (11, 9): "Teodor", (11, 10): "Tibor", (11, 11): "Martin, Maroš",
+    (11, 12): "Svätopluk", (11, 13): "Stanislav", (11, 14): "Irma",
+    (11, 15): "Leopold", (11, 16): "Agnesa", (11, 17): "Klaudia",
+    (11, 18): "Eugen", (11, 19): "Alžbeta", (11, 20): "Félix",
+    (11, 21): "Elvíra", (11, 22): "Cecília", (11, 23): "Klement",
+    (11, 24): "Emília", (11, 25): "Katarína", (11, 26): "Kornel",
+    (11, 27): "Milan", (11, 28): "Henrieta", (11, 29): "Vratko",
+    (11, 30): "Ondrej, Andrej",
+    # December
+    (12, 1): "Edmund", (12, 2): "Bibiána", (12, 3): "Oldrich",
+    (12, 4): "Barbora", (12, 5): "Oto", (12, 6): "Mikuláš",
+    (12, 7): "Ambróz", (12, 8): "Marína", (12, 9): "Izabela",
+    (12, 10): "Radúz", (12, 11): "Hilda", (12, 12): "Otília",
+    (12, 13): "Lucia", (12, 14): "Branislava, Bronislava", (12, 15): "Ivica",
+    (12, 16): "Albína", (12, 17): "Kornélia", (12, 18): "Sláva, Slávka",
+    (12, 19): "Judita", (12, 20): "Dagmara", (12, 21): "Bohdan",
+    (12, 22): "Adela", (12, 23): "Nadežda", (12, 24): "Adam, Eva",
+    (12, 26): "Štefan", (12, 27): "Filoména", (12, 28): "Ivana, Ivona",
+    (12, 29): "Milada", (12, 30): "Dávid", (12, 31): "Silvester",
 }
 
 
@@ -190,14 +344,6 @@ def ts_to_bratislava(ts):
     return datetime.datetime.fromtimestamp(ts)
 
 
-def remove_html_tags(text):
-    clean = re.compile(r"<.*?>")
-    text = re.sub(clean, "", text)
-    text = text.replace("&nbsp;", " ").replace("&#160;", " ").replace("\xa0", " ")
-    text = text.replace("&ndash;", "-").replace("&#8211;", "-").replace("–", "-")
-    return re.sub(r"\s+", " ", text).strip()
-
-
 # --- MENINY A SVIATKY (DOLNÁ LIŠTA) ---
 
 def get_easter_sunday(year):
@@ -233,71 +379,19 @@ def get_slovak_holiday(date_obj):
     return None
 
 
-def scrape_meniny_today(now):
-    """Stiahne dnešné meniny z kto-ma-meniny.sk so zálohou na zones.sk."""
-    months = [
-        "Január", "Február", "Marec", "Apríl", "Máj", "Jún",
-        "Júl", "August", "September", "Október", "November", "December",
-    ]
-    date_str_today = f"{now.day}. {months[now.month - 1]}"
-
-    # 1. Primárny zdroj: kto-ma-meniny.sk
-    try:
-        resp = requests.get("[https://kto-ma-meniny.sk/](https://kto-ma-meniny.sk/)", headers=HEADERS, timeout=8)
-        resp.encoding = "utf-8"
-        pattern = (
-            fr">\s*{re.escape(date_str_today)}\s*</div>"
-            r"\s*<div[^>]*>.*?</div>\s*<div[^>]*>(.*?)</div>"
-        )
-        match = re.search(pattern, resp.text, re.DOTALL | re.IGNORECASE)
-        if match:
-            names = remove_html_tags(match.group(1)).strip(" ,-")
-            if names and names.lower() not in ("neznáme", "nikto"):
-                return names
-    except Exception as e:
-        print(f"Chyba menín (kto-ma-meniny.sk): {e}")
-
-    # 2. Záložný zdroj: zones.sk
-    try:
-        resp = requests.get(
-            "[https://www.zones.sk/kalendar-udalosti/meniny/](https://www.zones.sk/kalendar-udalosti/meniny/)",
-            headers=HEADERS,
-            timeout=8,
-        )
-        resp.encoding = "utf-8"
-        match = re.search(
-            r"meniny</a> má.*?<strong>(.*?)</strong>",
-            resp.text,
-            re.DOTALL | re.IGNORECASE,
-        )
-        if match:
-            names = remove_html_tags(match.group(1)).strip(" ,-")
-            if names and names.lower() not in ("neznáme", "nikto"):
-                return names
-    except Exception as e:
-        print(f"Chyba menín (zones.sk): {e}")
-
-    return None
-
-
 def get_nameday_or_holiday(now):
-    """Vráti text pre dolnú lištu: aktuálne meniny, alebo sviatok ak meniny nikto nemá."""
+    """Vráti text pre dolnú lištu z vstavaného SK kalendára (100 % spoľahlivé offline)."""
     today_date = now.date()
     key = (today_date.month, today_date.day)
 
     if key in NO_NAMEDAY_HOLIDAYS:
         return f"Sviatok: {NO_NAMEDAY_HOLIDAYS[key]}"
 
-    meniny = scrape_meniny_today(now)
-    holiday = get_slovak_holiday(today_date)
-
+    meniny = SLOVAK_NAMEDAYS.get(key)
     if meniny:
-        low = meniny.lower()
-        holiday_keywords = ("nový rok", "sviatok", "vianočný", "pamiatka", "deň vzniku")
-        if any(kw in low for kw in holiday_keywords):
-            return f"Sviatok: {holiday or meniny}"
         return f"Meniny: {meniny}"
 
+    holiday = get_slovak_holiday(today_date)
     if holiday:
         return f"Sviatok: {holiday}"
 
@@ -366,20 +460,73 @@ def paste_inverted_block(img_1bit, x0, y0, x1, y1, draw_fn):
     img_1bit.paste(sub_1bit, (int(x0), int(y0)))
 
 
-# --- SŤAHOVANIE ETF DÁT Z YAHOO FINANCE ---
+# --- SŤAHOVANIE ETF DÁT Z YAHOO FINANCE (ODOLNÉ PROTI HTTP 429 V GITHUB ACTIONS) ---
 
-def fetch_yahoo_chart(symbol, range_str, interval_str):
-    url = (
-        f"[https://query1.finance.yahoo.com/v8/finance/chart/](https://query1.finance.yahoo.com/v8/finance/chart/){symbol}"
-        f"?range={range_str}&interval={interval_str}"
-    )
-    resp = requests.get(url, headers=HEADERS, timeout=10)
-    resp.raise_for_status()
-    data = resp.json()
-    result = data.get("chart", {}).get("result")
-    if not result:
+class YahooClient:
+    """Spravuje HTTP reláciu (uprednostní curl_cffi Chrome TLS), cookie/crumb a retry pri 429."""
+
+    def __init__(self):
+        if cffi_requests is not None:
+            self.session = cffi_requests.Session(impersonate="chrome")
+            self.backend = "curl_cffi"
+        else:
+            self.session = requests.Session()
+            self.session.headers.update(HEADERS)
+            self.backend = "requests"
+        self.crumb = None
+        self._warmed_up = False
+
+    def _warm_up_cookie_crumb(self):
+        if self._warmed_up:
+            return
+        self._warmed_up = True
+        try:
+            self.session.get("https://fc.yahoo.com", timeout=10)
+            resp = self.session.get(
+                "https://query2.finance.yahoo.com/v1/test/getcrumb",
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                txt = resp.text.strip()
+                if txt and "Too Many Requests" not in txt and "<" not in txt:
+                    self.crumb = txt
+        except Exception as e:
+            print(f"Poznámka (Yahoo cookie/crumb): {e}")
+
+    def fetch_chart(self, symbol, range_str="max", interval_str="1d"):
+        hosts = ("query1.finance.yahoo.com", "query2.finance.yahoo.com")
+        last_err = None
+
+        for attempt in range(4):
+            host = hosts[attempt % len(hosts)]
+            params = f"range={range_str}&interval={interval_str}&includePrePost=false"
+            if self.crumb:
+                params += f"&crumb={self.crumb}"
+            url = f"https://{host}/v8/finance/chart/{symbol}?{params}"
+
+            try:
+                resp = self.session.get(url, timeout=12)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    result = data.get("chart", {}).get("result")
+                    if result:
+                        return result[0]
+                    last_err = f"Prázdny výsledok ({host})"
+                elif resp.status_code in (401, 403, 429):
+                    last_err = f"HTTP {resp.status_code} ({host}, {self.backend})"
+                    print(f"Yahoo {symbol}: {last_err} – pokus {attempt + 1}/4")
+                    self._warm_up_cookie_crumb()
+                    time.sleep(2.0 * (attempt + 1))
+                else:
+                    last_err = f"HTTP {resp.status_code} ({host})"
+                    time.sleep(1.5)
+            except Exception as e:
+                last_err = str(e)
+                time.sleep(1.5)
+
+        if last_err:
+            print(f"Yahoo chart zlyhal pre {symbol} ({range_str}/{interval_str}): {last_err}")
         return None
-    return result[0]
 
 
 def get_return_over_days(points, latest_price, days_back):
@@ -405,8 +552,42 @@ def get_return_over_days(points, latest_price, days_back):
     return None
 
 
-def fetch_etf_data(cfg):
-    """Stiahne živú cenu, čas posledného kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH."""
+def fetch_etf_via_yfinance(symbol):
+    """Záložné stiahnutie cez knižnicu yfinance (ak je nainštalovaná)."""
+    if yf is None:
+        return None
+    try:
+        tk = yf.Ticker(symbol)
+        hist = tk.history(period="max", interval="1d", auto_adjust=False)
+        if hist is None or hist.empty:
+            return None
+
+        timestamps = [int(ts.timestamp()) for ts in hist.index]
+        closes = [None if math.isnan(v) else float(v) for v in hist["Close"].tolist()]
+        lows = [None if math.isnan(v) else float(v) for v in hist["Low"].tolist()]
+        highs = [None if math.isnan(v) else float(v) for v in hist["High"].tolist()]
+
+        valid_closes = [v for v in closes if v is not None]
+        if not valid_closes:
+            return None
+
+        meta = {
+            "regularMarketPrice": valid_closes[-1],
+            "regularMarketTime": timestamps[-1],
+            "regularMarketPreviousClose": valid_closes[-2] if len(valid_closes) >= 2 else None,
+        }
+        return {
+            "meta": meta,
+            "timestamp": timestamps,
+            "indicators": {"quote": [{"close": closes, "low": lows, "high": highs}]},
+        }
+    except Exception as e:
+        print(f"yfinance zlyhal pre {symbol}: {e}")
+        return None
+
+
+def fetch_etf_data(cfg, client):
+    """Stiahne živú cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH v 1 požiadavke."""
     symbol = cfg["yahoo"]
     live = False
     market_ts = None
@@ -423,12 +604,17 @@ def fetch_etf_data(cfg):
     perf_1y = cfg["fallback_perf"]["1y"]
 
     try:
-        # 1. Denné dáta za 2 roky (presné 1M, 3M, 6M, 1R a 52T min/max)
-        chart_2y = fetch_yahoo_chart(symbol, "2y", "1d")
-        if chart_2y:
-            meta = chart_2y.get("meta", {})
-            timestamps = chart_2y.get("timestamp", [])
-            quote = chart_2y.get("indicators", {}).get("quote", [{}])[0]
+        # Jediná požiadavka (celá denná história -> cena, výkonnosti, 52T aj presné ATH)
+        chart = client.fetch_chart(symbol, "max", "1d")
+        if chart is None:
+            chart = client.fetch_chart(symbol, "2y", "1d")
+        if chart is None:
+            chart = fetch_etf_via_yfinance(symbol)
+
+        if chart:
+            meta = chart.get("meta", {})
+            timestamps = chart.get("timestamp", [])
+            quote = chart.get("indicators", {}).get("quote", [{}])[0]
             raw_closes = quote.get("close", [])
             raw_lows = quote.get("low", [])
             raw_highs = quote.get("high", [])
@@ -500,31 +686,24 @@ def fetch_etf_data(cfg):
                 elif highs_1y:
                     high_52w = max(highs_1y)
 
-        # 2. Týždenné dáta za celú históriu (presné ATH a mesiac/rok maxima)
-        chart_max = fetch_yahoo_chart(symbol, "max", "1wk")
-        if chart_max:
-            timestamps_m = chart_max.get("timestamp", [])
-            quote_m = chart_max.get("indicators", {}).get("quote", [{}])[0]
-            highs_m = quote_m.get("high", [])
-            closes_m = quote_m.get("close", [])
+                # Historické ATH a dátum maxima (MM/RR) priamo z dennej histórie
+                best_val = 0.0
+                best_ts = None
+                for idx in range(len(timestamps)):
+                    h_val = raw_highs[idx] if idx < len(raw_highs) else None
+                    c_val = raw_closes[idx] if idx < len(raw_closes) else None
+                    cand = h_val if h_val is not None else c_val
+                    if cand is not None and float(cand) > best_val:
+                        best_val = float(cand)
+                        best_ts = timestamps[idx]
 
-            best_val = 0.0
-            best_ts = None
-            for idx in range(len(timestamps_m)):
-                h_val = highs_m[idx] if idx < len(highs_m) else None
-                c_val = closes_m[idx] if idx < len(closes_m) else None
-                cand = h_val if h_val is not None else c_val
-                if cand is not None and float(cand) > best_val:
-                    best_val = float(cand)
-                    best_ts = timestamps_m[idx]
-
-            if best_val > 0:
-                ath = max(best_val, price, high_52w)
-                if best_ts:
-                    dt = ts_to_bratislava(best_ts)
-                    ath_date_str = dt.strftime("%m/%y")
+                if best_val > 0:
+                    ath = max(best_val, price, high_52w)
+                    if best_ts:
+                        dt = ts_to_bratislava(best_ts)
+                        ath_date_str = dt.strftime("%m/%y")
     except Exception as e:
-        print(f"Chyba sťahovania {symbol}: {e} (používam záložné dáta)")
+        print(f"Chyba spracovania {symbol}: {e} (používam záložné dáta)")
 
     if price > ath:
         ath = price
@@ -589,7 +768,7 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
 
 
 def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
-    """Vykreslí popis 'Pokles od ATH' v rovnakom riadku ako lištu poklesu (0% až -25%) so stupnicou."""
+    """Vykreslí popis 'Pokles od ATH' v rovnakom riadku ako lištu poklesu s centrovanou stupnicou."""
     label = "Pokles od ATH"
     label_font = fonts["bold_12"]
     scale_font = fonts["bold_11"]
@@ -605,8 +784,9 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
     lbl_y = bar_y0 + (bar_h - lbl_h) / 2.0 - lbl_bbox[1]
     draw.text((x0, lbl_y), label, font=label_font, fill=TEXT_COLOR)
 
-    bar_x0 = int(x0 + lbl_w + 10)
-    bar_x1 = int(x1)
+    # Rezerva vpravo (-17 px), aby bolo −25% vycentrované pod pravou ryskami rovnako ako ostatné hodnoty
+    bar_x0 = int(x0 + lbl_w + 11)
+    bar_x1 = int(x1 - 17)
     bar_w = bar_x1 - bar_x0
     if bar_w <= 20:
         return
@@ -631,7 +811,7 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
             fill_solid=(drawdown_pct <= ATH_INVERT_THRESHOLD),
         )
 
-    # Zvislé deliace rysky a popisky stupnice priamo pod lištou
+    # Zvislé deliace rysky a rovnomerne vycentrované popisky stupnice pod lištou
     tick_vals = []
     cur = 0.0
     while cur < scale_max:
@@ -641,23 +821,16 @@ def draw_ath_drawdown_meter(draw, x0, y0, x1, drawdown_pct, fonts):
 
     tick_lbl_y = bar_y1 + 5
     for val in tick_vals:
-        tx = bar_x0 + int((val / scale_max) * bar_w)
+        tx = bar_x0 + int(round((val / scale_max) * bar_w))
         if 0 < val < scale_max:
             draw_dashed_vline(draw, tx, bar_y0 + 2, bar_y1 - 2, dash=2, gap=2)
-            draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
-        else:
-            draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
+        draw.line([(tx, bar_y1), (tx, bar_y1 + 3)], fill=TEXT_COLOR, width=1)
 
         lbl_txt = "0%" if val == 0 else f"{MINUS_SIGN}{int(val)}%"
-        if val == 0:
-            draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="left")
-        elif val == scale_max:
-            draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="right")
-        else:
-            draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
+        draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
 
 
-# --- HLAVNÉ VYKRESLENIE DASHBOARDU (KARTY 2×2 · NÁVRH 2) ---
+# --- HLAVNÉ VYKRESLENIE DASHBOARDU (KARTY 2×2) ---
 
 def create_etf_dashboard():
     # Krok 1: Všetky čierne prvky na bielom pozadí kreslíme do odtieňov sivej ('L')
@@ -666,7 +839,13 @@ def create_etf_dashboard():
     fonts = get_fonts()
     now = get_now_bratislava()
 
-    etfs = [fetch_etf_data(cfg) for cfg in ETF_CONFIG]
+    client = YahooClient()
+    etfs = []
+    for idx, cfg in enumerate(ETF_CONFIG):
+        if idx > 0:
+            time.sleep(0.8)  # Krátka pauza medzi požiadavkami proti rate-limitu
+        etfs.append(fetch_etf_data(cfg, client))
+
     any_live = any(e["live"] for e in etfs)
     market_times = [e["market_ts"] for e in etfs if e.get("market_ts")]
     latest_market_dt = ts_to_bratislava(max(market_times)) if market_times else now
@@ -768,7 +947,7 @@ def create_etf_dashboard():
         )
         draw_text_aligned(draw, inner_r, cy + 76, na_ath_str, fonts["bold_12"], align="right")
 
-        # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + stupnica)
+        # 3. Jednoriadkový merač poklesu od ATH ("Pokles od ATH" + lišta + vycentrovaná stupnica)
         draw_ath_drawdown_meter(draw, inner_l, cy + 101, inner_r, e["drawdown_pct"], fonts)
 
         # 4. 52-týždňový rozsah (52T + 18 px medzera + Min | posuvník | Max)
@@ -814,6 +993,7 @@ def create_etf_dashboard():
 
     # ==========================================================
     # C. PÄTIČKA (y = 452..480) — zdroj + čas dát + meniny/sviatok
+    #    (rezerva vpravo od x = 640 pre Battery: XX% na reTerminale)
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
     if any_live:
@@ -825,7 +1005,7 @@ def create_etf_dashboard():
     if footer_nameday_text:
         status_txt = f"{status_txt} · {footer_nameday_text}"
 
-    max_footer_w = WIDTH - 24
+    max_footer_w = 628  # x = 12..640 (neprekryje sa s "Battery: XX%" vpravo dole)
     while draw.textlength(status_txt, font=fonts["bold_12"]) > max_footer_w and len(status_txt) > 6:
         status_txt = status_txt[:-2].rstrip() + "…"
 
