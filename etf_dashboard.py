@@ -147,9 +147,6 @@ def get_fonts():
             raise IOError("Fonty nenájdené")
 
         fonts["header"] = ImageFont.truetype(font_bold, 18)
-        fonts["header_mid_15"] = ImageFont.truetype(font_bold, 15)
-        fonts["header_mid_14"] = ImageFont.truetype(font_bold, 14)
-        fonts["header_mid_13"] = ImageFont.truetype(font_bold, 13)
         fonts["header_date"] = ImageFont.truetype(font_bold, 14)
         fonts["price"] = ImageFont.truetype(font_bold, 22)
         fonts["ticker"] = ImageFont.truetype(font_bold, 16)
@@ -161,9 +158,8 @@ def get_fonts():
     except IOError:
         default = ImageFont.load_default()
         keys = [
-            "header", "header_mid_15", "header_mid_14", "header_mid_13",
-            "header_date", "price", "ticker", "sec_title", "bold_14",
-            "bold_13", "bold_12", "reg_13",
+            "header", "header_date", "price", "ticker", "sec_title",
+            "bold_14", "bold_13", "bold_12", "reg_13",
         ]
         fonts = {k: default for k in keys}
     return fonts
@@ -201,7 +197,7 @@ def remove_html_tags(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
-# --- MENINY A SVIATKY (HLAVIČKA) ---
+# --- MENINY A SVIATKY (DOLNÁ LIŠTA) ---
 
 def get_easter_sunday(year):
     """Meeus/Jones/Butcher algoritmus pre výpočet Veľkonočnej nedele."""
@@ -283,8 +279,8 @@ def scrape_meniny_today(now):
     return None
 
 
-def get_header_nameday_or_holiday(now):
-    """Vráti text pre stred hlavičky: aktuálne meniny, alebo sviatok ak meniny nikto nemá."""
+def get_nameday_or_holiday(now):
+    """Vráti text pre dolnú lištu: aktuálne meniny, alebo sviatok ak meniny nikto nemá."""
     today_date = now.date()
     key = (today_date.month, today_date.day)
 
@@ -659,51 +655,23 @@ def create_etf_dashboard():
     any_live = any(e["live"] for e in etfs)
     market_times = [e["market_ts"] for e in etfs if e.get("market_ts")]
     latest_market_dt = ts_to_bratislava(max(market_times)) if market_times else now
-    header_mid_text = get_header_nameday_or_holiday(now)
+    footer_nameday_text = get_nameday_or_holiday(now)
 
     header_h = 46
     inverted_tasks = []  # Čierne bloky s bielym textom (vykreslia sa s vlastným prahom)
 
     # ==========================================================
-    # A. HLAVIČKA (y = 0..46): Názov | Meniny/Sviatok | Dátum
+    # A. HLAVIČKA (y = 0..46): Názov | Dátum
     # ==========================================================
     def draw_header(hd, hw, hh):
         title_left = "ETF PORTFÓLIO · XETRA"
         hd.text((12, 13), title_left, font=fonts["header"], fill=BACKGROUND_COLOR)
-        left_end_x = 12 + hd.textlength(title_left, font=fonts["header"])
 
         days_short = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
         date_right = f"{days_short[now.weekday()]} {now.strftime('%d.%m.%Y  %H:%M')}"
         w_date = hd.textlength(date_right, font=fonts["header_date"])
         right_start_x = hw - w_date - 12
         hd.text((right_start_x, 15), date_right, font=fonts["header_date"], fill=BACKGROUND_COLOR)
-
-        if header_mid_text:
-            avail_w = (right_start_x - 14) - (left_end_x + 14)
-            mid_center_x = (left_end_x + right_start_x) / 2.0
-
-            mid_candidates = [
-                (fonts["header_mid_15"], 14),
-                (fonts["header_mid_14"], 15),
-                (fonts["header_mid_13"], 15),
-            ]
-            chosen_font, chosen_y = mid_candidates[-1]
-            for fnt, fy in mid_candidates:
-                if hd.textlength(header_mid_text, font=fnt) <= avail_w:
-                    chosen_font, chosen_y = fnt, fy
-                    break
-
-            display_mid = header_mid_text
-            while hd.textlength(display_mid, font=chosen_font) > avail_w and len(display_mid) > 6:
-                display_mid = display_mid[:-2].rstrip() + "…"
-
-            w_mid = hd.textlength(display_mid, font=chosen_font)
-            hd.text(
-                (mid_center_x - w_mid / 2.0, chosen_y),
-                display_mid,
-                font=chosen_font,
-                fill=BACKGROUND_COLOR,
-            )
 
     inverted_tasks.append((0, 0, WIDTH, header_h, draw_header))
 
@@ -873,14 +841,22 @@ def create_etf_dashboard():
         )
 
     # ==========================================================
-    # E. PÄTIČKA (y = 452..480) — zdroj + čas posledných dát z Xetry
+    # E. PÄTIČKA (y = 452..480) — zdroj + čas posledných dát + meniny/sviatok
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
     if any_live:
         data_time_str = latest_market_dt.strftime("%d.%m.%Y %H:%M")
-        status_txt = f"LIVE · Yahoo Finance (Xetra) · Dáta: {data_time_str}"
+        status_txt = f"Yahoo Finance · Dáta: {data_time_str}"
     else:
         status_txt = f"ZÁLOŽNÉ DÁTA · API nedostupné · {now.strftime('%d.%m.%Y %H:%M')}"
+
+    if footer_nameday_text:
+        status_txt = f"{status_txt} · {footer_nameday_text}"
+
+    max_footer_w = WIDTH - 24
+    while draw.textlength(status_txt, font=fonts["bold_12"]) > max_footer_w and len(status_txt) > 6:
+        status_txt = status_txt[:-2].rstrip() + "…"
+
     draw.text((12, 459), status_txt, font=fonts["bold_12"], fill=TEXT_COLOR)
 
     # Krok 2: Ostrý 1-bit prevod s optimalizovaným prahom pre biele pozadie
