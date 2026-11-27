@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 5,
+    "next_index": 1,
     "recent_keys": [
-      "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
-      "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
-      "neustálaúnavasmdačastémočenietietonenápadnéprízn",
-      "ruskýelektrickýuazskončilfiaskomterazchcúznehosp",
-      "nórskejnízkonákladovejleteckejspoločnostinorseat",
-      "trumppodporilnasadeniearmádyvirakuvládachcedosta",
       "tajomnýtrénerarsenalunechcelprezradiťčibudeopora",
       "políciaposilňujehliadkyabezpečnostnéopatreniapoč",
       "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
@@ -20,7 +14,13 @@
       "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
       "fotoelitnátenistkaodnašichsusedovsinechalazmrazi",
       "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
-      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp"
+      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp",
+      "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
+      "zapocitomplnostisamôžeskrývaťvážnadiagnózataktos",
+      "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
+      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
+      "kauzyprikávičkezastropovanieenergiíjeschválenému",
+      "chcelzachrániťdvochdemonštrantovpredpopravouirán"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -625,6 +625,12 @@
     "status": "ok",
     "summary": "Ministerstvo zdravotníctva spustí od roku 2028 plošný organizovaný skríning rakoviny prostaty pre mužov vo veku 50 až 69 rokov. Základom preventívneho programu bude jednoduchý odber krvi u všeobecného lekára, ktorý včas odhalí ochorenie. Cieľom je zvýšiť šancu na vyliečenie nad deväťdesiat percent a znížiť mortalitu."
   },
+  "https://www.aktuality.sk/clanok/eY8kt4x/iran-zatkol-novinara-ktory-upozornil-na-planovane-popravy-demonstrantov-predtym-ho-mucili/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Iránske úrady zatkli novinára Mehdiho Mahmúdijána za zverejnenie informácií o plánovanej poprave dvoch demonštrantov. Po zadržaní čelí brutálnemu mučeniu, pričom jeho práca prispela k dočasnému odloženiu výkonu trestu smrti."
+  },
   "https://www.aktuality.sk/clanok/fG9BwM3/uznavany-profesor-ma-ponizoval-a-vulgarne-mi-nadaval-dnes-vediem-atelier-a-ucim-ludi-ze-umenie-je-radost/": {
     "date": "2026-11-25",
     "status": "skip"
@@ -818,6 +824,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Slovenské cesty ochromilo sneženie a poľadovica, ktoré v Bratislavskom kraji vyvolali 111 hlásení a desiatky nehôd. Skrížené kamióny blokovali premávku a viaceré úseky boli neprejazdné. V noci a piatkové ráno hrozí na cestách tvorba nebezpečnej poľadovice."
+  },
+  "https://www.pravda.sk/auto/doprava/clanok/2087249-zima-udrela-uz-aj-na-vychode-kamiony-blokovali-cesty-horske-priechody-pokryl-sneh?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Zimné počasie spôsobilo dopravné komplikácie na východnom Slovensku, kde sneh a poľadovica potrápili vodičov. Horský priechod Vernár museli uzavrieť pre ťažké kamióny. Na D1 pri Budimíre sa zrazilo viacero áut a kolóny hlásili aj medzi Rákošom a Slancom."
   },
   "https://www.pravda.sk/auto/magazin/clanok/2082189-sef-mercedesu-priznal-ze-to-s-displejmi-prehnali-po-kritike-vodicov-vratia-do-aut-klasicke-tlacidla?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-25",
