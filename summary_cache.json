@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 1,
+    "next_index": 9,
     "recent_keys": [
-      "tajomnýtrénerarsenalunechcelprezradiťčibudeopora",
-      "políciaposilňujehliadkyabezpečnostnéopatreniapoč",
-      "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
-      "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
-      "vlakjuvliekolstovkymetrovpokoľajniciachmladážena",
-      "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
       "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
       "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
       "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
@@ -20,7 +14,13 @@
       "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
       "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
       "kauzyprikávičkezastropovanieenergiíjeschválenému",
-      "chcelzachrániťdvochdemonštrantovpredpopravouirán"
+      "chcelzachrániťdvochdemonštrantovpredpopravouirán",
+      "obrovskétrápenieduklytrenčínpokračujepotvrdilato",
+      "nakupovaťvgelnicisaoplatí",
+      "trumppodporilnasadeniearmádyvirakuvládachcedosta",
+      "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
+      "neustálaúnavasmdačastémočenietietonenápadnéprízn",
+      "ruskýelektrickýuazskončilfiaskomterazchcúznehosp"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -140,6 +140,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Montreal utrpel na ľade Colorada debakel 0:6 a pripísal si tretiu prehru v rade. Návrat Juraja Slafkovského do elitného útoku so Suzukim a Caufieldom nefungoval a trojica patrila k najhorším hráčom."
+  },
+  "https://sport.aktuality.sk/hokej/clanok/vysledky-vlci-zilina-dukla-trencin-tipsport-liga-2026112713020709903": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Hokejisti Vlkov Žilina zvíťazili v 23. kole Tiposport ligy nad Duklou Trenčín 2:1. O tesnom triumfe domácich rozhodli góly Šimona Petráša a Bretta Ritchieho. Trenčiansky záverečný tlak a gól Filipa Krivošíka už na vyrovnanie nestačili."
   },
   "https://sport.aktuality.sk/hokej/clanok/zdeno-chara-hokejova-sien-slavy-vyberova-komisia-2026112615563272120": {
     "date": "2026-11-26",
