@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 8,
+    "next_index": 5,
     "recent_keys": [
-      "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
-      "stellantistvrdoškrtámotoršportpeugeotkončívleman",
-      "ruskésabotážneaktivityveurópestúplizauplynulýrok",
-      "ruskonechcestratiťarménskodmitrijpeskovžiadajere",
-      "falošnépečiatkyvregionálnomfutbaleklubydostalipo",
-      "nakupovaťvgelnicisaoplatí",
       "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
       "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
       "neustálaúnavasmdačastémočenietietonenápadnéprízn",
@@ -20,7 +14,13 @@
       "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
       "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
       "vlakjuvliekolstovkymetrovpokoľajniciachmladážena",
-      "predraženýpaušálčipredplatnémajúsvojvýznampsycho"
+      "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
+      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
+      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
+      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
+      "fotoelitnátenistkaodnašichsusedovsinechalazmrazi",
+      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
+      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -253,6 +253,12 @@
     "status": "ok",
     "summary": "David Beckham žaluje kozmetický gigant Coty a požaduje odškodné najmenej 41 miliónov dolárov. Dôvodom je neoprávnená distribúcia jeho parfumov v diskontoch a na čerpacích staniciach. Podľa firmy DB Ventures to vážne poškodilo imidž luxusnej značky."
   },
+  "https://sport.aktuality.sk/sport-extra/clanok/polska-hviezda-si-nechala-zmrazit-vajicka-zatial-nechce-byt-mamou-2026112616300699051": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Poľská tenistka Magda Linetteová sa rozhodla podstúpiť zmrazenie vajíčok, aby mohla naďalej naplno pokračovať vo svojej športovej kariére. Rozhodnutie ovplyvnila aj nová finančná podpora od fondu WTA platná od roku 2025."
+  },
   "https://sport.aktuality.sk/sport-extra/clanok/temne-tajomstva-sportovcov-woods-odom-tyson-2026112415132979568": {
     "date": "2026-11-25",
     "status": "skip"
@@ -439,6 +445,12 @@
     "status": "ok",
     "summary": "Ukrajinský podnikateľ Dmytro Borodavka preorientoval svoj biznis na Slovensko po tom, čo mu ruská agresia zablokovala tranzit do Ázie. V Horných Salibah kúpil schátraný bitúnok a založil firmu EU Poultry. Spoločnosť sa prepracovala na najväčšieho spracovateľa hydiny na Slovensku."
   },
+  "https://www.aktuality.sk/clanok/ILbzht4/gadi-eizenkot-ma-osem-dni-na-zostavenie-izraelskej-vlady-netanjahuovu-stranu-obvinil-z-natahovania-rokovani/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Izraelský politik Gadi Eizenkot má osem dní na zostavenie novej vlády a nepožiada o predĺženie mandátu. Strana Likud podľa neho účelovo naťahuje rokovania. Eizenkot zatiaľ získal iba 36 mandátov, pričom na parlamentnú väčšinu potrebuje 61 kresiel."
+  },
   "https://www.aktuality.sk/clanok/IQEx8qC/kostarika-nepovolila-vstup-do-krajiny-osobitnej-spravodajkyni-osn-pre-ludske-prava-na-palestinskych-uzemiach/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -528,6 +540,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Reťazec Lidl otvoril vo štvrtok 26. novembra svoju 189. predajňu na Slovensku, ktorá sa nachádza na Hnileckej ulici v Gelnici. Nová prevádzka s rozlohou 1220 metrov štvorcových zamestnáva 27 ľudí. Zákazníkom ponúka ekologické LED osvetlenie, elektronické cenovky či šesť samoobslužných pokladníc."
+  },
+  "https://www.aktuality.sk/clanok/TyCzoeA/izrael-sa-pokusil-zabit-posledneho-zijuceho-syna-vodcu-hamasu-utok-prezil/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Izraelská armáda zaútočila vzdušným úderom v Pásme Gazy na bytový dom, kde sa nachádzal Izz ad-Dín Hajja, posledný žijúci syn vodcu Hamasu Chalíla Hajju. Cieľ atentátu prežil, zranenia utrpelo šesť ľudí vrátane nevesty lídra. Izrael tak pokračuje v tlaku na rodinu, hoci štyroch synov už skôr zabil."
   },
   "https://www.aktuality.sk/clanok/VXpLUxc/izraelsky-minister-obrany-hrozi-masovym-vysidlenim-miliona-palestincanov-z-gazy/": {
     "date": "2026-11-26",
@@ -846,6 +864,12 @@
   "https://www.pravda.sk/auto/magazin/clanok/2086577-chery-dieselove-hybridy-takmer-vymreli-cinania-tvrdia-ze-vyriesili-ich-najvacsi-problem?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-27",
     "status": "skip"
+  },
+  "https://www.pravda.sk/auto/magazin/clanok/2086599-posledny-sen-saabu-ide-do-drazby-moze-dostat-druhu-sancu?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Vo švédskom Trollhättane sa draží elektrický sedan Emily GT, ktorý vyvinuli bývalí konštruktéri Saabu. Aukcia zahŕňa štyri prototypy, technickú dokumentáciu aj práva k projektu za vyvolávaciu cenu zhruba 1,4 milióna eur. Projekt stroskotal po páde čínskeho vlastníka Evergrande."
   },
   "https://www.pravda.sk/auto/magazin/clanok/2086631-dominuje-fabia-stupa-panda-a-cinania-toto-je-15-najpredavanejsich-malych-aut-na-slovensku-aj-s-cenami?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-27",
