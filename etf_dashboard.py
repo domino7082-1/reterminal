@@ -23,8 +23,9 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v15-exact-daily-data"
-CACHE_VERSION = 2  # Zvýšenie zneplatní starú cache z mesačných/týždenných sviečok
+SCRIPT_VERSION = "2026-11-28-v16-reliability-fixes"
+CACHE_VERSION = 3     # Obsahuje príznak ath_verified pre overené celoživotné ATH
+MAX_DATA_AGE_DAYS = 10  # Max. povolený vek posledného obchodného dňa (zohľadňuje víkendy a sviatky)
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -52,13 +53,14 @@ ETF_CONFIG = [
         "stooq": "sxr8.de",
         "name": "Core S&P 500",
         "region": "USA",
+        "expected_start_year": 2011,  # zalistované 05/2010
         "fallback_price": 719.18,
-        "fallback_day_pct": 0.00,
+        "fallback_day_pct": None,
         "fallback_ath": 754.68,
         "fallback_ath_date": "10/26",
-        "fallback_min_52w": 562.40,
+        "fallback_min_52w": 597.92,
         "fallback_max_52w": 754.68,
-        "fallback_perf": {"1m": -4.2, "3m": -2.8, "6m": 1.1, "1y": 14.6},
+        "fallback_perf": {"1m": -3.9, "3m": 0.7, "6m": 3.6, "1y": 14.3},
     },
     {
         "ticker": "EXUS",
@@ -66,13 +68,14 @@ ETF_CONFIG = [
         "stooq": "exus.de",
         "name": "MSCI World ex USA",
         "region": "EX-US",
+        "expected_start_year": 2024,  # zalistované 03/2024
         "fallback_price": 39.915,
-        "fallback_day_pct": 0.00,
+        "fallback_day_pct": None,
         "fallback_ath": 41.110,
         "fallback_ath_date": "11/26",
-        "fallback_min_52w": 33.420,
+        "fallback_min_52w": 34.265,
         "fallback_max_52w": 41.110,
-        "fallback_perf": {"1m": -3.1, "3m": -1.4, "6m": 1.2, "1y": 11.4},
+        "fallback_perf": {"1m": -1.7, "3m": -1.0, "6m": 3.7, "1y": 16.4},
     },
     {
         "ticker": "IS3N",
@@ -80,13 +83,14 @@ ETF_CONFIG = [
         "stooq": "is3n.de",
         "name": "Core MSCI EM IMI",
         "region": "EM",
+        "expected_start_year": 2015,  # zalistované 05/2014
         "fallback_price": 43.495,
-        "fallback_day_pct": 0.00,
-        "fallback_ath": 50.690,
+        "fallback_day_pct": None,
+        "fallback_ath": 50.686,
         "fallback_ath_date": "06/26",
-        "fallback_min_52w": 38.120,
-        "fallback_max_52w": 50.690,
-        "fallback_perf": {"1m": -6.8, "3m": -9.2, "6m": -10.7, "1y": 4.8},
+        "fallback_min_52w": 36.916,
+        "fallback_max_52w": 50.686,
+        "fallback_perf": {"1m": -5.6, "3m": -8.5, "6m": -9.0, "1y": 14.8},
     },
     {
         "ticker": "IUSN",
@@ -94,13 +98,14 @@ ETF_CONFIG = [
         "stooq": "iusn.de",
         "name": "MSCI World Small Cap",
         "region": "SMALL",
+        "expected_start_year": 2019,  # zalistované 03/2018
         "fallback_price": 9.117,
-        "fallback_day_pct": 0.00,
-        "fallback_ath": 9.327,
+        "fallback_day_pct": None,
+        "fallback_ath": 9.328,
         "fallback_ath_date": "08/26",
-        "fallback_min_52w": 7.410,
-        "fallback_max_52w": 9.327,
-        "fallback_perf": {"1m": -3.4, "3m": -2.1, "6m": 1.2, "1y": 12.1},
+        "fallback_min_52w": 7.645,
+        "fallback_max_52w": 9.328,
+        "fallback_perf": {"1m": -0.5, "3m": -0.9, "6m": 2.4, "1y": 18.7},
     },
 ]
 
@@ -446,7 +451,7 @@ def format_day_change(e, now):
 
     „Dnes: ▼ −3,51%“ len pri dátach z dnešného dňa; cez víkend/sviatok/pred otvorením
     burzy „Pia: ▼ −3,51%“, pri starších dátach „20.11. ▼ −3,51%“.
-    Natvrdo zadané záložné dáta (bez času kurzu) → „Záloha: −3,51%“.
+    Natvrdo zadané záložné dáta (bez času kurzu) → „Záloha: —“.
     """
     ts = e.get("market_ts")
     if not ts:
@@ -683,7 +688,7 @@ def fetch_etf_via_stooq(stooq_symbol):
         return None
 
 
-def extract_daily_points(chart):
+def extract_daily_points(chart, symbol=""):
     """Vráti vyčistený zoznam denných záverov `[(date, ts, close), ...]` bez bad ticks."""
     timestamps = chart.get("timestamp") or []
     quotes = chart.get("indicators", {}).get("quote") or [{}]
@@ -711,8 +716,13 @@ def extract_daily_points(chart):
 
     # 3) Ochrana pred chybným prvým záznamom (napr. 10x skok v deň zalistovania)
     if len(points) >= 3:
-        v0, v1, v2 = points[0][2], points[1][2], points[2][2]
+        d0, _ts0, v0 = points[0]
+        v1, v2 = points[1][2], points[2][2]
         if abs(v0 / v1 - 1.0) > 0.25 and abs(v1 / v2 - 1.0) < 0.12:
+            print(
+                f"  [Filter] {symbol}: odstránený chybný prvý záznam "
+                f"{d0.strftime('%d.%m.%Y')} ({v0:.3f} €, ďalší deň {v1:.3f} €)"
+            )
             points = points[1:]
 
     # 4) Filter na jednodňové „bad ticks“ v Close (skok > 20 %, ktorý sa na ďalší deň vráti)
@@ -721,13 +731,17 @@ def extract_daily_points(chart):
         cleaned = [points[0]]
         for i in range(1, len(points) - 1):
             prev_v = cleaned[-1][2]
-            curr_v = points[i][2]
+            curr_d, _curr_ts, curr_v = points[i]
             next_v = points[i + 1][2]
             if (
                 abs(curr_v / prev_v - 1.0) > 0.20
                 and abs(curr_v / next_v - 1.0) > 0.20
                 and abs(next_v / prev_v - 1.0) < 0.12
             ):
+                print(
+                    f"  [Filter] {symbol}: odstránený chybný výkyv "
+                    f"{curr_d.strftime('%d.%m.%Y')} ({curr_v:.3f} €, susedné {prev_v:.3f}/{next_v:.3f} €)"
+                )
                 continue
             cleaned.append(points[i])
         cleaned.append(points[-1])
@@ -736,8 +750,9 @@ def extract_daily_points(chart):
     return points
 
 
-def validate_daily_series(daily_points, meta, symbol, source_name):
-    """Overí, že ide skutočne o denné dáta (nie týždenné ani mesačné)."""
+def validate_daily_series(daily_points, meta, symbol, source_name,
+                          is_full_history=True, expected_start_year=None):
+    """Overí dennú granularitu, úplnosť histórie a aktuálnosť posledného záznamu."""
     gran = meta.get("dataGranularity")
     if gran and gran != "1d":
         print(f"[{source_name}] {symbol}: odmietam granularitu '{gran}' namiesto '1d'")
@@ -760,6 +775,27 @@ def validate_daily_series(daily_points, meta, symbol, source_name):
         if median_gap > 2:
             print(f"[{source_name}] {symbol}: odmietam nedenné dáta (medián rozostupu {median_gap} dní)")
             return False
+
+    # Kontrola začiatku histórie pri zdrojoch, ktoré majú vrátiť plnú históriu fondu
+    if is_full_history and expected_start_year is not None:
+        first_date = daily_points[0][0]
+        if first_date.year > expected_start_year:
+            print(
+                f"[{source_name}] {symbol}: neúplná história "
+                f"(začína {first_date.strftime('%d.%m.%Y')}, očakávaný rok <= {expected_start_year})"
+            )
+            return False
+
+    # Kontrola aktuálnosti dát (odmietne zamrznutý alebo starý feed)
+    today = get_now_bratislava().date()
+    last_date = daily_points[-1][0]
+    age_days = (today - last_date).days
+    if age_days > MAX_DATA_AGE_DAYS:
+        print(
+            f"[{source_name}] {symbol}: zastarané dáta "
+            f"(posledný záznam {last_date.strftime('%d.%m.%Y')}, vek {age_days} dní)"
+        )
+        return False
 
     return True
 
@@ -800,7 +836,7 @@ def get_return_over_months(daily_points, ref_date, latest_price, months_back):
 # --- CACHE POSLEDNÝCH ÚSPEŠNÝCH DÁT (etf_cache.json) ---
 
 CACHE_FIELDS = (
-    "price", "day_pct", "ath", "ath_date", "drawdown_pct",
+    "price", "day_pct", "ath", "ath_date", "ath_verified", "drawdown_pct",
     "perf_1m", "perf_3m", "perf_6m", "perf_1y",
     "low_52w", "high_52w", "pos_52w", "market_ts", "source",
 )
@@ -836,6 +872,7 @@ def update_cache(cache, etfs):
     for e in etfs:
         if e.get("live"):
             entry = {k: e.get(k) for k in CACHE_FIELDS}
+            entry["ath_verified"] = bool(e.get("ath_verified", False))
             entry["cache_version"] = CACHE_VERSION
             entry["saved_at"] = int(time.time())
             cache[e["ticker"]] = entry
@@ -865,6 +902,7 @@ def load_cached_etf(cache, cfg):
         "ticker": cfg["ticker"],
         "name": cfg["name"],
         "region": cfg["region"],
+        "ath_verified": bool(entry.get("ath_verified", False)),
         "live": False,
         "offline": True,
         "source": "cache",
@@ -875,8 +913,15 @@ def load_cached_etf(cache, cfg):
 def parse_chart_into_etf(chart, source_name, is_full_history, cfg, cached_entry=None):
     """Spracuje a zvaliduje surový graf do kompletných denných metrík ETF, alebo vráti None."""
     meta = chart.get("meta") or {}
-    daily_points = extract_daily_points(chart)
-    if not validate_daily_series(daily_points, meta, cfg["ticker"], source_name):
+    daily_points = extract_daily_points(chart, cfg["ticker"])
+    if not validate_daily_series(
+        daily_points,
+        meta,
+        cfg["ticker"],
+        source_name,
+        is_full_history=is_full_history,
+        expected_start_year=cfg.get("expected_start_year"),
+    ):
         return None
 
     # 1) Aktuálna cena a čas kurzu
@@ -951,26 +996,44 @@ def parse_chart_into_etf(chart, source_name, is_full_history, cfg, cached_entry=
         ath = best_val
         ath_day = best_day
     ath_date_str = ath_day.strftime("%m/%y")
+    ath_log_date = ath_day.strftime("%d.%m.%Y")
+    ath_verified = is_full_history
 
-    # Pri núdzovej skrátenej histórii (2y) nezahodíme známe vyššie ATH z platnej cache
-    if not is_full_history and cached_entry is not None:
-        try:
-            c_ath = float(cached_entry["ath"])
-            if math.isfinite(c_ath) and c_ath > ath:
-                ath = c_ath
-                ath_date_str = cached_entry.get("ath_date") or ath_date_str
-        except (KeyError, TypeError, ValueError):
-            pass
+    # Pri núdzovej skrátenej histórii (2y) porovnáme ATH aj s overenou cache a záložným ATH,
+    # aby sa 2-ročné maximum nevydávalo za neoverené celoživotné ATH
+    if not is_full_history:
+        if cached_entry is not None and cached_entry.get("ath_verified"):
+            try:
+                c_ath = float(cached_entry["ath"])
+                if math.isfinite(c_ath) and c_ath > 0:
+                    if c_ath > ath:
+                        ath = c_ath
+                        ath_date_str = cached_entry.get("ath_date") or ath_date_str
+                        ath_log_date = ath_date_str
+                    # Ak overená cache siaha do 2-ročného okna, maximum pokrýva celú históriu
+                    c_ts = cached_entry.get("market_ts")
+                    if c_ts and int(c_ts) >= daily_points[0][1]:
+                        ath_verified = True
+            except (KeyError, TypeError, ValueError):
+                pass
+
+        fb_ath = cfg.get("fallback_ath")
+        if fb_ath is not None and float(fb_ath) > ath:
+            ath = float(fb_ath)
+            ath_date_str = cfg.get("fallback_ath_date") or ath_date_str
+            ath_log_date = ath_date_str
 
     drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
     span_52w = high_52w - low_52w
     pos_52w = (price - low_52w) / span_52w if span_52w > 0 else 0.5
     pos_52w = max(0.0, min(1.0, pos_52w))
 
+    prev_txt = f"{prev_close:.3f} €" if prev_close is not None else "nedostupná"
+    ath_tag = "ATH" if ath_verified else "ATH(2R)"
     print(
         f"  {cfg['ticker']}: {price:.3f} € "
-        f"(pred: {prev_close:.3f} €, {fmt_pct(day_pct, decimals=2)}) | "
-        f"ATH {ath:.3f} € ({ath_day.strftime('%d.%m.%Y')}, {drawdown_pct:.1f}%) | "
+        f"(pred: {prev_txt}, {fmt_pct(day_pct, decimals=2)}) | "
+        f"{ath_tag} {ath:.3f} € ({ath_log_date}, {drawdown_pct:.1f}%) | "
         f"{len(daily_points)} dní | zdroj={source_name}"
     )
 
@@ -982,6 +1045,7 @@ def parse_chart_into_etf(chart, source_name, is_full_history, cfg, cached_entry=
         "day_pct": day_pct,
         "ath": ath,
         "ath_date": ath_date_str,
+        "ath_verified": ath_verified,
         "drawdown_pct": drawdown_pct,
         "perf_1m": perf_1m,
         "perf_3m": perf_3m,
@@ -1000,11 +1064,11 @@ def parse_chart_into_etf(chart, source_name, is_full_history, cfg, cached_entry=
 def fetch_etf_data(cfg, client, cache=None):
     """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH z presných denných dát.
 
-    Poradie zdrojov (všetky overené na 1d granularitu):
+    Poradie zdrojov (všetky overené na 1d granularitu a aktuálnosť):
     1) Yahoo Finance (plná 1d história: period1=0, prípadne od 2000-01-01)
     2) yfinance (plná 1d história)
     3) Stooq CSV (plná 1d história)
-    4) Yahoo Finance (2y 1d záloha + zlúčenie s cache ATH)
+    4) Yahoo Finance (2y 1d záloha + zlúčenie s overenou cache / fallback ATH)
     5) lokálna cache (etf_cache.json)
     6) záložné dáta z ETF_CONFIG
     """
@@ -1043,7 +1107,10 @@ def fetch_etf_data(cfg, client, cache=None):
 
     # Posledná záchrana: natvrdo zadané záložné hodnoty z ETF_CONFIG
     price = cfg["fallback_price"]
-    ath = max(cfg["fallback_ath"], price)
+    ath = cfg["fallback_ath"]
+    ath_date_str = cfg["fallback_ath_date"]
+    if price > ath:
+        ath = price
     low_52w = min(cfg["fallback_min_52w"], price)
     high_52w = max(cfg["fallback_max_52w"], price)
     drawdown_pct = ((price / ath) - 1.0) * 100.0 if ath > 0 else 0.0
@@ -1058,7 +1125,8 @@ def fetch_etf_data(cfg, client, cache=None):
         "price": price,
         "day_pct": cfg["fallback_day_pct"],
         "ath": ath,
-        "ath_date": cfg["fallback_ath_date"],
+        "ath_date": ath_date_str,
+        "ath_verified": True,
         "drawdown_pct": drawdown_pct,
         "perf_1m": cfg["fallback_perf"]["1m"],
         "perf_3m": cfg["fallback_perf"]["3m"],
@@ -1384,9 +1452,10 @@ def create_etf_dashboard():
         else:
             draw.text((c1_x + 72, ry + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
         draw.text((c1_x, ry + 38), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
+        ath_prefix = "ATH" if e.get("ath_verified", True) else "2R"
         draw.text(
             (c1_x, ry + 62),
-            f"ATH: {fmt_eur(e['ath'])} ({e['ath_date']})",
+            f"{ath_prefix}: {fmt_eur(e['ath'])} ({e['ath_date']})",
             font=fonts["bold_13"],
             fill=TEXT_COLOR,
         )
