@@ -1,6 +1,7 @@
 import csv
 import datetime
 import io
+import json
 import math
 import os
 import time
@@ -22,7 +23,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v11-bar-20px"
+SCRIPT_VERSION = "2026-11-27-v12-data-reliability"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -38,6 +39,9 @@ PERF_TABLE_STYLE = "stitky"   # Výkonnosť 1M/3M/6M/1R: "linky" alebo "stitky" 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE = os.path.join(BASE_DIR, "etf_output.bmp")
+CACHE_FILE = os.path.join(BASE_DIR, "etf_cache.json")  # posledné úspešne stiahnuté dáta
+
+DAYS_SHORT = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
 
 # Definícia 4 ETF fondov (Xetra, EUR) + záložné dáta pri výpadku všetkých API
 ETF_CONFIG = [
@@ -422,6 +426,26 @@ def fmt_pct(val, show_plus=True, decimals=1, with_percent=True, arrow=False):
     return f"{prefix}{sign}{num_str}{suffix}"
 
 
+def format_day_change(e, now):
+    """Denná zmena s dňom, z ktorého naozaj je.
+
+    „Dnes: ▼ −3,51%“ len pri dátach z dnešného dňa; cez víkend/sviatok/pred otvorením
+    burzy „Pia: ▼ −3,51%“, pri starších dátach „20.11. ▼ −3,51%“.
+    Natvrdo zadané záložné dáta (bez času kurzu) → „Záloha: −3,51%“.
+    """
+    ts = e.get("market_ts")
+    if not ts:
+        return f"Záloha: {fmt_pct(e['day_pct'], decimals=2)}"
+    pct = fmt_pct(e["day_pct"], decimals=2, arrow=True)
+    data_date = ts_to_bratislava(ts).date()
+    age_days = (now.date() - data_date).days
+    if age_days <= 0:
+        return f"Dnes: {pct}"
+    if age_days < 7:
+        return f"{DAYS_SHORT[data_date.weekday()]}: {pct}"
+    return f"{data_date.strftime('%d.%m.')} {pct}"
+
+
 def draw_text_aligned(draw, x, y, text, font, fill=TEXT_COLOR, align="left"):
     bbox = draw.textbbox((0, 0), text, font=font)
     tw = bbox[2] - bbox[0]
@@ -643,8 +667,81 @@ def get_return_over_days(points, latest_price, days_back):
     return None
 
 
-def fetch_etf_data(cfg, client):
-    """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH (Yahoo -> yfinance -> Stooq)."""
+# --- CACHE POSLEDNÝCH ÚSPEŠNÝCH DÁT (etf_cache.json) ---
+
+CACHE_FIELDS = (
+    "price", "day_pct", "ath", "ath_date", "drawdown_pct",
+    "perf_1m", "perf_3m", "perf_6m", "perf_1y",
+    "low_52w", "high_52w", "pos_52w", "market_ts", "source",
+)
+CACHE_REQUIRED_NUMERIC = ("price", "ath", "drawdown_pct", "low_52w", "high_52w", "pos_52w")
+
+
+def load_cache():
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        return data if isinstance(data, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print(f"[Cache] {CACHE_FILE} sa nedá načítať ({e}) – ignorujem")
+        return {}
+
+
+def save_cache(cache):
+    """Atomický zápis (cez .tmp + os.replace), aby výpadok uprostred zápisu nepoškodil súbor."""
+    tmp = CACHE_FILE + ".tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(cache, fh, ensure_ascii=False, indent=1)
+        os.replace(tmp, CACHE_FILE)
+    except Exception as e:
+        print(f"[Cache] uloženie zlyhalo: {e}")
+
+
+def update_cache(cache, etfs):
+    """Uloží do cache iba ETF so živými dátami. Vráti True, ak sa niečo zmenilo."""
+    changed = False
+    for e in etfs:
+        if e.get("live"):
+            entry = {k: e.get(k) for k in CACHE_FIELDS}
+            entry["saved_at"] = int(time.time())
+            cache[e["ticker"]] = entry
+            changed = True
+    return changed
+
+
+def load_cached_etf(cache, cfg):
+    """Vráti dáta ETF z cache (označené ako offline), alebo None, ak v cache nie sú platné."""
+    entry = (cache or {}).get(cfg["ticker"])
+    if not isinstance(entry, dict):
+        return None
+    try:
+        for k in CACHE_REQUIRED_NUMERIC:
+            float(entry[k])
+        if float(entry["price"]) <= 0:
+            return None
+    except (KeyError, TypeError, ValueError):
+        return None
+
+    result = {k: entry.get(k) for k in CACHE_FIELDS}
+    result.update({
+        "ticker": cfg["ticker"],
+        "name": cfg["name"],
+        "region": cfg["region"],
+        "live": False,
+        "offline": True,
+        "source": "cache",
+    })
+    return result
+
+
+def fetch_etf_data(cfg, client, cache=None):
+    """Stiahne cenu, čas kurzu, 1M/3M/6M/1R výkonnosť, 52T rozpätie a ATH.
+
+    Poradie zdrojov: Yahoo -> yfinance -> Stooq -> cache posledných dát -> ETF_CONFIG.
+    """
     symbol = cfg["yahoo"]
     stooq_symbol = cfg.get("stooq", symbol.lower())
     live = False
@@ -686,8 +783,6 @@ def fetch_etf_data(cfg, client):
             timestamps = chart.get("timestamp", [])
             quote = chart.get("indicators", {}).get("quote", [{}])[0]
             raw_closes = quote.get("close", [])
-            raw_lows = quote.get("low", [])
-            raw_highs = quote.get("high", [])
 
             points = []
             for idx in range(min(len(timestamps), len(raw_closes))):
@@ -733,46 +828,29 @@ def fetch_etf_data(cfg, client):
                 if r1y is not None:
                     perf_1y = r1y
 
-                lows_1y = [
-                    float(raw_lows[i])
-                    for i in range(min(len(timestamps), len(raw_lows)))
-                    if timestamps[i] >= cutoff_1y and raw_lows[i] is not None
-                ]
-                highs_1y = [
-                    float(raw_highs[i])
-                    for i in range(min(len(timestamps), len(raw_highs)))
-                    if timestamps[i] >= cutoff_1y and raw_highs[i] is not None
-                ]
+                # ATH aj 52T rozpätie len zo ZÁVEREČNÝCH cien. Intraday maximá/minimá
+                # z Yahoo majú pri Xetra ETF občas chybné výkyvy, ktoré by navždy
+                # pokazili ATH aj pokles od ATH.
+                closes_1y = [c for ts, c in points if ts >= cutoff_1y]
+                if closes_1y:
+                    low_52w = min(closes_1y)
+                    high_52w = max(closes_1y)
 
-                meta_low = meta.get("fiftyTwoWeekLow")
-                meta_high = meta.get("fiftyTwoWeekHigh")
-                if meta_low:
-                    low_52w = float(meta_low)
-                elif lows_1y:
-                    low_52w = min(lows_1y)
-
-                if meta_high:
-                    high_52w = float(meta_high)
-                elif highs_1y:
-                    high_52w = max(highs_1y)
-
-                best_val = 0.0
-                best_ts = None
-                for idx in range(len(timestamps)):
-                    h_val = raw_highs[idx] if idx < len(raw_highs) else None
-                    c_val = raw_closes[idx] if idx < len(raw_closes) else None
-                    cand = h_val if h_val is not None else c_val
-                    if cand is not None and float(cand) > best_val:
-                        best_val = float(cand)
-                        best_ts = timestamps[idx]
-
+                best_ts, best_val = max(points, key=lambda p: p[1])
                 if best_val > 0:
-                    ath = max(best_val, price, high_52w)
-                    if best_ts:
-                        dt = ts_to_bratislava(best_ts)
-                        ath_date_str = dt.strftime("%m/%y")
+                    ath = max(best_val, price)
+                    ath_date_str = ts_to_bratislava(best_ts).strftime("%m/%y")
     except Exception as e:
         print(f"Chyba spracovania {symbol}: {e} (používam záložné dáta)")
+
+    # Bez živých dát: najprv posledné úspešne stiahnuté dáta z cache,
+    # až potom natvrdo zadané záložné hodnoty z ETF_CONFIG
+    if not live:
+        cached = load_cached_etf(cache, cfg)
+        if cached is not None:
+            when = ts_to_bratislava(cached["market_ts"]).strftime("%d.%m.%Y %H:%M") if cached.get("market_ts") else "?"
+            print(f"  {cfg['ticker']}: OFFLINE – posledné dáta z cache ({when})")
+            return cached
 
     if price > ath:
         ath = price
@@ -805,6 +883,7 @@ def fetch_etf_data(cfg, client):
         "high_52w": high_52w,
         "pos_52w": pos_52w,
         "live": live,
+        "offline": not live,
         "source": source,
         "market_ts": market_ts,
     }
@@ -996,16 +1075,21 @@ def create_etf_dashboard():
     client = YahooClient()
     print(f"Backend HTTP: {client.backend} | yfinance={'áno' if yf else 'nie'}")
 
+    cache = load_cache()
     etfs = []
     for idx, cfg in enumerate(ETF_CONFIG):
         if idx > 0:
             time.sleep(0.6)
-        etfs.append(fetch_etf_data(cfg, client))
+        etfs.append(fetch_etf_data(cfg, client, cache))
 
-    live_sources = sorted({e["source"] for e in etfs if e["live"]})
-    any_live = len(live_sources) > 0
-    market_times = [e["market_ts"] for e in etfs if e.get("market_ts")]
-    latest_market_dt = ts_to_bratislava(max(market_times)) if market_times else now
+    if update_cache(cache, etfs):
+        save_cache(cache)
+
+    live_etfs = [e for e in etfs if e["live"]]
+    offline_etfs = [e for e in etfs if not e["live"]]
+    live_sources = sorted({e["source"] for e in live_etfs})
+    live_times = [e["market_ts"] for e in live_etfs if e.get("market_ts")]
+    offline_times = [e["market_ts"] for e in offline_etfs if e.get("market_ts")]
     footer_nameday_text = get_nameday_or_holiday(now)
     print(f"Dátum (BA): {now.strftime('%d.%m.%Y %H:%M')} | {footer_nameday_text}")
 
@@ -1019,8 +1103,7 @@ def create_etf_dashboard():
         title_left = "ETF PORTFÓLIO · XETRA"
         hd.text((12, 13), title_left, font=fonts["header"], fill=BACKGROUND_COLOR)
 
-        days_short = ["Pon", "Uto", "Str", "Štv", "Pia", "So", "Ne"]
-        date_right = f"{days_short[now.weekday()]} {now.strftime('%d.%m.%Y  %H:%M')}"
+        date_right = f"{DAYS_SHORT[now.weekday()]} {now.strftime('%d.%m.%Y  %H:%M')}"
         w_date = hd.textlength(date_right, font=fonts["header_date"])
         right_start_x = hw - w_date - 12
         hd.text((right_start_x, 15), date_right, font=fonts["header_date"], fill=BACKGROUND_COLOR)
@@ -1057,7 +1140,17 @@ def create_etf_dashboard():
             ry + 33,
             make_centered_inverted_drawer(e["ticker"], fonts["ticker"]),
         ))
-        draw.text((c1_x + 72, ry + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
+        if e.get("offline"):
+            # Riadok bez živých dát: namiesto regiónu čierny štítok OFFLINE
+            inverted_tasks.append((
+                c1_x + 70,
+                ry + 12,
+                c1_x + 70 + 60,
+                ry + 30,
+                make_centered_inverted_drawer("OFFLINE", fonts["bold_11"]),
+            ))
+        else:
+            draw.text((c1_x + 72, ry + 13), e["region"], font=fonts["bold_13"], fill=TEXT_COLOR)
         draw.text((c1_x, ry + 38), e["name"], font=fonts["reg_13"], fill=TEXT_COLOR)
         draw.text(
             (c1_x, ry + 62),
@@ -1079,7 +1172,7 @@ def create_etf_dashboard():
             draw,
             c2_r,
             ry + 55,
-            f"Dnes: {fmt_pct(e['day_pct'], decimals=2, arrow=True)}",
+            format_day_change(e, now),
             fonts["bold_15"],
             align="right",
         )
@@ -1134,10 +1227,18 @@ def create_etf_dashboard():
     # C. PÄTIČKA (y = 452..480) — zdroj + čas dát + meniny/sviatok
     # ==========================================================
     draw.line([(0, 452), (WIDTH, 452)], fill=TEXT_COLOR, width=1)
-    if any_live:
-        src_label = " / ".join(live_sources)
-        data_time_str = latest_market_dt.strftime("%d.%m.%Y %H:%M")
-        status_txt = f"{src_label} · Dáta: {data_time_str}"
+    def _fmt_ts(ts):
+        return ts_to_bratislava(ts).strftime("%d.%m.%Y %H:%M")
+
+    if live_etfs:
+        status_txt = " / ".join(live_sources)
+        if live_times:
+            status_txt += f" · Dáta: {_fmt_ts(max(live_times))}"
+        if offline_etfs:
+            status_txt += " · Offline: " + ", ".join(e["ticker"] for e in offline_etfs)
+    elif offline_times:
+        # Všetky API zlyhali, ale máme posledné dáta z cache
+        status_txt = f"API nedostupné · Posledné dáta: {_fmt_ts(max(offline_times))}"
     else:
         status_txt = f"ZÁLOŽNÉ DÁTA · API nedostupné · {now.strftime('%d.%m.%Y %H:%M')}"
 
