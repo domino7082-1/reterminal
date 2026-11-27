@@ -1,17 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 9,
+    "next_index": 0,
     "recent_keys": [
-      "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
-      "zruskaaokupovanýchúzemísavrátiloďalšíchdevťukraj",
-      "kleinovsparingpartnermánovýzápasmartinhoríneknas",
-      "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
-      "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
-      "vučikomplikuještudentomvládnutiemajiteľjemublízk",
-      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
-      "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
-      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
       "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
       "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
       "beznádejneposlednýprešovnepredalsvojukožulacnoko",
@@ -20,7 +11,16 @@
       "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
       "vlakjuvliekolstovkymetrovpokoľajniciachmladážena",
       "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
-      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors"
+      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
+      "kauzyprikávičkezastropovanieenergiíjeschválenému",
+      "trumppodporilnasadeniearmádyvirakuvládachcedosta",
+      "poriadnevyhrotenýšlágervnitrehrdinaslovanadokona",
+      "nakupovaťvgelnicisaoplatí",
+      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp",
+      "benzínzlacnelnanajnižšiucenuodmarcanaftajenajlac",
+      "neustálaúnavasmdačastémočenietietonenápadnéprízn",
+      "ruskýelektrickýuazskončilfiaskomterazchcúznehosp",
+      "koniecstarlinkuajmodernýchtechnológiíruskájadrov"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -156,6 +156,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Hokejisti Vlkov Žilina zvíťazili v 23. kole Tiposport ligy nad Duklou Trenčín 2:1. O tesnom triumfe domácich rozhodli góly Šimona Petráša a Bretta Ritchieho. Trenčiansky záverečný tlak a gól Filipa Krivošíka už na vyrovnanie nestačili."
+  },
+  "https://sport.aktuality.sk/hokej/clanok/vysledok-hk-nitra-slovan-bratislava-tipsport-liga-2026112713042761921": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Hokejisti Slovana Bratislava zvíťazili v 23. kole Tipsport ligy na ľade Nitry 4:3 po predĺžení. Hrdinom duelu sa stal hosťujúci útočník Ryan Dmowski, ktorý zaznamenal hetrik a v 61. minúte rozhodol o zisku extra bodu pre svoj tím."
   },
   "https://sport.aktuality.sk/hokej/clanok/zdeno-chara-hokejova-sien-slavy-vyberova-komisia-2026112615563272120": {
     "date": "2026-11-26",
