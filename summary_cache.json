@@ -1,14 +1,8 @@
 {
   "__carousel__": {
     "date": "2026-11-27",
-    "next_index": 7,
+    "next_index": 4,
     "recent_keys": [
-      "neustálaúnavasmdačastémočenietietonenápadnéprízn",
-      "ruskýelektrickýuazskončilfiaskomterazchcúznehosp",
-      "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
-      "ukrajinadostalaspťďalšieodvlečenédetizelenskyjvy",
-      "prehralsbudayomvufcpredstavilsavoktagonenavajost",
-      "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
       "slovácineváhalizaplatiťzagtavitakmer100eurčovidí",
       "vučikomplikuještudentomvládnutiemajiteľjemublízk",
       "putinpredstavilnovújadrovúponorkuruskochcedoroku",
@@ -20,7 +14,13 @@
       "nocnasobotuprinesiemrázsneženieajnebezpečnúpoľad",
       "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
       "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
-      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč"
+      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
+      "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
+      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
+      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
+      "ruskélodeotočilivstredozemnommoriukrajinskýútokn",
+      "známytrénerktorýpripravovalajmikeatysonavyjadril",
+      "nakupovaťvgelnicisaoplatí"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -226,6 +226,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Navajo Stirling knokautoval v Katare Jiřího Procházku v druhom kole a stal sa kandidátom na titul v poloťažkej váhe UFC. Hlavný tréner Eugene Bareman však vzájomný zápas so šampiónom a tímovým kolegom Carlosom Ulbergom vylúčil kvôli dlhoročnému priateľstvu a pravidlám gymu."
+  },
+  "https://sport.aktuality.sk/mma/clanok/znamy-trener-ktory-pripravoval-aj-mikea-tysona-vyjadril-vazne-obavy-k-tazkej-situacii-jiriho-prochazku-2026112719442840827": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Uznávaný tréner Teddy Atlas vyjadril vážne obavy o ďalšiu kariéru Jiřího Procházku po jeho nedávnej prehre. Podľa neho je český bojovník kvôli svojmu neopatrnému štýlu a veľkému množstvu inkasovaných rán na konci svojich síl."
   },
   "https://sport.aktuality.sk/motosport/clanok/neumyselna-chyba-ich-vyjde-draho-williams-prekrocil-rozpoctovy-strop-a-fia-mu-udelila-trest-2026112611190575326": {
     "date": "2026-11-26",
@@ -770,6 +776,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Mimoriadny samit EÚ v Bruseli skončil bez dohody o dlhodobom rozpočte na roky 2028 až 2034 a pôžičke pre Ukrajinu. Lídri sa nezhodli na výdavkoch ani na nových prioritách. Rokovania presunuli na decembrový samit."
+  },
+  "https://www.aktuality.sk/clanok/pYSHrKx/ukrajinsky-utok-v-libyi-vystrasil-rusov-konvoj-vojenskych-lodi-zmenil-kurz-a-vracia-sa-spat/": {
+    "date": "2026-11-27",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Najmenej dva konvoje ruských lodí zmenili kurz v Stredozemnom mori a vrátili sa späť po tom, čo ukrajinské drony 22. novembra potopili ruskú korvetu v líbyjskom prístave Benghází. Moskva tak chráni svoje kapacity po útoku, ktorý ukazuje zraniteľnosť jej síl ďaleko od frontu."
   },
   "https://www.aktuality.sk/clanok/pdI2LNo/ma-vyse-sto-rokov-do-dochodku-sa-nechysta-slovensky-mlyn-stale-melie/": {
     "date": "2026-11-26",
