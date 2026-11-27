@@ -23,7 +23,7 @@ try:
 except ImportError:
     yf = None
 
-SCRIPT_VERSION = "2026-11-27-v13-data-reliability"
+SCRIPT_VERSION = "2026-11-27-v14-equal-bar-widths"
 
 # --- KONFIGURÁCIA (reTerminal E1001 · 800x480 1-bit BMP) ---
 WIDTH = 800
@@ -932,6 +932,22 @@ def fetch_etf_data(cfg, client, cache=None):
 
 # --- KRESLIACE POMOCNÉ FUNKCIE (E-INK) ---
 
+def _text_ink_width(draw, text, font):
+    """Vráti skutočnú pixelovú šírku vykresleného textu podľa textbbox."""
+    bb = draw.textbbox((0, 0), text, font=font)
+    return bb[2] - bb[0]
+
+
+def _ath_scale_params(drawdown_pct):
+    """Vráti (scale_max, step_pct) pre stupnicu poklesu od ATH."""
+    dd_abs = abs(min(0.0, drawdown_pct))
+    if dd_abs <= 25.0:
+        return 25.0, 5.0
+    # Pri hlbšom poklese stupnica po 10 % až po najbližšiu desiatku (−30, −40 …),
+    # aby sa posledné dva popisky neprekrývali
+    return float(math.ceil(dd_abs / 10.0) * 10), 10.0
+
+
 def draw_dashed_vline(draw, x, y0, y1, dash=2, gap=2, color=TEXT_COLOR):
     y = y0
     while y < y1:
@@ -958,24 +974,19 @@ def draw_hatched_rect(draw, x0, y0, x1, y1, step=4, fill_solid=False):
 
 
 def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, drawdown_pct, fonts,
-                                scale_y=None):
+                                scale_y=None, left_pad=None):
     """Vykreslí graf poklesu od ATH sprava doľava (0% na pravom okraji, −25% na ľavom).
 
     Nad lištou je nadpis s hodnotou, napr. „Pokles od ATH: −8,1%“
     (popisok 12B + výraznejšia hodnota 14B, zarovnané na spoločnú účiarie).
-    Lišta využíva celú šírku stĺpca x0..x1.
+    Ak je zadané `left_pad`, všetky riadky majú rovnakú dĺžku lišty.
     """
     label_font = fonts["bold_12"]
     value_font = fonts["bold_14"]
     scale_font = fonts["bold_11"]
 
     dd_abs = abs(min(0.0, drawdown_pct))
-    if dd_abs <= 25.0:
-        scale_max, step_pct = 25.0, 5.0
-    else:
-        # Pri hlbšom poklese stupnica po 10 % až po najbližšiu desiatku (−30, −40 …),
-        # aby sa posledné dva popisky neprekrývali
-        scale_max, step_pct = float(math.ceil(dd_abs / 10.0) * 10), 10.0
+    scale_max, step_pct = _ath_scale_params(drawdown_pct)
 
     # 1) Nadpis s hodnotou poklesu nad lištou, zarovnaný doľava
     label = "Pokles od ATH: "
@@ -990,10 +1001,10 @@ def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, dr
     # 2) Rezerva vľavo/vpravo = polovica šírky krajných popiskov stupnice,
     #    aby „−25%“ ani „0%“ neprečnievali cez okraj stĺpca (a deliace čiary)
     def _half_w(txt):
-        bb = draw.textbbox((0, 0), txt, font=scale_font)
-        return int(math.ceil((bb[2] - bb[0]) / 2.0))
+        return int(math.ceil(_text_ink_width(draw, txt, scale_font) / 2.0))
 
-    bar_x0 = int(x0 + _half_w(f"{MINUS_SIGN}{int(scale_max)}") + 1)
+    eff_left_pad = left_pad if left_pad is not None else _half_w(f"{MINUS_SIGN}{int(scale_max)}")
+    bar_x0 = int(x0 + eff_left_pad + 1)
     bar_x1 = int(x1 - _half_w("0%") - 1)
     bar_w = bar_x1 - bar_x0
     if bar_w <= 20:
@@ -1036,8 +1047,12 @@ def draw_ath_drawdown_meter_rtl(draw, x0, x1, title_baseline, bar_y0, bar_y1, dr
         draw_text_aligned(draw, tx, tick_lbl_y, lbl_txt, scale_font, align="center")
 
 
-def draw_52w_slider(draw, x0, x1, center_y, low_52w, high_52w, pos_52w, fonts):
-    """52-týždňový posuvník: min | ——■—— | max cez celú šírku x0..x1, zvislo vycentrovaný na center_y."""
+def draw_52w_slider(draw, x0, x1, center_y, low_52w, high_52w, pos_52w, fonts, side_w=None):
+    """52-týždňový posuvník: min | ——■—— | max cez celú šírku x0..x1, zvislo vycentrovaný na center_y.
+
+    Ak je zadané `side_w`, rezervuje zhodnú šírku pre popisky vľavo aj vpravo,
+    aby mali všetky riadky posuvník presne rovnakej dĺžky.
+    """
     font = fonts["bold_12"]
     low_txt = fmt_eur(low_52w, with_symbol=False)
     high_txt = fmt_eur(high_52w, with_symbol=False)
@@ -1048,10 +1063,15 @@ def draw_52w_slider(draw, x0, x1, center_y, low_52w, high_52w, pos_52w, fonts):
     draw_text_aligned(draw, x0, text_y, low_txt, font, align="left")
     draw_text_aligned(draw, x1, text_y, high_txt, font, align="right")
 
-    low_w = draw.textlength(low_txt, font=font)
-    high_w = draw.textlength(high_txt, font=font)
-    bar_x0 = int(x0 + low_w + 8)
-    bar_x1 = int(x1 - high_w - 8)
+    if side_w is not None:
+        low_w = side_w
+        high_w = side_w
+    else:
+        low_w = _text_ink_width(draw, low_txt, font)
+        high_w = _text_ink_width(draw, high_txt, font)
+
+    bar_x0 = int(math.ceil(x0 + low_w + 8))
+    bar_x1 = int(math.floor(x1 - high_w - 8))
     bar_y = int(center_y)
     if bar_x1 <= bar_x0 + 14:
         return
@@ -1160,12 +1180,39 @@ def create_etf_dashboard():
     gap_y = 6
     row_h = 96  # 4 * 96 + 3 * 6 = 402 px (50..452)
 
+    visible_etfs = etfs[:4]
+
+    # Spoločné šírky popiskov cez všetky 4 riadky → zhodná dĺžka posuvníkov aj ATH líšt
+    slider_side_w = max(
+        (
+            max(
+                _text_ink_width(draw, fmt_eur(e["low_52w"], with_symbol=False), fonts["bold_12"]),
+                _text_ink_width(draw, fmt_eur(e["high_52w"], with_symbol=False), fonts["bold_12"]),
+            )
+            for e in visible_etfs
+        ),
+        default=0,
+    )
+    ath_left_pad = max(
+        (
+            int(math.ceil(
+                _text_ink_width(
+                    draw,
+                    f"{MINUS_SIGN}{int(_ath_scale_params(e['drawdown_pct'])[0])}",
+                    fonts["bold_11"],
+                ) / 2.0
+            ))
+            for e in visible_etfs
+        ),
+        default=0,
+    )
+
     def make_centered_inverted_drawer(label_text, font_obj):
         def _draw(sd, sw, sh):
             draw_text_centered_in_box(sd, 0, 0, sw, sh, label_text, font_obj, fill=BACKGROUND_COLOR)
         return _draw
 
-    for idx, e in enumerate(etfs[:4]):
+    for idx, e in enumerate(visible_etfs):
         rx = margin_x
         ry = start_y + idx * (row_h + gap_y)
         r_right = rx + row_w
@@ -1237,6 +1284,7 @@ def create_etf_dashboard():
             e["drawdown_pct"],
             fonts,
             scale_y=value_row_y,  # stupnica v línii s percentami výkonnosti
+            left_pad=ath_left_pad,
         )
 
         # 4. Pravý blok (x = 551..785): 52T posuvník + tabuľka výkonnosti 1M · 3M · 6M · 1R
@@ -1245,6 +1293,7 @@ def create_etf_dashboard():
         draw_52w_slider(
             draw, c4_x0, c4_x1, top_center_y,
             e["low_52w"], e["high_52w"], e["pos_52w"], fonts,
+            side_w=slider_side_w,
         )
 
         # Výkonnosť: obdobia v štítkoch, percentá pod nimi (v línii so stupnicou grafu)
