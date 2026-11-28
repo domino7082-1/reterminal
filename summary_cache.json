@@ -1,26 +1,26 @@
 {
   "__carousel__": {
-    "date": "2026-11-27",
-    "next_index": 5,
+    "date": "2026-11-28",
+    "next_index": 7,
     "recent_keys": [
-      "vučikomplikuještudentomvládnutiemajiteľjemublízk",
-      "putinposilňujeruskénámorníctvonovéjadrovéponorky",
-      "predraženýpaušálčipredplatnémajúsvojvýznampsycho",
-      "poslednýsensaabuidedodražbymôžedostaťdruhúšancu",
-      "koniecstarlinkuajmodernýchtechnológiíruskájadrov",
-      "gadieizenkotmáosemdnínazostavenieizraelskejvlády",
-      "pofiaskuvoktagoneďalšíproblémnaváhejakubíksipred",
-      "nocnasobotuprinesiemrázsneženieajnebezpečnúpoľad",
-      "svetovýnewsfilterputinobmenilvládupremiérmáslabš",
-      "nemeckýparlamentschválilnarok2027rekordnýrozpoče",
-      "zdravotnépoisťovnebrzdiavyššiuvýkonnosťnemocnícč",
-      "4kamánovútvslužbubezviazanostivyskúšaťsadázadarm",
-      "zimaudrelaužajnavýchodekamiónyblokovalicestyhors",
-      "štyrochsynovmuužzabiliterazizraelzaútočilnaposle",
-      "ruskélodeotočilivstredozemnommoriukrajinskýútokn",
-      "benátkybodovalilentretíkrátvaktuálnejsezónenaďal",
-      "štátnyzbrojárskyholdingblokovalkontrolunkúšéfpre",
-      "sýkorkynepohrdnúmsomčimozgominéhovtákaprizimnomp"
+      "zimnásezónavovysokýchtatráchsazačínaotvorilibežk",
+      "autonarazilodooploteniarodinnéhodomuaprevrátilos",
+      "palestínuuznáva160krajínplnýmčlenomosnvšakstálen",
+      "útokydronmisinaukrajinevyžiadaliobeteruskohlásiz",
+      "dvojitýmetervufcbudayovinestačilabilancia71tátoť",
+      "kúpnopredajnázmluvaužpredpokutamineochrániprepis",
+      "húsíoviazaútočilinasaudskúarábiurijádzachytilrak",
+      "devťtisícnovýchsusedovnapasienkochktozaplatíškol",
+      "tátochorobapostihujeasikaždúdesiatuženuvplodnomv",
+      "hyundaiioniq3nlineevokompaktnýelektromobilsveľký",
+      "newyorkzatrholautomobilkámdrzépredplatnékedytodo",
+      "protestyvalbánskuprerástlidonásilnostídemonštran",
+      "šéfkanemeckejafdhovorilaozápadompodporenomprevra",
+      "raketovývstupatléticaajveľkádrámadávidhanckososv",
+      "slovácivyzbieralitakmer4miliónyeurnazáchranuvilk",
+      "mestozaspalona65dníslnkotunevyjdeaždo23januára",
+      "mariánleškojetozoskupenievagabundovzosvojejminis",
+      "čakánásporiadnemrazivánocteplotyvúdoliachklesnúa"
     ]
   },
   "https://sport.aktuality.sk/futbal/clanok/arsenal-manchester-city-raya-arteta-saka-spravy-2026112715590395541": {
@@ -51,11 +51,29 @@
     "status": "ok",
     "summary": "Kluby Nová Polhora a Jasov dostali pokuty za sfalšované lekárske potvrdenia mladých hráčov v 6. lige. Výsledky zápasov z jesene zostávajú v platnosti a tabuľka sa nemení."
   },
+  "https://sport.aktuality.sk/futbal/clanok/fk-spartak-dubnica-zachrana-a-restart-2026112510062904075": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Futbalový klub FK Spartak Dubnica nad Váhom unikol zániku a po reštruktualizácii je bez dlhov. Po jeseni vedie štvrtú ligu a cieľom nového vedenia je postup na zdravých základoch."
+  },
+  "https://sport.aktuality.sk/futbal/clanok/gornik-zabrze-wisla-plock-3-2-gasparik-2026112810244004880": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Górnik Zabrze zvíťazil v piatkovom zápase poľskej Ekstraklasy nad Wislou Płock tesne 3:2. Kľúčovou postavou bol Kacper Urbański, ktorý sa podieľal na všetkých góloch domáceho celku. Zverenci trénera Michala Gašparíka si týmto triumfom upevnili pozíciu na čele tabuľky."
+  },
   "https://sport.aktuality.sk/futbal/clanok/ken-fagerberg-zomrel-vo-veku-37-rokov-2026112607413656818": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Vo veku 37 rokov zomrel bývalý švédsky futbalový útočník a mládežnícky reprezentant Ken Fagerberg. Niekdajšieho veľkého talenta našli bez známok života v jeho dome na Faerských ostrovoch."
+  },
+  "https://sport.aktuality.sk/futbal/clanok/la-liga-atletico-madrid-elche-vysledky-2026112819130281420": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Atlético Madrid zvíťazilo na ihrisku Elche 3:2 po raketovom úvode a tesný náskok ubránilo aj vďaka celozápasovému výkonu slovenského obrancu Dávida Hancka. Rayo Vallecano triumfovalo na ihrisku Betisu 1:0 gólom De Frutosa zo 72. minúty."
   },
   "https://sport.aktuality.sk/futbal/clanok/levante-doma-nedokazalo-zastavit-rozbehnuteho-novacika-zo-santanderu-2026112713214564209": {
     "date": "2026-11-27",
@@ -85,6 +103,10 @@
   },
   "https://sport.aktuality.sk/futbal/clanok/reprezentacia-slovensko-weiss-calzona-slavia-rozhovor-2026112715223188710": {
     "date": "2026-11-27",
+    "status": "skip"
+  },
+  "https://sport.aktuality.sk/futbal/clanok/rozhovor-andrej-stellar-vedie-fk-slovan-ivanka-pri-dunaji-2026112708553416267": {
+    "date": "2026-11-28",
     "status": "skip"
   },
   "https://sport.aktuality.sk/futbal/clanok/simeone-atletico-madrid-januarove-posily-elche-2026112715515385571": {
@@ -117,11 +139,23 @@
     "status": "ok",
     "summary": "Montreal Canadiens čelí kritike pre slabé presilovky a ťažký vstup Juraja Slafkovského do sezóny. Vedenie klubu na čele s Jeffom Gortonom mladého Slováka obhajuje a odmieta paniku. Podľa klubu je Slafkovský na seba sám príliš prísny a čoskoro sa vráti do svojej formy."
   },
+  "https://sport.aktuality.sk/hokej/clanok/juraj-slafkovsky-montreal-canadiens-nhl-kriza-2026112806195011605": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Slovenský hokejista Juraj Slafkovský prežíva v drese Montrealu výsledkovú krízu, keď po 26 zápasoch aktuálnej sezóny NHL zaznamenal iba dva góly. Zámorskí experti mu vyčítajú ťažkopádny pohyb, slabú efektivitu streľby na úrovni 3,4 percenta a stratu produktivity v presilovkách."
+  },
   "https://sport.aktuality.sk/hokej/clanok/ms-v-hokeji-do-20-rokov-2027-nominacia-slovensko-2026112612175487748": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Slovenská hokejová dvadsiatka odcestuje do Kanady na záverečnú prípravu pred MS s 28 hráčmi. Tréner Peter Frühauf musel vynechať zranených reprezentantov ročníka 2009 aj útočníka Alexa Mišiaka. Pred šampionátom zredukuje zoznam o troch hokejistov."
+  },
+  "https://sport.aktuality.sk/hokej/clanok/nitra-slovan-hlasy-erik-caladi-dmowski-tipsport-liga-2026112810540119684": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Hokejisti Slovana Bratislava zvíťazili v 23. kole Tipsport ligy na ľade Nitry 4:3 po predĺžení. Hlavnou postavou duelu sa stal americký útočník Ryan Dmowski, ktorý zaznamenal hetrik vrátane víťazného gólu v 61. minúte. Slovan tak predĺžil svoju víťaznú sériu na šesť stretnutí."
   },
   "https://sport.aktuality.sk/hokej/clanok/simon-nemec-calgary-flames-new-jersey-devils-nhl-2026112707502889979": {
     "date": "2026-11-27",
@@ -159,6 +193,12 @@
     "status": "ok",
     "summary": "Bývalý slovenský hokejový obranca Zdeno Chára sa stal členom osemnásťčlennej výberovej komisie Hokejovej siene slávy v Toronte. V komisii nahradil Igora Larionova, ktorému sa skončilo 15-ročné pôsobenie. Noví členovia komisie určujú každé leto nových laureátov."
   },
+  "https://sport.aktuality.sk/mma/clanok/dvojity-meter-v-ufc-budayovi-nestacila-bilancia-7-1-tato-tazka-vaha-dostala-zapas-aj-po-osmich-prehrach-v-rade-2026112816250896477": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Tai Tuivasa dostal v UFC zápas s Jhonatom Dinizom 6. februára 2027 v Sydney, hoci ťahá sériu ôsmich prehier. Slovák Martin Buday pritom po troch výhrach za sebou novú zmluvu nedostal."
+  },
   "https://sport.aktuality.sk/mma/clanok/kleinov-sparingpartner-ma-novy-zapas-martin-horinek-nastupi-na-rovnakom-turnaji-ako-slovensky-bojovnik-ufc-2026112719171550475": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -176,6 +216,10 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Hafeni Nafuka opäť nesplnil váhový limit pred turnajom PML 22 v Trenčíne, keď ho prekročil o 300 gramov. Slovenský bojovník Marián Jakubík napriek neprofesionálnemu prístupu súpera zápas prijal. Duel sa uskutoční v sobotu 28. novembra na trenčianskom Zimnom štadióne."
+  },
+  "https://sport.aktuality.sk/mma/clanok/po-vyhre-nad-prochazkom-by-mal-zvolit-toto-radikalne-riesenie-byvaly-ufc-bojovnik-odporuca-stirlingovi-tento-krok-2026112818174661395": {
+    "date": "2026-11-28",
+    "status": "skip"
   },
   "https://sport.aktuality.sk/mma/clanok/prehral-s-budayom-v-ufc-predstavil-sa-v-oktagone-navajo-stirling-vyzval-tazkotonaznika-na-suboj-po-jeho-kritike-2026112719224470539": {
     "date": "2026-11-27",
@@ -199,6 +243,12 @@
     "status": "ok",
     "summary": "Navajo Stirling knokautoval v Katare Jiřího Procházku v druhom kole a stal sa kandidátom na titul v poloťažkej váhe UFC. Hlavný tréner Eugene Bareman však vzájomný zápas so šampiónom a tímovým kolegom Carlosom Ulbergom vylúčil kvôli dlhoročnému priateľstvu a pravidlám gymu."
   },
+  "https://sport.aktuality.sk/mma/clanok/vysledky-vazenia-pml-22-nafuka-ako-jediny-nesplnil-limit-jeho-zapas-s-jakubikom-zostava-na-karte-2026112815472742110": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Turnaj PML 22 v Trenčíne prinesie súboj o titul medzi Ertelom a Karlíkom aj zápasy Chochlíkovej či Kleina. Na vážení neuspel iba Nafuka, ktorý prekročil limit o 300 gramov, no jeho zápas s Jakubíkom sa napriek tomu uskutoční."
+  },
   "https://sport.aktuality.sk/mma/clanok/znamy-trener-ktory-pripravoval-aj-mikea-tysona-vyjadril-vazne-obavy-k-tazkej-situacii-jiriho-prochazku-2026112719442840827": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -211,6 +261,18 @@
     "status": "ok",
     "summary": "Tím Williams neúmyselne prekročil rozpočtový strop F1 o takmer 750-tisíc eur. FIA mu udelila finančnú pokutu a znížila čas na aerodynamický výskum o 1,5 percenta."
   },
+  "https://sport.aktuality.sk/motosport/clanok/tragedia-le-mans-1955-obete-havaria-2026112613433748569": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Po kolízii pretekárskych áut na 24 hodín Le Mans 11. júna 1955 vyleteli trosky do preplneného davu. Tragédia si vyžiadala vyše 80 mŕtvych a stovky zranených."
+  },
+  "https://sport.aktuality.sk/ostatne-sporty/clanok/biatlon-dnes-kontiolahti-zmiesana-stafeta-dvojic-vysledky-slovensko-2026112812163108528": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Švédski biatlonisti Ella Halvarssonová a Sebastian Samuelsson zvíťazili v pretekoch miešaných dvojíc na úvodnom podujatí Svetového pohára vo fínskom Kontiolahti. Slovenská dvojica Ema Kapustová a Jakub Borguľa obsadila po bilancii 0+10 desiate miesto so stratou 1:32,2 minúty na víťazov."
+  },
   "https://sport.aktuality.sk/ostatne-sporty/clanok/hasim-rahman-navrat-box-54-rokov-2026112711501651390": {
     "date": "2026-11-27",
     "status": "skip"
@@ -219,11 +281,27 @@
     "date": "2026-11-26",
     "status": "skip"
   },
+  "https://sport.aktuality.sk/ostatne-sporty/clanok/malinin-ovladol-nhk-trophy-tokio-finale-grand-prix-2026112813511975388": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Americký krasokorčuliar Ilia Malinin suverénne ovládol NHK Trophy v Tokiu so skóre 305,31 bodu napriek pokazenému úvodnému skoku. V kategórii žien triumfovala Kórejčanka Šin Dži-a so 220,84 bodu, keďže vylepšila svoju pozíciu po krátkom programe."
+  },
+  "https://sport.aktuality.sk/ostatne-sporty/clanok/nba-vysledky-dnes-sobota-basketbal-2026112806363627691": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "San Antonio Spurs zdolali v šlágri NBA Los Angeles Lakers 99:96 a zosadili súpera z čela tabuľky. V drese víťazov žiaril Stephon Castle s 26 bodmi a Victor Wembanyama s 25 bodmi a 16 doskokmi. Lakers nestačilo ani 31 bodov Luku Dončiča."
+  },
   "https://sport.aktuality.sk/ostatne-sporty/clanok/ondrej-kacmar-st-novym-reprezentacnym-trenerom-2026112713253897537": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Novým trénerom slovenskej reprezentácie v malom futbale sa stal Ondrej Kačmár st., ktorý podpísal zmluvu do decembra 2027. Na lavičke nahradil Rumuna Mariusa Mitua. Tím povedie na budúcich majstrovstvách sveta v Brne, jeho asistentom bude Rudolf Beliš."
+  },
+  "https://sport.aktuality.sk/ostatne-sporty/clanok/petra-vlhova-dnes-startove-cisla-obrovsky-slalom-killington-2026112805080038748": {
+    "date": "2026-11-28",
+    "status": "skip"
   },
   "https://sport.aktuality.sk/ostatne-sporty/clanok/slavomir-lindvai-beh-na-24-hodin-thajsko-varany-plaz-dicapria-2026112622111080132": {
     "date": "2026-11-27",
@@ -243,11 +321,27 @@
     "status": "ok",
     "summary": "Slovenskí basketbalisti prehrali doma so Švajčiarskom 84:95 a skomplikovali si postup do hlavnej kvalifikácie ME 2029. Tréner Oliver Vidin kritizoval obranu aj nízku minutáž hráčov v pohároch."
   },
+  "https://sport.aktuality.sk/sport-extra/clanok/peter-schmeichel-rodinne-tajomstva-otec-dvojity-agent-2026112513054639146": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Legendárny brankár Peter Schmeichel odhalil temnú minulosť svojej rodiny, ktorú poznačila vojna a komunizmus. Jeho otec Antoni pôsobil ako dvojitý agent a matka zahynula v koncentračnom tábore. Táto dramatická rodinná história a ťažké detstvo zásadne formovali jeho nezlomnú povahu."
+  },
   "https://sport.aktuality.sk/sport-extra/clanok/polska-hviezda-si-nechala-zmrazit-vajicka-zatial-nechce-byt-mamou-2026112616300699051": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Poľská tenistka Magda Linetteová sa rozhodla podstúpiť zmrazenie vajíčok, aby mohla naďalej naplno pokračovať vo svojej športovej kariére. Rozhodnutie ovplyvnila aj nová finančná podpora od fondu WTA platná od roku 2025."
+  },
+  "https://touchit.sk/chatgpt-ci-gemini-vam-mozu-klamat-dovod/946085/": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
+  "https://touchit.sk/hyundai-ioniq-3-n-line-evo-kompaktny-elektromobil-s-velkym-kufrom-no-cenou-uz-mieri-vyssie/946253/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Hyundai uvádza na európsky trh kompaktný hatchback IONIQ 3 vyvinutý v Turecku. Verzia N Line EVO s 61 kWh batériou a výkonom 100 kW ponúka 441-litrový kufor a cenu atakujúcu 47-tisíc eur. Novinka sa dostala medzi sedem finalistov ankety Európske auto roka 2027."
   },
   "https://touchit.sk/ktore-garmin-hodinky-si-kupit-na-konci-roka-2026/946083/": {
     "date": "2026-11-27",
@@ -259,6 +353,10 @@
   },
   "https://touchit.sk/setri-miesto-no-plnu-chut-kavy-si-zachovava-objavte-caro-kavovaru-cafissimo-now/946026/": {
     "date": "2026-11-27",
+    "status": "skip"
+  },
+  "https://touchit.sk/vzdy-to-treba-zazit-na-vlastnej-kozi/945873/": {
+    "date": "2026-11-28",
     "status": "skip"
   },
   "https://touchit.sk/whatsapp-planovane-spravy-na-slovensku/946023/": {
@@ -273,6 +371,18 @@
     "date": "2026-11-27",
     "status": "skip"
   },
+  "https://touchit.sk/xiaomi-ukoncuje-softverovu-podporu-pre-7-smartfonov-je-medzi-nimi-aj-ten-vas/946212/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Spoločnosť Xiaomi aktualizovala zoznam nepodporovaných zariadení a ukončila softvérovú podporu pre sedem modelov značiek Xiaomi, Redmi a POCO. Medzi dotknutými zariadeniami sú aj globálne verzie ako Xiaomi 12S či Redmi Note 12 Pro, ktoré už nedostanú žiadne bezpečnostné záplaty."
+  },
+  "https://www.aktuality.sk/clanok/12BJgqT/caka-nas-poriadne-mraziva-noc-teploty-v-udoliach-klesnu-az-na-17-stupnov/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Slovensko čaká z noci zo soboty na nedeľu výrazne chladné počasie so silnými mrazmi. Na väčšine územia klesnú teploty na -2 až -9 stupňov Celzia, pričom v údoliach ojedinele až na -17 stupňov. Vodiči si musia dávať pozor na zníženú viditeľnosť a riziko tvorby poľadovice."
+  },
   "https://www.aktuality.sk/clanok/2Gtcenw/norskej-nizkonakladovej-leteckej-spolocnosti-norse-atlantic-prenajimatelia-vypovedali-zmluvy-na-prenajom-vsetkych-lietadiel/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -284,6 +394,16 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Holandskí colníci zaistili na amsterdamskom letisku 26 kriticky ohrozených korytnačiek druhu Kinosternon vogti. Pašerák ich mal oblepené páskou v batožine smerujúcej do Hongkongu. Hodnota jedného kusu na čiernom trhu dosahuje 30-tisíc dolárov, všetky zvieratá prežili."
+  },
+  "https://www.aktuality.sk/clanok/2jX9niN/saudska-arabia-zostrelila-raketu-smerujucu-na-rijad-husiovia-predtym-informovali-o-utokoch-na-jemen/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Saudská Arábia zostrelila riadenú strelu vypálenú húsíovskými povstalcami na metropolu Rijád. Útok prišiel po tom, čo letectvo koalície bombardovalo jemenské hlavné mesto Saná, kde húsíovia hlásili zranených."
+  },
+  "https://www.aktuality.sk/clanok/3aEFOV0/beata-jurik-z-ps-studentskemu-strajku-podavam-ruku-a-chcem-sa-stretnut/": {
+    "date": "2026-11-28",
+    "status": "skip"
   },
   "https://www.aktuality.sk/clanok/6OTxcrp/donald-trump-a-mark-rutte-po-stretnuti-na-floride-vyzvali-rusko-aby-nestupnovalo-vojnu-na-ukrajine/": {
     "date": "2026-11-26",
@@ -303,6 +423,12 @@
     "status": "ok",
     "summary": "Americký prezident Trump podporil irackého premiéra v boji proti pašovaniu ropy do Iránu a obchádzaniu sankcií. Bagdad nasadil ozbrojené sily v Kurdistane, čo vyvolalo odpor miestnych úradov. Iracký najvyšší súd označil vládne kroky za oprávnené."
   },
+  "https://www.aktuality.sk/clanok/763e9JX/kupno-predajna-zmluva-uz-pred-pokutami-neochrani-prepis-vozidiel-od-januara-zahrna-nove-prava-a-povinnosti/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Od januára 2027 ponesie za pokuty a povinnosti k vozidlu plnú zodpovednosť osoba v štátnej evidencii, nie vlastník v zmluve. Ak kupujúci auto neprepíše, sankcie za STK či rýchlosť prídu pôvodnému majiteľovi. Zmenu treba hlásiť do 30 dní."
+  },
   "https://www.aktuality.sk/clanok/7I4ftgu/putin-predstavil-novu-jadrovu-ponorku-rusko-chce-do-roku-2030-rozsirit-flotilu-o-dalsich-pat/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -318,6 +444,12 @@
   "https://www.aktuality.sk/clanok/9OF6D7S/z-londynskej-centraly-fitch-ratings-spat-do-popradu-nas-rodinny-biznis-stoji-na-prisnej-profesionalite/": {
     "date": "2026-11-26",
     "status": "skip"
+  },
+  "https://www.aktuality.sk/clanok/A55WRpG/mesto-zaspalo-na-65-dni-slnko-nad-nim-opat-vyjde-az-23-januara/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "V aljašskom meste Utqiagvik sa začala polárna noc, ktorá potrvá 65 dní. Obyvatelia najsevernejšieho sídla v USA uvidia slnko opäť až 23. januára 2027. Tento prírodný jav spôsobuje sklon zemskej osi, kvôli ktorému slnečný kotúč nevystúpi nad obzor."
   },
   "https://www.aktuality.sk/clanok/AoZSiI7/na-rovinu-s-beatou-jurik-zahranicni-slovaci-su-nastvani-a-vlade-to-spocitaju/": {
     "date": "2026-11-26",
@@ -367,6 +499,12 @@
     "status": "ok",
     "summary": "Ukrajinský podnikateľ Dmytro Borodavka preorientoval svoj biznis na Slovensko po tom, čo mu ruská agresia zablokovala tranzit do Ázie. V Horných Salibah kúpil schátraný bitúnok a založil firmu EU Poultry. Spoločnosť sa prepracovala na najväčšieho spracovateľa hydiny na Slovensku."
   },
+  "https://www.aktuality.sk/clanok/I9cc0Mv/zimna-sezona-vo-vysokych-tatrach-sa-zacina-otvorili-bezkarske-trate-aj-sankovacku/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Vo Vysokých Tatrách sa začala zimná sezóna sprístupnením prvého kilometra bežkárskych tratí na Štrbskom Plese. V regióne má byť celkovo pripravených 72 kilometrov trás. Zároveň odštartovala denná aj večerná sánkovačka na 2,5 kilometra dlhej dráhe z Hrebienka."
+  },
   "https://www.aktuality.sk/clanok/ILbzht4/gadi-eizenkot-ma-osem-dni-na-zostavenie-izraelskej-vlady-netanjahuovu-stranu-obvinil-z-natahovania-rokovani/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -385,11 +523,23 @@
     "status": "ok",
     "summary": "Pri španielskom ostrove Ibiza sa potopila loď Med Emre s 1,2 milióna litrov nafty, pričom zahynul jeden človek a šiesti utrpeli zranenia. Úrady aktivovali núdzový plán a nasadili špecializované plavidlo s vrtuľníkmi pre obavy zo znečistenia vzácneho morského ekosystému."
   },
+  "https://www.aktuality.sk/clanok/IuPGQGI/izrael-zabil-dvoch-pracovnikov-kliniky-lekarov-bez-hranic-tvrdi-ze-patrili-k-hamasu/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Izraelská armáda zabila na klinike organizácie Lekári bez hraníc v meste Gaza dvoch mužov, pričom jedného označila za veliteľa Hamasu. Humanitárna organizácia obvinila Izrael z priameho útoku a uviedla, že o presnej polohe priestorov armáda vopred vedela."
+  },
   "https://www.aktuality.sk/clanok/JvOkn2K/pocet-pripadov-eboly-v-konzskej-demokratickej-republike-presiahol-12-tisic-nakaze-podlahlo-uz-5904-ludi/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "V Konžskej demokratickej republike presiahol počet prípadov eboly 12-tisíc a nákaze podľahlo 5904 ľudí. Ide o druhú najväčšiu epidémiu v histórii, pričom vzácny kmeň nemá schválenú vakcínu. Len 15 percent nových infekcií pochádza zo známych kontaktov a počet obetí môže byť podhodnotený."
+  },
+  "https://www.aktuality.sk/clanok/M9B5LsF/ruske-drony-zabijali-na-ukrajine-zachranari-vytiahli-z-trosiek-aj-tela-deti/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Ruske dronove utoky na Ukrajine si vyziadali najmenej devat obeti a desiatky zranenych. Ruské ministerstvo obrany sucasne ohlásilo zostrelenie vyše 1200 ukrajinských dronov."
   },
   "https://www.aktuality.sk/clanok/NAoOVKQ/pride-slovensko-o-europske-peniaze-fico-moze-podporit-novu-dan-ale-brusel-je-rozhadany/": {
     "date": "2026-11-26",
@@ -415,6 +565,12 @@
     "status": "ok",
     "summary": "Krymský polostrov a Sevastopol vo štvrtok postihol rozsiahly výpadok dodávok elektriny. Porucha na zariadeniach mimo regiónu spôsobila celkový blackout. Miestni energetici začali s obnovou siete a pripájaním dôležitých objektov."
   },
+  "https://www.aktuality.sk/clanok/Q9eVV7h/sobota-prinesie-chladne-pocasie-a-na-vychode-silny-vietor-na-severe-zostane-pod-nulou/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Sobota prinesie chladné počasie s ojedinelými snehovými zrážkami a tvorbou snehových jazykov či hmly. Denné teploty dosiahnu jeden až šesť stupňov, na severe zostane pod nulou. Na juhovýchode fúka silný vietor s nárazmi do 60 kilometrov za hodinu."
+  },
   "https://www.aktuality.sk/clanok/QGjD1eV/sest-krajin-vyzyva-brusel-aby-investoval-do-vojenskych-palivovodov-a-skladov/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -431,6 +587,12 @@
     "status": "ok",
     "summary": "Ceny pohonných látok na Slovensku v 47. týždni výrazne klesli nad rámec bežných výkyvov. Benzín zlacnel o päť centov na najnižšiu úroveň od marca 2026, liter stojí 1,571 eura. Nafta klesla o takmer štyri centy na 1,854 eura za liter, čo je najmenej za 14 týždňov."
   },
+  "https://www.aktuality.sk/clanok/S1sgRl4/kim-cong-un-moze-opat-navstivit-cinu-soul-sleduje-mozne-pripravy-na-cestu/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Juhokórejská rozviedka preveruje špekulácie o možnej ceste severokórejského vodcu Kim Čong-una do Číny. Návšteva by sa mohla uskutočniť začiatok decembra pred stretnutím Si Ťin-pchinga s Donaldom Trumpom. Mohla by ovplyvniť obnovenie dialógu medzi KĽDR a USA."
+  },
   "https://www.aktuality.sk/clanok/SGVgpXk/robert-fico-uz-nie-je-lider-stal-sa-otrokom-extremististov-tvrdi-peter-weiss/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -443,11 +605,21 @@
     "status": "ok",
     "summary": "Reťazec Lidl otvoril vo štvrtok 26. novembra svoju 189. predajňu na Slovensku, ktorá sa nachádza na Hnileckej ulici v Gelnici. Nová prevádzka s rozlohou 1220 metrov štvorcových zamestnáva 27 ľudí. Zákazníkom ponúka ekologické LED osvetlenie, elektronické cenovky či šesť samoobslužných pokladníc."
   },
+  "https://www.aktuality.sk/clanok/TxzOacV/polsky-minister-zahranicia-sa-pustil-do-sefky-afd-opakuje-ruske-klamstva-o-revolucii-na-ukrajine/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Šéfka nemeckej AfD Alice Weidelová vyhlásila, že zosadenie Viktora Janukovyča v roku 2014 bol Západom podporený prevrat. Poľský minister Radosław Sikorski jej tvrdenia rázne odmietol. Pripomenul, že Janukovyča demokraticky odvolal ukrajinský parlament a ide o ruské lži."
+  },
   "https://www.aktuality.sk/clanok/TyCzoeA/izrael-sa-pokusil-zabit-posledneho-zijuceho-syna-vodcu-hamasu-utok-prezil/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Izraelská armáda zaútočila vzdušným úderom v Pásme Gazy na bytový dom, kde sa nachádzal Izz ad-Dín Hajja, posledný žijúci syn vodcu Hamasu Chalíla Hajju. Cieľ atentátu prežil, zranenia utrpelo šesť ľudí vrátane nevesty lídra. Izrael tak pokračuje v tlaku na rodinu, hoci štyroch synov už skôr zabil."
+  },
+  "https://www.aktuality.sk/clanok/UeE3s7f/vianocne-trhy-u-nas-su-predrazene-jedno-mesto-ale-vyhrava-pytali-sme-slovakov-kam-vyrazaju-aj-co-ich-sklamalo/": {
+    "date": "2026-11-28",
+    "status": "skip"
   },
   "https://www.aktuality.sk/clanok/VXpLUxc/izraelsky-minister-obrany-hrozi-masovym-vysidlenim-miliona-palestincanov-z-gazy/": {
     "date": "2026-11-26",
@@ -473,6 +645,16 @@
     "status": "ok",
     "summary": "Slovenské matky čelia na trhu práce skrytej penaltzie napriek legislatívnej rovnosti. Zamestnávatelia ich materstvo často vnímajú ako prekážku pri výbere a uprednostňujú mužov."
   },
+  "https://www.aktuality.sk/clanok/YUVEAi9/mexicke-cenotes-miesto-kde-sa-plava-modli-a-miznu-snorchlovacie-masky/": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
+  "https://www.aktuality.sk/clanok/Yb9h4k4/zmenili-jedno-pismeno-takto-sa-v-cesku-odmietnuta-reklama-dostala-na-obrazovky-stvr/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Českými televíziami odmietnutá reklama pivovaru Bernard sa objavila na obrazovkách STVR. Spot s krčmovými bitkami upravil záver na nealko pivo a zmenil jedno písmeno v nápise na strope. Česká televízia a TV Nova spot odmietli pre obavy z porušenia zákona a dobrých mravov."
+  },
   "https://www.aktuality.sk/clanok/aQ9Zudo/slovenske-ministerstva-dostanu-nove-ulohy-na-posilnenie-spoluprace-s-ukrajinou/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -491,17 +673,35 @@
     "status": "ok",
     "summary": "Ruské sabotážne aktivity v Európe stúpli za rok o šestnásť percent, pričom Moskva čoraz častejšie nasadzuje skúsenejších agentov na útoky s výbušninami. Hlavnými terčmi kritickej infraštruktúry zostávajú Nemecko a Poľsko ako kľúčové tranzitné krajiny pomoci pre Ukrajinu."
   },
+  "https://www.aktuality.sk/clanok/ePPNxmv/poziar-rodinneho-domu-v-kuchyni-sposobil-skodu-100-tisic-eur/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "V piatok večer zasahovali profesionálni aj dobrovoľní hasiči pri požiari strechy a podkrovia rodinného domu v obci Kuchyňa v okrese Malacky. Predbežná škoda bola vyčíslená na stotisíc eur. Príčina vzniku požiaru je zatiaľ predmetom prebiehajúceho vyšetrovania."
+  },
   "https://www.aktuality.sk/clanok/eY8kt4x/iran-zatkol-novinara-ktory-upozornil-na-planovane-popravy-demonstrantov-predtym-ho-mucili/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Iránske úrady zatkli novinára Mehdiho Mahmúdijána za zverejnenie informácií o plánovanej poprave dvoch demonštrantov. Po zadržaní čelí brutálnemu mučeniu, pričom jeho práca prispela k dočasnému odloženiu výkonu trestu smrti."
   },
+  "https://www.aktuality.sk/clanok/ewHmaAV/v-afrike-zacali-testovat-novu-vakcinu-proti-ebole-vyuziva-technologiu-znamu-z-pandemie-covidu/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "V Ugande sa začalo klinické testovanie experimentálnej mRNA vakcíny proti ebole, ktorá cieli na kmeň Bundibugyo. Na testovaní bezpečnosti sa zúčastní 224 dobrovoľníkov. V KDR sa otestujú ďalšie dve vakcíny a GAVI už zazmluvnila 1,5 milióna dávok."
+  },
   "https://www.aktuality.sk/clanok/g2T6tbe/v-tatrach-plati-lavinove-nebezpecenstvo-sneh-je-nestabilny-najma-po-prudkych-vetroch/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Vo Vysokých, Západných a Nízkych Tatrách platí vo štvrtok druhý stupeň lavínového nebezpečenstva. Hlavným problémom je vetrom previaty sneh a trvalo slabé vrstvy v snehovej pokrývke. Uvoľnenie lavín je možné najmä pri väčšom dodatočnom zaťažení na strmých svahoch."
+  },
+  "https://www.aktuality.sk/clanok/gpvPZ1v/protesty-v-albansku-prerastli-do-nasilnosti-demonstranti-ziadaju-odchod-premiera-ediho-ramu/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "V Tiranes vypukli násilné strety medzi políciou a demonštrantami, ktorí požadujú odstúpenie premiéra Ediho Ramu. Polícia použila slzotvorný plyn a vodné delá proti davu, ktorý hádzal kamene a ničil majetok. Protesty trvajú od mája pre sporné projekty a zlý stav krajiny."
   },
   "https://www.aktuality.sk/clanok/h7PoxGJ/cla-z-usa-hrozia-svetovej-ekonomike-cina-varuje-pred-vaznymi-rizikami-a-slubuje-tvrdu-odpoved/": {
     "date": "2026-11-26",
@@ -527,6 +727,16 @@
     "status": "ok",
     "summary": "Bulharsko sa zapojí do 45-miliardovej pôžičky EÚ pre Ukrajinu, no podporí iba jej nevojenskú časť vo výške 20 mili árd eur. Premiér Radev vyhlásil, že peniaze nepôjdu na zbrane. Slovensko naďalej odmieta do tejto finančnej pomoci vstúpiť."
   },
+  "https://www.aktuality.sk/clanok/idjXtgA/palestinu-uznava-160-krajin-plnym-clenom-osn-vsak-stale-nie-je-co-pripomina-den-solidarity/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Palestínu uznalo 160 krajín, no plným členom OSN zatiaľ nie je. Medzinárodný deň solidarity s palestínskym ľudom pripomína dlhodobo nevyriešenú otázku štátnosti a pretrvávajúcu krízu v regióne."
+  },
+  "https://www.aktuality.sk/clanok/j8cOa7B/betlehemske-svetlo-si-ludia-budu-moct-odniest-aj-z-bratislavskych-vianocnych-trhov/": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
   "https://www.aktuality.sk/clanok/jWP526O/americky-prezident-apeluje-na-putina-aby-zastavil-vsetky-vojenske-operacie-proti-europe/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -538,6 +748,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Venezuelský opozičný líder Edmundo González Urrutia oznámil návrat z exilu v Španielsku do vlasti, kde sa chce zúčastniť na decembrovej púti. Po zosadení prezidenta Madura a americkej intervencii krajinu dočasne spravuje Delcy Rodríguezová a USA kontrolujú aj príjmy z ropy."
+  },
+  "https://www.aktuality.sk/clanok/kLJrDMW/predaval-jed-ludom-ktori-chceli-zomriet-kanadskemu-kucharovi-hrozi-25-rokov-vazenia/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Kanadskí prokurátori navrhli 25-ročný trest pre Kennetha Lawa za predaj jedu na samovraždu. Bývalý kuchár ponúkal smrteľné balíčky cez internet zákazníkom v 41 krajinách. Útočil najmä na mladých ľudí s psychickými problémami a priznal sa k 14 úmrtiam v Kanade."
   },
   "https://www.aktuality.sk/clanok/l4sRgMn/europska-rada-diskutuje-v-bruseli-o-rozpocte-a-financnej-pomoci-ukrajine-bez-konecnych-zaverov/": {
     "date": "2026-11-26",
@@ -563,11 +779,23 @@
     "status": "ok",
     "summary": "Srbský súd poslal na 30 dní do väzby Dragana J. Vučičeviča, majiteľa a šéfredaktora provládneho média Informer. Prokuratúra ho podozrieva z marenia spravodlivosti a šírenia paniky. Hrozí riziko, že na slobode bude pokračovať v trestnej činnosti."
   },
+  "https://www.aktuality.sk/clanok/oVnakbA/sestnastrocni-by-mohli-chodit-k-psychologovi-bez-suhlasu-rodicov-sas-navrhuje-zmenu/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Strana SaS navrhuje, aby mladí od 16 rokov mohli navštíviť psychológa bez súhlasu rodičov a so zaručenou dôvernosťou. Výnimkou by bolo vážne ohrozenie života alebo zdravia. Cieľom je sprístupniť včasnú odbornú pomoc aj v prípadoch, ak je zdrojom problémov rodina."
+  },
   "https://www.aktuality.sk/clanok/oldH59I/mimoriadny-samit-eu-v-bruseli-skoncil-bez-dohody-lidri-sa-nezhodli-na-rozpocte-ani-na-pozicke-pre-ukrajinu/": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Mimoriadny samit EÚ v Bruseli skončil bez dohody o dlhodobom rozpočte na roky 2028 až 2034 a pôžičke pre Ukrajinu. Lídri sa nezhodli na výdavkoch ani na nových prioritách. Rokovania presunuli na decembrový samit."
+  },
+  "https://www.aktuality.sk/clanok/pGCALm9/dopravna-nehoda-pri-trebisove-uzavrela-cestu-na-secovce-policia-urcila-obchadzku/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Medzi obcami Malý Ruskov a Plechotice sa prevrátilo vozidlo po náraze do oplotenia, čo uzavrelo cestu na Sečovce. Dve zranené osoby skončili v nemocnici, pričom sú mimo ohrozenia života. Polícia odkláňa dopravu cez obce Vojčice a Hriadky."
   },
   "https://www.aktuality.sk/clanok/pYSHrKx/ukrajinsky-utok-v-libyi-vystrasil-rusov-konvoj-vojenskych-lodi-zmenil-kurz-a-vracia-sa-spat/": {
     "date": "2026-11-27",
@@ -603,11 +831,21 @@
     "status": "ok",
     "summary": "Štátny podnik Hydromeliorácie zníži poľnohospodárom nájom za závlahy z takmer 43 eur späť na tri eurá za hektár. Rozdiel 2,2 milióna eur ročne pokryje ministerstvo pôdohospodárstva z vlastného rozpočtu. Ušetrené prostriedky musia štát aj farmári investovať do obnovy infraštruktúry."
   },
+  "https://www.aktuality.sk/clanok/rpEouNi/zly-mikulas-mozno-by-sme-si-tento-rok-nic-do-cizmy-ani-nezasluzili/": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
   "https://www.aktuality.sk/clanok/uKzw9VB/v-madarsku-nadobudol-ucinnost-zakon-o-preverovani-majetku-politikov-danovy-urad-spusti-prve-kontroly-do-30-dni/": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "V Maďarsku nadobudol účinnosť zákon o preverovaní pôvodu majetku politikov a ich rodinných príslušníkov. Daňový úrad spustí prvé individuálne kontroly do tridsiatich dní. Legislatíva má preveriť, či nárast majetku verejných činiteľov zodpovedá ich zdaneným príjmom."
+  },
+  "https://www.aktuality.sk/clanok/ukCZtAf/volodymyr-zelenskyj-vysvetloval-giorgii-meloniovej-utok-v-libyi-ukrajina-konala-bez-koordinacie-so-spojencami/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Ukrajinské drony potopili v líbyjskom prístave Benghází ruskú korvetu Merkurij a zničili vrtuľník. Operácia prebehla bez koordinácie s európskymi spojencami, čo vyvolalo obavy Talianska. Rím preto zvažuje posilnenie bezpečnosti svojich 200 vojakov pôsobiacich v Líbyi."
   },
   "https://www.aktuality.sk/clanok/vKA0kK0/vo-veku-65-rokov-zomrel-povodny-gitarista-britskej-popovej-skupiny-duran-duran-andy-taylor/": {
     "date": "2026-11-26",
@@ -638,6 +876,12 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Polícia posilňuje bezpečnostné opatrenia a hliadky na vianočných trhoch a námestiach pre hrozby v zahraničí. Na ochranu mäkkých cieľov využije uniformovaných aj civilných policajtov, kynologóv či mobilné zábrany. Návštevníkov vyzýva na zvýšenú všímavosť."
+  },
+  "https://www.aktuality.sk/clanok/zfAFn47/slovaci-vyzbierali-takmer-4-miliony-eur-na-zachranu-vilka-na-liecbu-sa-zlozilo-viac-ako-100-tisic-darcov/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Na liečbu trojročného Vilka trpiaceho Duchennovou svalovou dystrofiou sa vyzbieralo takmer 4 milióny eur od vyše 100-tisíc darcov. Zahraniční a slovenskí vedci teraz pripravujú génovú terapiu na mieru, pričom liek by chlapec mohl dostať začiatkom roka 2028."
   },
   "https://www.pravda.sk/auto/doprava/clanok/2086609-snezenie-sposobilo-na-slovensku-desiatky-nehod-v-noci-hrozi-dalsie-nebezpecenstvo?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-26",
@@ -685,6 +929,12 @@
     "status": "ok",
     "summary": "Slovenský trh s malými autami klesol za desať mesiacov o 14 percent. Lídrom zostáva Škoda Fabia, no výrazne prepadla Toyota Yaris a Opel Corsa. Naopak, darí sa Fiatu a čínske automobilky zvýšili predaje o vyše 83 percent."
   },
+  "https://www.pravda.sk/auto/magazin/clanok/2087273-new-york-zatrhol-automobilkam-drze-predplatne-kedy-to-dorazi-aj-k-nam?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Americký štát New York zakázal automobilkám vyberať opakované poplatky za funkcie, ktoré využívajú už existujúcu techniku vo vozidle. Zákon začne platiť vo februári a za porušenie hrozí pokuta 250 dolárov. Výnimku majú služby vyžadujúce priebežnú podporu."
+  },
   "https://www.pravda.sk/auto/novinky/clanok/2085835-leapmotor-b05-modernizacia-uz-po-roku-cinska-rychlost-ma-vsak-aj-odvratenu-tvar?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-26",
     "provider": "Gemini/gemini-3.5-flash-lite",
@@ -707,6 +957,14 @@
     "status": "ok",
     "summary": "Organizácia Euro NCAP otestovala desať nových áut, pričom deväť získalo päť hviezdičiek. Nová Škoda Peaq stanovila rekord v ochrane pri nehode. Jediným štvorhviezdičkovým modelom sa stal Nissan Leaf pre slabšie predchádzanie nehodám a chýbajúci stredový airbag v základe."
   },
+  "https://www.pravda.sk/auto/testy/clanok/2087219-test-peugeot-e-5008-gt-long-range-velka-bateria-meni-pravidla-hry?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
+  "https://www.pravda.sk/auto/testy/clanok/2087487-videotest-lacny-elektromobil-pod-drobnohladom-ako-jazdi-leapmotor-b05-a-kde-musel-vyrobca-setrit?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
   "https://www.pravda.sk/sportweb/formula-1/clanok/2086227-na-zaciatku-mal-ceskoslovensku-embecku-a-dokazal-na-nej-sialene-veci-lepsi-sofer-vraj-na-tejto-zemi-este-nebol?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-27",
     "status": "skip"
@@ -724,6 +982,12 @@
     "provider": "Groq/qwen/qwen3.8-27b",
     "status": "ok",
     "summary": "Škandinávska štúdia s viac ako 142-tisíc účastníkmi preukázala, že dlhodobý hluk z cestnej dopravy zvyšuje riziko cukrovky 2. typu o 6 % pri každom náraste o 10 decibelov. Tento efekt je výraznejší u ľudí s nadváhou a pri kombinácii so znečistením ovzduším, kde môže stúpať až o 14 %."
+  },
+  "https://www.pravda.sk/zdravie/prevencia/clanok/2084827-vybrala-si-saty-na-vlastny-pohreb-a-miesto-kde-rozptylia-jej-popol-experimentalna-vakcina-jej-dala-druhu-sancu-na-zivot?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Tridsaťročná Molly trpiaca vzácnou rakovinou pečene sa po metastázach do pľúc pripravovala na smrť. Po podaní experimentálnej vakcíny a imunoterapie však štyri pľúcne nádory úplne zmizli za 110 dní."
   },
   "https://www.pravda.sk/zdravie/prevencia/clanok/2086045-parkinsonova-choroba-sa-nemusi-zacinat-trasenim-pribeh-znamej-spevacky-upozornil-na-nenapadne-prve-priznaky?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-26",
@@ -743,11 +1007,25 @@
     "status": "ok",
     "summary": "Na Slovensku sa ku koncu roka 2025 v ambulanciách liečilo 339 650 diabetikov, pričom 90,8 percenta tvoril diabetes 2. typu. Medzi varovné príznaky patrí nadmerný smäd, časté močenie či únava. Včasná diagnóza krvným testom pomáha predchádzať vážnym komplikáciám."
   },
+  "https://www.pravda.sk/zdravie/prevencia/clanok/2087357-tato-choroba-postihuje-asi-kazdu-desiatu-zenu-v-plodnom-veku-bolest-sa-moze-ozvat-aj-na-toalete?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Endometrióza postihuje každú desiatu ženu v plodnom veku a často sa prejavuje bolesťami pri močení či stolici, ktoré sa mýlia so syndrómom dráždivého čreva. Priemerná doba stanovenia diagnózy trvá sedem až desať rokov. Liečba zahŕňa lieky, hormonálnu terapiu alebo chirurgické zákroky."
+  },
+  "https://www.pravda.sk/zdravie/prevencia/clanok/2087441-slovaci-mozu-prist-o-peniaze-od-zdravotnej-poistovne-blizi-sa-dolezity-termin-tieto-benefity-si-treba-skontrolovat?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "status": "skip"
+  },
   "https://www.pravda.sk/zdravie/relax/clanok/2082467-budite-sa-v-noci-a-rano-ste-unaveni-mozno-vam-chyba-tento-jeden-vitamin?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-27",
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Americká štúdia na 460 ľuďoch ukázala, že vyššia hladina vitamínu D súvisí s dlhším spánkom a menším počtom prebudení. Osoby s nedostatkom tohto vitamínu spali v priemere o 23 minút kratšie."
+  },
+  "https://www.pravda.sk/zdravie/zivotosprava/clanok/2083779-nie-je-chlieb-ako-chlieb-jeden-druh-moze-prospiet-cukru-v-krvi-srdcu-aj-traveniu?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
+    "date": "2026-11-28",
+    "status": "skip"
   },
   "https://www.pravda.sk/zdravie/zivotosprava/clanok/2084403-toto-nenapadne-ovocie-je-nabite-antioxidantmi-prospieva-srdcu-aj-mocovym-cestam-no-ma-to-jeden-hacik?utm_source=pravda&utm_medium=rss&utm_campaign=rss": {
     "date": "2026-11-26",
@@ -762,6 +1040,12 @@
   "https://zive.aktuality.sk/clanok/6rj40bi/do-mobilov-a-pocitacov-sa-nastahoval-novy-mozog-nevidite-ho-no-zmeni-vsetko/": {
     "date": "2026-11-27",
     "status": "skip"
+  },
+  "https://zive.aktuality.sk/clanok/6zhbNC7/zavazny-problem-toto-auto-sa-nesmie-predavat-v-eu-co-tvrdi-vyrobca/": {
+    "date": "2026-11-28",
+    "provider": "Gemini/gemini-3.5-flash-lite",
+    "status": "ok",
+    "summary": "Holandský súd zakázal predaj SUV čínskej značky BYD v EÚ pre porušenie dizajnových práv Land Roveru Defender. Model Ti7 nesmie BYD ani vyrábať v Maďarsku, kým sa spor nevyrieši. Automobilka rozhodnutie odmieta a plánuje sa odvolať."
   },
   "https://zive.aktuality.sk/clanok/CiskA70/japonsky-rover-bude-na-mesiaci-plnit-specialnu-misiu/": {
     "date": "2026-11-26",
@@ -806,6 +1090,10 @@
     "provider": "Gemini/gemini-3.5-flash-lite",
     "status": "ok",
     "summary": "Zámerná zrážka sondy DART s asteroidom Dimorphos v septembri 2022 vytvorila kráter veľký ako štadión, zmenila tvar telesa a spôsobila jeho chaotické otáčanie. Nové snímky z misie Hera odhalili skrátenie obežnej doby telesa a stovky okolitých skál, ktoré môžu ohroziť plánované pristátie družíc."
+  },
+  "https://zive.aktuality.sk/clanok/VxcqGYc/znama-banka-varuje-slovakov-siria-sa-falosne-verzie-nasej-aplikacie-ako-postupovat/": {
+    "date": "2026-11-28",
+    "status": "paywall"
   },
   "https://zive.aktuality.sk/clanok/XqlQODR/velka-zmena-v-o2-tv-novu-sluzbu-bude-mat-od-arabskeho-spolumajitela-pozname-detaily/": {
     "date": "2026-11-26",
